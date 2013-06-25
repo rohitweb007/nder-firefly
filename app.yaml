@@ -1,0 +1,28 @@
+application: nder-firefly
+version: 1
+runtime: php
+api_version: 1
+
+handlers:
+- url: /favicon\.ico
+  static_files: public/favicon.ico
+  upload: public/favicon\.ico
+
+- url: /bootstrap
+  static_dir: public/bootstrap
+
+- url: /img
+  static_dir: public/img
+
+- url: /css
+  static_dir: public/css
+
+- url: /js
+  static_dir: public/js
+
+- url: /home.*
+  script: public/index.php
+  login: required
+
+- url: /.*
+  script: public/index.php
