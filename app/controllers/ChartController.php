@@ -7,7 +7,7 @@ class ChartController extends BaseController {
   }
 
   public function showOverExpendingCategories() {
-    $key = cacheKey('overExpending');
+    $key = cacheKey('overExpendingCategories');
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     } else {
@@ -172,6 +172,72 @@ class ChartController extends BaseController {
           $data['rows'][$index]['c'][2]['v'] = $r['moved'];
           $index++;
         }
+      }
+      return Response::json($data);
+    }
+  }
+
+  public function showTransfersByAccount($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
+      return Response::error(404);
+    } else {
+      $results               = array();
+      $start                 = new DateTime(Input::get('start'));
+      $end                   = new DateTime(Input::get('end'));
+      $transfersAwayFromHere = $account->transfersfrom()->where('transfers.date', '>=', $start->format('Y-m-d'))->where('transfers.date', '<=', $end->format('Y-m-d'))
+              ->groupBy('accounts.name')
+              ->leftJoin('accounts', 'accounts.id', '=', 'transfers.account_to')
+              ->get(array('accounts.name', DB::Raw('SUM(`amount`) as `sum`')));
+
+      $transfersToHere = $account->transfersto()->where('transfers.date', '>=', $start->format('Y-m-d'))->where('transfers.date', '<=', $end->format('Y-m-d'))
+              ->groupBy('accounts.name')
+              ->leftJoin('accounts', 'accounts.id', '=', 'transfers.account_from')
+              ->get(array('accounts.name', DB::Raw('SUM(`amount`) as `sum`')));
+
+      foreach ($transfersAwayFromHere as $tr) {
+        $name = Crypt::decrypt($tr->name);
+        if (!isset($results[$name])) {
+          $results[$name] = array('name' => $name, 'to'   => 0, 'from' => 0);
+        }
+        $results[$name]['to'] += floatval($tr->sum);
+      }
+      foreach ($transfersToHere as $tr) {
+        $name = Crypt::decrypt($tr->name);
+        if (!isset($results[$name])) {
+          $results[$name] = array('name' => $name, 'to'   => 0, 'from' => 0);
+        }
+        $results[$name]['from'] += floatval($tr->sum);
+      }
+
+
+      // klopt wie ein busje!
+      $data = array(
+          'cols' => array(
+              array(
+                  'id'    => 'account',
+                  'label' => 'Account',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'to',
+                  'label' => 'Moved from ' . Crypt::decrypt($account->name),
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'from',
+                  'label' => 'Moved to ' . Crypt::decrypt($account->name),
+                  'type'  => 'number',
+              ),
+          ),
+          'rows' => array()
+      );
+      $index = 0;
+      foreach($results as $x) {
+        $data['rows'][$index]['c'][0]['v'] = $x['name'];
+        $data['rows'][$index]['c'][1]['v'] = $x['to'];
+        $data['rows'][$index]['c'][2]['v'] = $x['from'];
+        $index++;
       }
       return Response::json($data);
     }
