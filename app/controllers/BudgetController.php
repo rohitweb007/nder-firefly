@@ -103,6 +103,10 @@ class BudgetController extends BaseController {
   }
 
   public function homeOverviewGraph($id = 0) {
+    $key = cacheKey('Budget','homeOverviewGraph',$id,CACHE_TODAY);
+    if(Cache::has($key)) {
+      return Response::json(Cache::get($key));
+    }
     // 30 days into the past.
     $end    = clone Session::get('period');
     $end->modify('last day of this month ');
@@ -154,6 +158,7 @@ class BudgetController extends BaseController {
       $past->add(new DateInterval('P1D'));
       $index++;
     }
+    Cache::put($key,$data,1440);
     return Response::json($data);
   }
 
