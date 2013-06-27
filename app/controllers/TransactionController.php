@@ -87,6 +87,7 @@ class TransactionController extends BaseController {
         if ($validator->passes()) {
           $category->name           = Crypt::encrypt($category->name);
           $category->save();
+
           $transaction->category_id = $category->id;
         }
       } else {
@@ -130,6 +131,7 @@ class TransactionController extends BaseController {
       return Redirect::to('/home/transaction/add')->withErrors($validator)->withInput();
     } else {
       $transaction->save();
+      Cache::flush();
       Session::flash('success', 'The new transaction has been created.');
       return Redirect::to('/home/transaction/add');
     }

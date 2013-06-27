@@ -17,15 +17,18 @@ Route::get('/', function() {
         });
 
 Route::get('/oldimport', 'ImportController@doOldImport');
-Route::get('/export', 'ImportController@doExport');
+Route::get('/home/export', 'ImportController@doExport');
 Route::get('/concept', 'HomeController@showConcept');
 Route::get('/home/logout', 'HomeController@doLogout');
+Route::get('/home/delete', 'HomeController@askDelete');
+Route::post('/home/delete', 'HomeController@doDelete');
 Route::get('/home', 'HomeController@getHome');
 
 # charts
 Route::get('/home/chart/ovcat','ChartController@showOverExpendingCategories');
 Route::get('/home/chart/bba/{id}','ChartController@showBudgetsByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/cba/{id}','ChartController@showCategoriesByAccount')->where('id', '[0-9]+');
+Route::get('/home/chart/tba/{id}','ChartController@showTransfersByAccount')->where('id', '[0-9]+');
 
 
 // account management:

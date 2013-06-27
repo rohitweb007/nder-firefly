@@ -94,6 +94,7 @@ class TargetController extends BaseController {
     if ($validator->fails()) {
       return Redirect::to('/home/target/add')->withErrors($validator)->withInput();
     } else {
+      Cache::flush();
       $target->save();
       Session::flash('success', 'The new target has been created.');
       return Redirect::to('/home');

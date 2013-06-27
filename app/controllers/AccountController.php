@@ -31,12 +31,12 @@ class AccountController extends BaseController {
     $validator = Validator::make($account->toArray(), Account::$rules);
     $validator->fails();
     if ($validator->fails()) {
-      var_dump($validator->messages());
-      exit;
+      //DB::delete('delete from cache'); // moet beter!
       return Redirect::to('/home/account/add')->withErrors($validator)->withInput();
     } else {
       $account->name = Crypt::encrypt($account->name);
       $account->save();
+      Cache::flush();
       Session::flash('success', 'The new account has been created.');
       return Redirect::to('/home');
       exit;
