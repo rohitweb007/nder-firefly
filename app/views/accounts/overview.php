@@ -21,7 +21,7 @@
     <div id="budgetTable"></div>
     </div>
   <div class="span4"><h4>Categories</h4><div id="categoryTable"></div></div>
-  <div class="span4" style="border:1px red solid;"><h4>Beneficiaries</h4></div>
+  <div class="span4"><h4>Moved</h4><div id="moveTable"></div></div>
 </div>
 
 <script src="/js/account.js"></script>
