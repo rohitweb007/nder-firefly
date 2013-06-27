@@ -1,4 +1,4 @@
-google.load('visualization', '1.0', {'packages': ['controls','table']});
+google.load('visualization', '1.0', {'packages': ['controls', 'table']});
 google.setOnLoadCallback(drawDashboard);
 
 var accountDashboard;
@@ -14,6 +14,7 @@ function drawDashboard() {
   updateHeader();
   drawBudget();
   drawCategory();
+  drawMoves();
 }
 
 
@@ -59,7 +60,9 @@ function drawAccount() {
   var data = new google.visualization.DataTable(jsondata);
   google.visualization.events.addListener(accountControl, 'statechange', drawBudget);
   google.visualization.events.addListener(accountControl, 'statechange', drawCategory);
+  google.visualization.events.addListener(accountControl, 'statechange', drawMoves);
   google.visualization.events.addListener(accountControl, 'statechange', updateHeader);
+
   accountDashboard.bind(accountControl, accountChart);
   accountDashboard.draw(data);
 
@@ -80,14 +83,14 @@ function drawBudget(opt) {
 
     var state = accountControl.getState();
 
-    $.getJSON('/home/chart/bba/' + ID, {start: state.range.start.toDateString(),end:state.range.end.toDateString()}, function(data) {
+    $.getJSON('/home/chart/bba/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
       var chart = new google.visualization.Table(document.getElementById('budgetTable'));
       var gdata = new google.visualization.DataTable(data);
       var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata,{sortAscending: false, sortColumn:1});
+      chart.draw(gdata, {sortAscending: false, sortColumn: 1});
       workingBudget = false;
     });
   }
@@ -101,7 +104,7 @@ function drawCategory(opt) {
 
     var state = accountControl.getState();
 
-    $.getJSON('/home/chart/cba/' + ID, {start: state.range.start.toDateString(),end:state.range.end.toDateString()}, function(data) {
+    $.getJSON('/home/chart/cba/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
       var chart = new google.visualization.Table(document.getElementById('categoryTable'));
       var gdata = new google.visualization.DataTable(data);
       var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
@@ -109,8 +112,30 @@ function drawCategory(opt) {
         money.format(gdata, i);
       }
 
-      chart.draw(gdata,{sortAscending: false, sortColumn:1});
+      chart.draw(gdata, {sortAscending: false, sortColumn: 1});
       workingCategory = false;
+    });
+  }
+}
+
+var workingMoves = false;
+function drawMoves(opt) {
+
+  if (workingMoves === false || (workingMoves === false && opt && opt.inProgress === false)) {
+    workingMoves = true;
+
+    var state = accountControl.getState();
+
+    $.getJSON('/home/chart/tba/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
+      var chart = new google.visualization.Table(document.getElementById('moveTable'));
+      var gdata = new google.visualization.DataTable(data);
+      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+        money.format(gdata, i);
+      }
+
+      chart.draw(gdata, {sortAscending: false, sortColumn: 1});
+      workingMoves = false;
     });
   }
 }

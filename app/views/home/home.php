@@ -219,7 +219,7 @@
     </div>
 <?php endif; ?>
 </div>
-
+<?php if(count($targets) > 0) { ?>
 <div class="row-fluid">
   <div class="span6">
     <h4>Saving targets</h4>
@@ -253,6 +253,8 @@
     </table>
   </div>
 </div>
+<?php } ?>
+
 
 <?php
 $now   = new DateTime('now');

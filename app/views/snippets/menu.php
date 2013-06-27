@@ -20,8 +20,8 @@ $next->add(new DateInterval('P1M'));
       <li class="divider-vertical"></li>
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Navigation <b class="caret"></b></a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="drop-1">
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/{{strtolower($previous->format('Y/F'))}}">&larr; {{$previous->format('F Y')}}</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/{{strtolower($next->format('Y/F'))}}">&rarr; {{$next->format('F Y')}}</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/<?php echo strtolower($previous->format('Y/F')); ?>">&larr; <?php echo $previous->format('F Y'); ?></a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/<?php echo strtolower($next->format('Y/F')); ?>}">&rarr; <?php echo $next->format('F Y'); ?></a></li>
         </ul>
       </li>
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Create <b class="caret"></b></a>
@@ -48,7 +48,8 @@ $next->add(new DateInterval('P1M'));
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Other <b class="caret"></b></a>
 
       <ul class="dropdown-menu" role="menu" aria-labelledby="drop-1">
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/logout">Logout</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/logout"><i class="icon-arrow-right"></i> Logout</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/delete"><i class="icon-warning-sign"></i> Logout and delete</a></li>
         </ul>
 
       </li>
