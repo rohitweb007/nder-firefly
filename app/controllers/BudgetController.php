@@ -97,6 +97,7 @@ class BudgetController extends BaseController {
     } else {
       $budget->name = Crypt::encrypt($budget->name);
       $budget->save();
+      Cache::flush();
       Session::flash('success', 'The new budget has been created.');
       return Redirect::to('/home');
     }
