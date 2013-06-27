@@ -56,13 +56,23 @@ class BaseController extends Controller {
    * transfer
    */
   public static function getFirst() {
-    $firstTransaction = Auth::user()->transactions()->orderBy('date','ASC')->first();
-    $firstTransactionDate = new DateTime($firstTransaction->date);
-    unset($firstTransaction);
+    $firstTransaction = Auth::user()->transactions()->orderBy('date', 'ASC')->first();
+    if (!is_null($firstTransaction)) {
+      $firstTransactionDate = new DateTime($firstTransaction->date);
+      unset($firstTransaction);
+    } else {
+      $firstTransactionDate = new DateTime('now');
+    }
 
-    $firstTransfer = Auth::user()->transfers()->orderBy('date','ASC')->first();
-    $firstTransferDate = new DateTime($firstTransfer->date);
-    return min($firstTransactionDate,$firstTransferDate);
+    $firstTransfer     = Auth::user()->transfers()->orderBy('date', 'ASC')->first();
+
+    if (!is_null($firstTransfer)) {
+      $firstTransferDate = new DateTime($firstTransfer->date);
+      unset($firstTransaction);
+    } else {
+      $firstTransferDate = new DateTime('now');
+    }
+    return min($firstTransactionDate, $firstTransferDate);
   }
 
 }
