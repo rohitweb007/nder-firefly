@@ -123,6 +123,7 @@ class TransferController extends BaseController {
       return Redirect::to('/home/transfer/add')->withErrors($validator)->withInput();
     } else {
       $transfer->save();
+      Cache::flush();
       Session::flash('success', 'The new transfer has been created.');
       return Redirect::to('/home');
     }
