@@ -44,6 +44,10 @@ class AccountController extends BaseController {
   }
 
   public function homeOverviewGraph($id = 0) {
+    $key = cacheKey('Account','homeOverviewGraph',$id,CACHE_TODAY);
+    if(Cache::has($key)) {
+      return Response::json(Cache::get($key));
+    }
     // 30 days into the past.
     $today   = clone Session::get('period');
     $past    = clone $today;
@@ -89,6 +93,7 @@ class AccountController extends BaseController {
       $past->add(new DateInterval('P1D'));
       $index++;
     }
+    Cache::put($key,$data,1440);
     return Response::json($data);
   }
 
