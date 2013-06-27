@@ -25,14 +25,15 @@ class Account extends Eloquent {
 
     // add and substract all transactions:
     $tr_sum = floatval($this->transactions()->where('date','<=',$date->format('Y-m-d'))->sum('amount'));
+    //Log::error('balance equation: ' . $date->format('Y-m-d'));
 
     // substract all transfers away from this account:
-    $away_sum = floatval($this->transfersfrom()->where('date','<=',$date->format('Y-m-d'))->sum('amount'));
+    $away_sum = floatval($this->transfersfrom()->where('date','<=',$date->format('Y-m-d'))->sum('amount')) * -1;
 
     // add all transfers TO this account
     $here_sum = floatval($this->transfersto()->where('date','<=',$date->format('Y-m-d'))->sum('amount'));
 
-    return $start + $tr_sum - $away_sum + $here_sum;
+    return $start + $tr_sum + $away_sum + $here_sum;
   }
 
   public function transfersfrom() {

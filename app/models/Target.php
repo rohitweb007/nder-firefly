@@ -11,4 +11,59 @@ class Target extends Eloquent {
       'startdate'      => 'required|before:2038-01-01|after:1980-01-01',
   );
 
+  public function transfers() {
+    return $this->hasMany('Transfer');
+  }
+
+  public function hassaved(DateTime $date = null) {
+    $date = is_null($date) ? clone Session::get('period') : $date;
+    // check it!
+    $transfers = $this->transfers()->where('date','<=',$date->format('Y-m-d'))->get();
+    $sum = 0;
+    foreach($transfers as $t) {
+      if($t->account_from == $this->account_id) {
+        $sum -= floatval($t->amount);
+      } else {
+        $sum += floatval($t->amount);
+      }
+    }
+    return floatval($sum);
+  }
+
+  /**
+   * Daily saving guideline.
+   * @param DateTime $date
+   * @return int
+   */
+  public function guide(DateTime $date = null) {
+    $date = is_null($date) ? clone Session::get('period') : $date;
+    $end = $this->duedate != '0000-00-00' ? new DateTime($this->duedate) : new DateTime('now');
+
+    $diff = $date->diff($end);
+    if($diff->days > 0) {
+      $amount = $this->amount - $this->hassaved();
+
+      $guide = $amount / $diff->days;
+      return $guide;
+
+    } else {
+      return 0;
+    }
+  }
+
+  public function shouldhavesaved(DateTime $date = null) {
+    $date = is_null($date) ? clone Session::get('period') : $date;
+    echo $this->id;
+    if($this->duedate == '0000-00-00') {
+      return null;
+    } else {
+      $start = new DateTime($this->startdate);
+      // guide voor de hele periode:
+      $due = new DateTime($this->duedate);
+      $guide = $this->guide($start);
+      // days since start:
+      $diff = $start->diff($date); // hoeveel dagen al onderweg?
+      return $diff->days * $guide;
+    }
+  }
 }

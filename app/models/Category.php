@@ -32,5 +32,9 @@ class Category extends Eloquent {
     return $this->hasMany('Transaction');
   }
 
+  public function transfers() {
+    return $this->hasMany('Transfer');
+  }
+
 
 }

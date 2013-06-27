@@ -19,6 +19,9 @@ class Transfer extends Eloquent {
   public function accountFrom() {
     return $this->belongsTo('Account','account_from');
   }
+  public function category() {
+    return $this->belongsTo('Category');
+  }
 
   public function accountTo() {
     return $this->belongsTo('Account','account_to');
@@ -26,5 +29,9 @@ class Transfer extends Eloquent {
   public function budget() {
     return $this->belongsTo('Budget');
   }
+  public function target() {
+    return $this->belongsTo('Target');
+  }
+
 
 }

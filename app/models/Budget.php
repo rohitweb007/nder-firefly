@@ -81,7 +81,7 @@ class Budget extends Eloquent {
     }
     $oldest = BaseController::getFirst();
     $diff   = $oldest->diff($date);
-    return ($sum / $diff->m);
+    return $diff->m == 0 ? $sum : ($sum / $diff->m);
   }
 
   /**
