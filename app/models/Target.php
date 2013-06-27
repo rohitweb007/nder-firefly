@@ -35,13 +35,18 @@ class Target extends Eloquent {
    * @param DateTime $date
    * @return int
    */
-  public function guide(DateTime $date = null) {
+  public function guide(DateTime $date = null,$ignoresaved = false) {
     $date = is_null($date) ? clone Session::get('period') : $date;
     $end = $this->duedate != '0000-00-00' ? new DateTime($this->duedate) : new DateTime('now');
 
     $diff = $date->diff($end);
     if($diff->days > 0) {
-      $amount = $this->amount - $this->hassaved();
+      if($ignoresaved === false) {
+        $amount = $this->amount - $this->hassaved($date);
+      } else {
+        $amount = $this->amount;
+      }
+
 
       $guide = $amount / $diff->days;
       return $guide;

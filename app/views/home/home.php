@@ -223,7 +223,7 @@
 <div class="row-fluid">
   <div class="span6">
     <h4>Saving targets</h4>
-    <table class="table table-striped">
+    <table class="table table-striped table-condensed">
     <?php foreach($targets as $target) { ?>
       <tr>
         <th style="width:30%;"><?php echo HTML::Link('home/target/overview/' . $target['id'],$target['description']); ?></th>
@@ -236,14 +236,14 @@
             </div></div>
         </td>
         <?php } else { ?>
-          <td style="width:50%"></td>
+          <td style="width:70%"></td>
         <?php } ?>
-          <td style="width:20%;"><small>
+          <!--<td style="width:40%;"><small>
               <?php echo mf($target['saved']); ?> /
               <?php echo mf($target['amount']); ?> /
               <?php echo mf($target['should']); ?>
 
-            </small></td>
+            </small></td>-->
       </tr>
       <tr>
         <td colspan="3">

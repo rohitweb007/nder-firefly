@@ -49,6 +49,8 @@ route::post('/home/transaction/add', 'TransactionController@newTransaction');
 // target management
 route::get('/home/target/add', 'TargetController@addTarget');
 route::post('/home/target/add', 'TargetController@newTarget');
+route::get('/home/target/overviewGraph/{id}', 'TargetController@homeOverviewGraph')->where('id', '[0-9]+');
+
 
 // transfer management
 route::get('/home/transfers', 'TransferController@showAll');

@@ -53,10 +53,26 @@ function drawChart() {
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata, {lineWidth: 1, legend: {position: 'none'}, chartArea: {left: 40, width: '100%', colors: ['blue', 'red']}});
+      chart.draw(gdata, {lineWidth: 1, legend: {position: 'none'}, chartArea: {left: 40, width: '100%'}});
     });
 
   });
+
+    $.each($('.targetOverviewGraph'), function(i, v) {
+    var graphHolder = $(v);
+    var ID = graphHolder.attr('data-value');
+    $.getJSON('/home/target/overviewGraph/' + ID, function(data) {
+      var chart = new google.visualization.AreaChart(document.getElementById('targetOverviewGraph' + ID));
+      var gdata = new google.visualization.DataTable(data);
+      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+        money.format(gdata, i);
+      }
+      chart.draw(gdata, {lineWidth: 1, legend: {position: 'none'}, chartArea: {left: 40, width: '100%'}});
+    });
+
+  });
+
   if ($('#ovcat')) {
     $.getJSON('/home/chart/ovcat', function(data) {
       var chart = new google.visualization.BubbleChart(document.getElementById('ovcat'));
