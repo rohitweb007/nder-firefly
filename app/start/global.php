@@ -29,13 +29,8 @@ ClassLoader::addDirectories(array(
   |
  */
 
-//if (gethostname() != 'nder-firefly.appspot.com') {
-//  $logFile = 'log-' . php_sapi_name() . '.txt';
-//  Log::useDailyFiles(storage_path() . '/logs/' . $logFile);
-//} else {
 $monolog = Log::getMonolog();
 $monolog->pushHandler(new Monolog\Handler\SyslogHandler('intranet', 'user', Monolog\Logger::DEBUG, false, LOG_PID));
-//}
 
 /*
   |--------------------------------------------------------------------------
@@ -81,7 +76,23 @@ App::down(function() {
  */
 
 function mf($m) {
-  return '&euro; '.number_format(floatval($m), 2, ',', '.');
+  return '&euro; ' . number_format(floatval($m), 2, ',', '.');
+}
+
+define('CACHE_TODAY', date('Ymd'));
+function cacheKey() {
+  $keys = func_get_args();
+  $cKey = Auth::user()->id;
+  foreach ($keys as $key) {
+    if (is_string($key)) {
+      $cKey .= $key;
+    } else if ($key instanceof DateTime) {
+      $cKey .= $key->format('Ymd');
+    } else if (is_int($key) || is_float($key)) {
+      $cKey .= (string) $key;
+    }
+  }
+  return $cKey;
 }
 
 require app_path() . '/filters.php';
