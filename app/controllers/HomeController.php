@@ -13,6 +13,7 @@ class HomeController extends BaseController {
   }
 
   public function getHome() {
+    
 
 
 
@@ -139,6 +140,18 @@ class HomeController extends BaseController {
     Session::flush();
     return Redirect::to(UserService::createLogoutUrl('/'));
   }
+
+  public function askDelete() {
+    return View::make('home.delete');
+  }
+  public function doDelete() {
+    $user = Auth::user();
+    Auth::logout();
+    Session::flush();
+    $user->delete();
+    return Redirect::to(UserService::createLogoutUrl('/'));
+  }
+
 
   public function showConcept() {
     return View::make('home.concept');
