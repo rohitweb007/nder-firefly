@@ -7,3 +7,4 @@ app/config/local/database.php
 app/config/google/session.php
 app/config/local/session.php
 cache.php
+import.json
