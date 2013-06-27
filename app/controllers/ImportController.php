@@ -6,12 +6,30 @@ class ImportController extends BaseController {
     $this->beforeFilter('gs', array('only' => 'getHome')); // do Google "sync".
   }
 
-  public function doImport() {
+  public function doExport() {
+    $filename = 'firefly-export-'.date('Y-m-d').'.json';
+    // accounts
+    // icons
+    // beneficiaries
+    // budgets
+    // categories
+    // targets
+    // transactions
+    // transfers
+    return 'Data exported in '.$filename.'?';
+  }
+
+  public function doOldImport() {
+
+    DB::delete('DELETE FROM `cache`');
+
+
 
     // delete old data:
     foreach (Auth::user()->accounts()->get() as $acc) {
       $acc->delete();
     }
+
 
     foreach (Auth::user()->budgets()->get() as $b) {
       $b->delete();
@@ -28,7 +46,7 @@ class ImportController extends BaseController {
       $icon->delete();
     }
 
-    $data            = file_get_contents('/Library/WebServer/Documents/import.json');
+    $data            = file_get_contents('http://commondatastorage.googleapis.com/nder/import.json');
     $json            = json_decode($data);
     $map             = array();
     $map['accounts'] = array();
@@ -133,14 +151,14 @@ class ImportController extends BaseController {
 
     }
 
-    var_dump($map);
+    //
     //var_dump($data);
 
     // create everything from this file.
     // we map the old id's to the new one to save problems.
 
 
-    return 'x;';
+    return 'Old data successfully imported.';
   }
 
 }

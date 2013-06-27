@@ -6,6 +6,10 @@ class TransferController extends BaseController {
     $this->beforeFilter('gs'); // do Google "sync".
   }
 
+  public function showAll() {
+    return View::make('transfers.all')->with('transfers',Auth::user()->transfers()->orderBy('date','DESC')->get());
+  }
+
   public function addTransfer() {
 
     $accounts = array();
@@ -73,7 +77,7 @@ class TransferController extends BaseController {
         $category->fireflyuser_id = Auth::user()->id;
         $category->name           = Input::get('category');
         $category->showtrend      = 0;
-        $category->icon_id        = 1; // FIXME moet niet hardcoded
+        $category->icon_id        = Icon::first()->id;
         $validator                = Validator::make($category->toArray(), Category::$rules);
         if ($validator->passes()) {
           $category->name        = Crypt::encrypt($category->name);

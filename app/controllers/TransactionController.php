@@ -6,6 +6,10 @@ class TransactionController extends BaseController {
     $this->beforeFilter('gs'); // do Google "sync".
   }
 
+  public function showAll() {
+    return View::make('transactions.all')->with('transactions',Auth::user()->transactions()->orderBy('date','DESC')->get());
+  }
+
   public function addTransaction() {
 
     $accounts = array();
@@ -127,7 +131,7 @@ class TransactionController extends BaseController {
     } else {
       $transaction->save();
       Session::flash('success', 'The new transaction has been created.');
-      return Redirect::to('/home');
+      return Redirect::to('/home/transaction/add');
     }
   }
 
