@@ -11,6 +11,8 @@ class BudgetController extends BaseController {
   }
 
   public function showBudgetOverview($id) {
+
+
     $budget = Auth::user()->budgets()->find($id);
 
     // avg spent per day must correct for past budgets:
@@ -104,7 +106,8 @@ class BudgetController extends BaseController {
   }
 
   public function homeOverviewGraph($id = 0) {
-    $key = cacheKey('Budget','homeOverviewGraph',$id,CACHE_TODAY);
+
+    $key = cacheKey('Budget','homeOverviewGraph',$id,Session::get('period'));
     if(Cache::has($key)) {
       return Response::json(Cache::get($key));
     }
