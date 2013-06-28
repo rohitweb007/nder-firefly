@@ -34,10 +34,12 @@ if(intval($next->format('m')) == intval($currentPeriod->format('m'))+2  ) {
 
       <ul class="dropdown-menu" role="menu" aria-labelledby="drop-2">
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/account/add"><i class="icon-plus"></i> New account</a></li>
+            <?php if((isset($data['accounts']) && count($data['accounts']) > 0) || !isset($data['accounts'])) { ?>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/budget/add"><i class="icon-plus"></i> New budget</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/transaction/add"><i class="icon-plus"></i> New transaction</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/target/add"><i class="icon-plus"></i> New saving target</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/transfer/add"><i class="icon-plus"></i> New transfer</a></li>
+            <?php } ?>
         </ul>
 
       </li>
