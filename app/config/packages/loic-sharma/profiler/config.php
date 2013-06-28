@@ -1,7 +1,7 @@
 <?php
 
 return array(
-	
+
 	/*
 	| -----------------------------------------------------------------------------
 	| Enable profiler
@@ -42,6 +42,6 @@ return array(
 	|
 	*/
 
-	'require_password' => array('production', 'prod'),
+	'require_password' => array('production', 'prod','google'),
 
 );
