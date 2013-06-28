@@ -8,14 +8,37 @@ class ImportController extends BaseController {
 
   public function doExport() {
     $filename = 'firefly-export-'.date('Y-m-d').'.json';
+    $data = array();
     // accounts
+    $accounts = Auth::user()->accounts()->get();
+    foreach($accounts as $account) {
+      $account->name = Crypt::decrypt($account->name);
+      $data['accounts'][] = $account->toArray();
+    }
     // icons
+    $icons = Icon::all();
+    foreach($icons as $i) {
+      $data['icons'][] = $i->toArray();
+    }
     // beneficiaries
+    $bene = Auth::user()->beneficiaries()->get();
+    foreach($bene as $b) {
+      $b->name = Crypt::decrypt($b->name);
+      $data['beneficiaries'][] = $b->toArray();
+    }
+
     // budgets
+    $budgets = Auth::user()->budgets()->get();
+    foreach($budgets as $budget) {
+      $budget->name = Crypt::decrypt($b->name);
+      $data['budgets'][] = $b->toArray();
+    }
     // categories
     // targets
     // transactions
     // transfers
+
+    var_dump($data);
     return 'Data exported in '.$filename.'?';
   }
 
