@@ -9,7 +9,7 @@ class TargetController extends BaseController {
   public function homeOverviewGraph($id = 0) {
     $target = Auth::user()->targets()->find($id);
     if ($target) {
-      $key = cacheKey('Target', 'homeOverviewGraph', $id, CACHE_TODAY);
+      $key = cacheKey('Target', 'homeOverviewGraph', $id, Session::get('period'));
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
       } else {
@@ -54,6 +54,7 @@ class TargetController extends BaseController {
           $guide += $step;
           $index++;
         }
+        Cache::put($key,$data,1440);
         return Response::json($data);
       }
     } else {
