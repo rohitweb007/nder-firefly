@@ -7,7 +7,7 @@ class ChartController extends BaseController {
   }
 
   public function showOverExpendingCategories() {
-    $key = cacheKey('overExpendingCategories');
+    $key = cacheKey('overExpendingCategories', Session::get('period'));
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     } else {
@@ -102,8 +102,8 @@ class ChartController extends BaseController {
         $data['rows'][$index]['c'] = $c['c'];
         $index++;
       }
-      Cache::put($key, $data, 1440);
     }
+    Cache::put($key, $data, 1440);
     return Response::json($data);
   }
 
@@ -212,7 +212,7 @@ class ChartController extends BaseController {
 
 
       // klopt wie ein busje!
-      $data = array(
+      $data  = array(
           'cols' => array(
               array(
                   'id'    => 'account',
@@ -233,7 +233,7 @@ class ChartController extends BaseController {
           'rows' => array()
       );
       $index = 0;
-      foreach($results as $x) {
+      foreach ($results as $x) {
         $data['rows'][$index]['c'][0]['v'] = $x['name'];
         $data['rows'][$index]['c'][1]['v'] = $x['to'];
         $data['rows'][$index]['c'][2]['v'] = $x['from'];
