@@ -39,33 +39,19 @@ class ChartController extends BaseController {
                   'label' => 'Spent on average',
                   'type'  => 'number',
               ),
-//            array(
-//                'id'    => 'overspent',
-//                'label' => 'Spent too much',
-//                'type'  => 'number',
-//            ),
           ),
           'rows' => array()
       );
       $collection = array();
 
       foreach ($categories as $category) {
-
-
-
         $avg_spent      = $category->averagespending();
         $spent          = $category->spent();
         $category->name = Crypt::decrypt($category->name);
         if ($avg_spent > 0) {
           if ($avg_spent < $spent) {
-            $current = array();
-
-
-
-
-
+            $current    = array();
             // overspent as part of average:
-            //100-(100/120)*100
             $spentpct   = 100 - (($avg_spent / $spent) * 100);
             $spentindex = round($spentpct / 10, 0);
             if ($spentindex == 0) {
@@ -114,7 +100,10 @@ class ChartController extends BaseController {
     } else {
       $start = new DateTime(Input::get('start'));
       $end   = new DateTime(Input::get('end'));
-
+      $key   = cacheKey('cba', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
       $categories = Auth::user()->categories()->get();
       $records    = array();
       foreach ($categories as $cat) {
@@ -173,18 +162,24 @@ class ChartController extends BaseController {
           $index++;
         }
       }
+      Cache::put($key, $data, 1440);
       return Response::json($data);
     }
   }
 
-  public function showTransfersByAccount($id) {
+  public function showMovesByAccount($id) {
     $account = Auth::user()->accounts()->find($id);
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
       return Response::error(404);
     } else {
-      $results               = array();
-      $start                 = new DateTime(Input::get('start'));
-      $end                   = new DateTime(Input::get('end'));
+
+      $results = array();
+      $start   = new DateTime(Input::get('start'));
+      $end     = new DateTime(Input::get('end'));
+      $key     = cacheKey('mba', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
       $transfersAwayFromHere = $account->transfersfrom()->where('transfers.date', '>=', $start->format('Y-m-d'))->where('transfers.date', '<=', $end->format('Y-m-d'))
               ->groupBy('accounts.name')
               ->leftJoin('accounts', 'accounts.id', '=', 'transfers.account_to')
@@ -239,6 +234,7 @@ class ChartController extends BaseController {
         $data['rows'][$index]['c'][2]['v'] = $x['from'];
         $index++;
       }
+      Cache::put($key, $data, 1440);
       return Response::json($data);
     }
   }
@@ -250,6 +246,11 @@ class ChartController extends BaseController {
     } else {
       $start = new DateTime(Input::get('start'));
       $end   = new DateTime(Input::get('end'));
+
+      $key = cacheKey('bba', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
 
       $start_first = clone $start;
       $end_first   = clone $end;
@@ -321,10 +322,101 @@ class ChartController extends BaseController {
         }
       }
     }
-
-
-
+    Cache::put($key, $data, 1440);
     return Response::json($data);
+  }
+
+  public function showTransactionsByAccount($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
+      return Response::error(404);
+    } else {
+      $start = new DateTime(Input::get('start'));
+      $end   = new DateTime(Input::get('end'));
+
+      $key = cacheKey('transba', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
+      $trans = $account->transactions()->orderBy('date', 'DESC')->
+              where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->
+              get();
+
+      $ct   = array(); // category temp
+      $at   = array(); // account temp
+      $bt   = array(); // budget temp
+      $bet  = array(); // beneficiary temp
+      $ct   = array(); // category temp
+      $data = array(
+          'cols' => array(
+              array(
+                  'id'    => 'date',
+                  'label' => 'Date',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'descr',
+                  'label' => 'Description',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'amount',
+                  'label' => 'Amount',
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'budget',
+                  'label' => 'Budget',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'category',
+                  'label' => 'Category',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'beneficiary',
+                  'label' => 'Beneficiary',
+                  'type'  => 'string',
+              ),
+          ),
+          'rows' => array()
+      );
+
+      $index = 0;
+      foreach ($trans as $t) {
+
+        // save acc. name:
+        if (!isset($at[intval($t->account_id)])) {
+          $at[intval($t->account_id)] = Crypt::decrypt($t->account()->first()->name);
+        }
+        // get budget and save
+        if (!is_null($t->budget_id) && !isset($bt[intval($t->budget_id)])) {
+          $bt[intval($t->budget_id)] = Crypt::decrypt($t->budget()->first()->name);
+        }
+
+        // get ben and save
+        if (!is_null($t->beneficiary_id) && !isset($bet[intval($t->beneficiary_id)])) {
+          $bet[intval($t->beneficiary_id)] = Crypt::decrypt($t->beneficiary()->first()->name);
+        }
+
+        // get cat and save
+        if (!is_null($t->category_id) && !isset($ct[intval($t->category_id)])) {
+          $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
+        }
+        $date                              = new DateTime($t->date);
+        $strDate                           = $date->format('d F Y');
+        $data['rows'][$index]['c'][0]['v'] = $strDate;
+        $data['rows'][$index]['c'][1]['v'] = Crypt::decrypt($t->description);
+        $data['rows'][$index]['c'][2]['v'] = floatval($t->amount);
+        $data['rows'][$index]['c'][3]['v'] = (is_null($t->budget_id) ? null : $bt[intval($t->budget_id)]);
+        $data['rows'][$index]['c'][4]['v'] = (is_null($t->beneficiary_id) ? null : $bet[intval($t->beneficiary_id)]);
+        $data['rows'][$index]['c'][5]['v'] = (is_null($t->category_id) ? null : $ct[intval($t->category_id)]);
+        $index++;
+      }
+      Cache::put($key,$data,1440);
+      return Response::json($data);
+    }
   }
 
 }

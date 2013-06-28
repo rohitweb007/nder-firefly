@@ -189,7 +189,7 @@ class TransactionController extends BaseController {
       $transaction->save();
       Cache::flush();
       Session::flash('success', 'The new transaction has been created.');
-      return Redirect::to('/home/transaction/add');
+      return Redirect::to('/home');
     }
   }
 

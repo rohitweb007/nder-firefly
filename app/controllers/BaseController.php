@@ -13,7 +13,6 @@ class BaseController extends Controller {
     }
   }
 
-
   public static function _determinePeriod() {
     // get the period from the session:
     $sessionPeriod = Session::get('period');
@@ -58,21 +57,33 @@ class BaseController extends Controller {
    * transfer
    */
   public static function getFirst() {
-    $firstTransaction = Auth::user()->transactions()->orderBy('date', 'ASC')->first();
-    if (!is_null($firstTransaction)) {
-      $firstTransactionDate = new DateTime($firstTransaction->date);
-      unset($firstTransaction);
+    $tr  = cacheKey('firstTransactionDate');
+    $trf = cacheKey('firstTransferDate');
+    if (Cache::has($tr)) {
+      $firstTransactionDate = Cache::get($tr);
     } else {
-      $firstTransactionDate = new DateTime('now');
+      $firstTransaction = Auth::user()->transactions()->orderBy('date', 'ASC')->first();
+      if (!is_null($firstTransaction)) {
+        $firstTransactionDate = new DateTime($firstTransaction->date);
+        unset($firstTransaction);
+      } else {
+        $firstTransactionDate = new DateTime('now');
+      }
+      Cache::put($tr, $firstTransactionDate, 5000);
     }
 
-    $firstTransfer     = Auth::user()->transfers()->orderBy('date', 'ASC')->first();
-
-    if (!is_null($firstTransfer)) {
-      $firstTransferDate = new DateTime($firstTransfer->date);
-      unset($firstTransaction);
+    if (Cache::has($trf)) {
+      $firstTransferDate = Cache::get($trf);
     } else {
-      $firstTransferDate = new DateTime('now');
+      $firstTransfer = Auth::user()->transfers()->orderBy('date', 'ASC')->first();
+
+      if (!is_null($firstTransfer)) {
+        $firstTransferDate = new DateTime($firstTransfer->date);
+        unset($firstTransaction);
+      } else {
+        $firstTransferDate = new DateTime('now');
+      }
+      Cache::put($trf, $firstTransferDate, 5000);
     }
     return min($firstTransactionDate, $firstTransferDate);
   }

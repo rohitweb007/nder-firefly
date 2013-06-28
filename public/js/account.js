@@ -15,6 +15,7 @@ function drawDashboard() {
   drawBudget();
   drawCategory();
   drawMoves();
+  drawTransactions();
 }
 
 
@@ -126,7 +127,7 @@ function drawMoves(opt) {
 
     var state = accountControl.getState();
 
-    $.getJSON('/home/chart/tba/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
+    $.getJSON('/home/chart/mba/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
       var chart = new google.visualization.Table(document.getElementById('moveTable'));
       var gdata = new google.visualization.DataTable(data);
       var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
@@ -136,6 +137,26 @@ function drawMoves(opt) {
 
       chart.draw(gdata, {sortAscending: false, sortColumn: 1});
       workingMoves = false;
+    });
+  }
+}
+
+var workingTransactions = false;
+function drawTransactions(opt) {
+
+  if (workingTransactions === false || (workingTransactions === false && opt && opt.inProgress === false)) {
+    workingTransactions = true;
+
+    var state = accountControl.getState();
+
+    $.getJSON('/home/chart/transba/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
+      var chart = new google.visualization.Table(document.getElementById('transactionsTable'));
+      var gdata = new google.visualization.DataTable(data);
+      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+      money.format(gdata, 2);
+
+      chart.draw(gdata);
+      workingTransactions = false;
     });
   }
 }

@@ -84,6 +84,60 @@ class AccountController extends BaseController {
     return Response::json($data);
   }
 
+  /**
+   * Same but a longer date range
+   * TODO combine and smarter call.
+   * @param type $id
+   * @return type
+   */
+  public function overviewGraph($id = 0) {
+    $key = cacheKey('Account','overviewGraph',$id,Session::get('period'));
+    if(Cache::has($key)) {
+      return Response::json(Cache::get($key));
+    }
+    // 30 days into the past.
+    $today   = clone Session::get('period');
+    $past    = self::getFirst();
+    $account = Auth::user()->accounts()->find($id);
 
+    $data = array(
+        'cols' => array(
+            array(
+                'id'    => 'date',
+                'label' => 'Date',
+                'type'  => 'date',
+                'p'     => array('role' => 'domain')
+            ),
+            array(
+                'id'    => 'balance',
+                'label' => 'Balance',
+                'type'  => 'number',
+                'p'     => array('role' => 'data')
+            ),
+            array(
+                'id'    => 'lowbalance',
+                'label' => 'Balance',
+                'type'  => 'number',
+                'p'     => array('role' => 'data')
+            )
+        ),
+        'rows' => array()
+    );
+
+    $index = 0;
+    while ($past <= $today) {
+      $month = intval($past->format('n'))-1;
+      $year = intval($past->format('Y'));
+      $day = intval($past->format('j'));
+      $data['rows'][$index]['c'][0]['v'] = 'Date('.$year.', '.$month.', '.$day.')';
+      $balance                           = $account->balance($past);
+      $data['rows'][$index]['c'][1]['v'] = $balance;
+      $past->add(new DateInterval('P1D'));
+      $index++;
+    }
+
+    Cache::put($key,$data,1440);
+    return Response::json($data);
+  }
 
 }

@@ -1,12 +1,11 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 <div class="row-fluid">
   <div class="span6">
-    <h4>Accounts</h4>
+
     <?php
-    if (count($data['accounts']) == 0) {
-      echo '<p><em>You have no accounts defined yet.</em></p><p><em>Your first step should be to </em> <strong>' . HTML::Link('/home/account/add', 'add a new account') . '</strong></p>';
-    } else {
-      echo '<table class="table table-condensed table-striped">';
+    if (count($data['accounts']) > 0) {
+
+      echo '<h4>Accounts</h4><table class="table table-condensed table-striped">';
       foreach ($data['accounts'] as $account):
         ?>
         <tr>

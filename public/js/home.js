@@ -73,7 +73,7 @@ function drawChart() {
 
   });
 
-  if ($('#ovcat')) {
+  if ($('#ovcat').length == 1) {
     $.getJSON('/home/chart/ovcat', function(data) {
       var chart = new google.visualization.BubbleChart(document.getElementById('ovcat'));
       var gdata = new google.visualization.DataTable(data);

@@ -33,7 +33,6 @@ class HomeController extends BaseController {
             'currentbalance' => $a->balance()
         );
         $account['header'] = $account['currentbalance'] < 0 ? array('style' => 'color:red;', 'class' => 'tt', 'title' => $account['name'] . ' has a balance below zero. Try to fix this.') : array();
-
         $min = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
         $max = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
 
@@ -148,6 +147,16 @@ class HomeController extends BaseController {
       }
       Cache::put($key, $data, 2440);
     }
+    // flash some warnings:
+    if(count($data['budgets']) == 0) {
+      Session::flash('warning', 'You don\'t have any budgets defined.');
+    }
+    if(count($data['accounts']) == 0) {
+      Session::flash('warning', 'You do not have any accounts added. You should do this first (Create &rarr; New account)');
+    }
+
+
+
     return View::make('home.home')->with('data', $data);
   }
 
