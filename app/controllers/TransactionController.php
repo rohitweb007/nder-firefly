@@ -7,7 +7,63 @@ class TransactionController extends BaseController {
   }
 
   public function showAll() {
-    return View::make('transactions.all')->with('transactions',Auth::user()->transactions()->orderBy('date','DESC')->get());
+    $key = cacheKey('Transactions', 'showAll');
+    if (Cache::has($key)) {
+      $data = Cache::get($key);
+    } else {
+      $data  = array();
+      $trans = Auth::user()->transactions()->orderBy('date', 'DESC')->get();
+
+      $ct  = array(); // category temp
+      $at  = array(); // account temp
+      $bt  = array(); // budget temp
+      $bet = array(); // beneficiary temp
+      $ct  = array(); // category temp
+
+      foreach ($trans as $t) {
+        $month           = new DateTime($t->date);
+        $strMonth        = $month->format('F Y');
+        $data[$strMonth] = isset($data[$strMonth]) ? $data[$strMonth] : array();
+
+        // save acc. name:
+        if (!isset($at[intval($t->account_id)])) {
+          $at[intval($t->account_id)] = Crypt::decrypt($t->account()->first()->name);
+        }
+        // get budget and save
+        if (!is_null($t->budget_id) && !isset($bt[intval($t->budget_id)])) {
+          $bt[intval($t->budget_id)] = Crypt::decrypt($t->budget()->first()->name);
+        }
+
+        // get ben and save
+        if (!is_null($t->beneficiary_id) && !isset($bet[intval($t->beneficiary_id)])) {
+          $bet[intval($t->beneficiary_id)] = Crypt::decrypt($t->beneficiary()->first()->name);
+        }
+
+        // get cat and save
+        if (!is_null($t->category_id) && !isset($ct[intval($t->category_id)])) {
+          $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
+        }
+        $date              = new DateTime($t->date);
+        $strDate           = $date->format('d F Y');
+        $current           = array(
+            'id'               => intval($t->id),
+            'date'             => $strDate,
+            'description'      => Crypt::decrypt($t->description),
+            'amount'           => mf(floatval($t->amount)),
+            'account_id'       => $t->account_id,
+            'account_name'     => $at[$t->account_id],
+            'budget_id'        => $t->budget_id,
+            'budget_name'      => (is_null($t->budget_id) ? null : $bt[intval($t->budget_id)]),
+            'beneficiary_id'   => $t->beneficiary_id,
+            'beneficiary_name' => (is_null($t->beneficiary_id) ? null : $bet[intval($t->beneficiary_id)]),
+            'category_id'      => $t->category_id,
+            'category_name'    => (is_null($t->category_id) ? null : $ct[intval($t->category_id)]),
+        );
+        $data[$strMonth][] = $current;
+      }
+      Cache::put($key,$data,4000);
+    }
+    return View::make('transactions.all')->with('transactions', $data);
   }
 
   public function addTransaction() {
@@ -85,7 +141,7 @@ class TransactionController extends BaseController {
         $category->icon_id        = Icon::first()->id; // FIXME moet niet hardcoded
         $validator                = Validator::make($category->toArray(), Category::$rules);
         if ($validator->passes()) {
-          $category->name           = Crypt::encrypt($category->name);
+          $category->name = Crypt::encrypt($category->name);
           $category->save();
 
           $transaction->category_id = $category->id;
@@ -99,8 +155,8 @@ class TransactionController extends BaseController {
     // beneficiary
 
     if (!is_null(Input::get('beneficiary'))) {
-      $beneficiaries  = Auth::user()->beneficiaries()->get(); //->where('name','=',Input::get('beneficiary'))->first();
-      $beneficiary = null;
+      $beneficiaries = Auth::user()->beneficiaries()->get(); //->where('name','=',Input::get('beneficiary'))->first();
+      $beneficiary   = null;
       foreach ($beneficiaries as $ben) {
         if (Crypt::decrypt($ben->name) == Input::get('beneficiary')) {
           $beneficiary = $ben;
