@@ -13,6 +13,7 @@ class BaseController extends Controller {
     }
   }
 
+
   public static function _determinePeriod() {
     // get the period from the session:
     $sessionPeriod = Session::get('period');
@@ -38,9 +39,10 @@ class BaseController extends Controller {
         // check if matches today:
         if ($date > $today) {
           // in the future:
-          $date->modify('last day of this month');
-        } else if ($date < $today) {
           $date->modify('first day of this month');
+        } else if ($date < $today) {
+          // in the past:
+          $date->modify('last day of this month');
         } else if ($date == $today) {
           $date = clone $today;
         } else {
