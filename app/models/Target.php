@@ -58,7 +58,6 @@ class Target extends Eloquent {
 
   public function shouldhavesaved(DateTime $date = null) {
     $date = is_null($date) ? clone Session::get('period') : $date;
-    echo $this->id;
     if($this->duedate == '0000-00-00') {
       return null;
     } else {
