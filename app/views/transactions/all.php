@@ -2,44 +2,35 @@
 
 <div class="row-fluid">
   <div class="span12">
+    <h2>All transactions you ever made!</h2>
 
-    <table class="table">
-      <?php foreach ($transactions as $t) { ?>
+
+      <?php foreach ($transactions as $period => $tr): ?>
+        <h3><?php echo $period;?></h3>
+        <table class="table table-bordered table-condensed table-striped">
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Account</th>
+            <th>Budget</th>
+            <th>Category</th>
+            <th>Beneficiary</th>
+          </tr>
+        <?php foreach($tr as $t):?>
         <tr>
-          <td><?php echo $t->date; ?></td>
-          <td><?php echo Crypt::decrypt($t->description); ?></td>
-          <td><?php echo $t->amount; ?></td>
-          <td>
-            <?php if ($t->account_id != null) {
-            echo Crypt::decrypt($t->account()->first()->name);
-            }
-            ?>
-          </td>
-          <td>
-            <?php if ($t->budget_id != null) {
-            echo Crypt::decrypt($t->budget()->first()->name);
-            }
-            ?>
-          </td>
-          <td>
-            <?php if ($t->beneficiary_id != null) {
-            echo Crypt::decrypt($t->beneficiary()->first()->name);
-            }
-            ?>
-          </td>
-          <td>
-            <?php if ($t->category_id != null) {
-            echo Crypt::decrypt($t->category()->first()->name);
-            }
-            ?>
-          </td>
-
-
-
+          <td><?php echo $t['date']; ?></td>
+          <td><?php echo HTML::Link('/home/transaction/edit/'.$t['id'],$t['description']); ?></td>
+          <td><?php echo $t['amount'] ?></td>
+          <td><?php echo HTML::Link('/home/account/overview/' . $t['account_id'],$t['account_name']);?></td>
+          <td><?php echo !is_null($t['budget_id']) ? HTML::Link('/home/budget/overview/' . $t['budget_id'],$t['budget_name']) : '';?></td>
+          <td><?php echo !is_null($t['category_id']) ? HTML::Link('/home/category/overview/' . $t['category_id'],$t['category_name']) : '';?></td>
+          <td><?php echo !is_null($t['beneficiary_id']) ? HTML::Link('/home/beneficiary/overview/' . $t['beneficiary_id'],$t['beneficiary_name']) : '';?></td>
         </tr>
+        <?php endforeach;?>
+</table>
+<?php endforeach;?>
 
-<?php } ?>
-    </table>
   </div>
 </div>
 
