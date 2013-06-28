@@ -53,6 +53,8 @@ route::get('/home/budget/overviewGraph/{id}', 'BudgetController@homeOverviewGrap
 route::get('/home/transactions', 'TransactionController@showAll');
 route::get('/home/transaction/add', 'TransactionController@addTransaction');
 route::post('/home/transaction/add', 'TransactionController@newTransaction');
+route::get('/home/transaction/edit/{id}', 'TransactionController@editTransaction')->where('id', '[0-9]+');
+route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransaction')->where('id', '[0-9]+');
 
 // target management
 route::get('/home/target/add', 'TargetController@addTarget');

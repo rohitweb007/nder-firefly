@@ -193,4 +193,22 @@ class TransactionController extends BaseController {
     }
   }
 
+  public function editTransaction($id) {
+    $transaction = Auth::user()->transactions()->find($id);
+    if($transaction) {
+      return View::make('transactions.edit')->with('transaction',$transaction);
+    } else {
+      return Response::error(404);
+    }
+  }
+
+  public function doEditTransaction($id) {
+    $transaction = Auth::user()->transactions()->find($id);
+    if($transaction) {
+      echo 'Do actual work here.';
+    } else {
+      return Response::error(404);
+    }
+  }
+
 }
