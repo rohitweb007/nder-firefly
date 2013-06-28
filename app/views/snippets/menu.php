@@ -6,9 +6,15 @@ $periodName    = $currentPeriod->format('F Y');
 // previous period:
 $previous = clone $currentPeriod;
 $previous->sub(new DateInterval('P1M'));
+if($previous->format('m') == $currentPeriod->format('m')) {
+  $previous->sub(new DateInterval('P5D'));
+}
 
 $next = clone $currentPeriod;
 $next->add(new DateInterval('P1M'));
+if(intval($next->format('m')) == intval($currentPeriod->format('m'))+2  ) {
+  $next->sub(new DateInterval('P5D'));
+}
 
 ?>
 
@@ -21,7 +27,7 @@ $next->add(new DateInterval('P1M'));
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Navigation <b class="caret"></b></a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="drop-1">
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/<?php echo strtolower($previous->format('Y/F')); ?>">&larr; <?php echo $previous->format('F Y'); ?></a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/<?php echo strtolower($next->format('Y/F')); ?>}">&rarr; <?php echo $next->format('F Y'); ?></a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/<?php echo strtolower($next->format('Y/F')); ?>">&rarr; <?php echo $next->format('F Y'); ?></a></li>
         </ul>
       </li>
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Create <b class="caret"></b></a>
