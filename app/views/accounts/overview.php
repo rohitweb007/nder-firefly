@@ -24,5 +24,11 @@
   <div class="span4"><h4>Moved</h4><div id="moveTable"></div></div>
 </div>
 
+<div class="row-fluid">
+  <div class="span12">
+    <h4>Transactions</h4>
+    <div id="transactionsTable"></div>
+</div>
+
 <script src="/js/account.js"></script>
 <?php require_once(__DIR__ . '/../layouts/bottom.php') ?>
