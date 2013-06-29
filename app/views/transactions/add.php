@@ -111,5 +111,6 @@
   </div>
 </div>
 
+<script src="/js/transaction.js"></script>
 
 <?php require_once(__DIR__ . '/../layouts/bottom.php') ?>

@@ -1,5 +1,4 @@
-@extends('layouts.main')
-@section('content')
+<?php require_once(__DIR__ . '/../layouts/top.php') ?>
 <div class="row-fluid">
   <div class="span6">
     <h3>Add a new budget</h3>
@@ -15,21 +14,21 @@
       is on its way, it is an easy way to manage your money.</em>
     </p>
     <p>
-      This budget will be created for {{Session::get('period')->format('F Y')}}.
+      This budget will be created for <?php echo Session::get('period')->format('F Y'); ?>.
     </p>
 
-    {{Form::open(array('class' => 'form-horizontal'))}}
+    <?php echo Form::open(array('class' => 'form-horizontal')); ?>
     <div class="control-group">
       <label class="control-label" for="inputName">New budget name</label>
       <div class="controls">
-        {{Form::text('name',null,array('id' => 'inputName','autocomplete' => 'off','placeholder' => 'Budget Name'))}}
+        <?php echo Form::text('name',null,array('id' => 'inputName','autocomplete' => 'off','placeholder' => 'Budget Name')); ?>
         <br /><span class="text-error"><?php echo $errors->first('name'); ?></span>
       </div>
     </div>
     <div class="control-group">
       <label class="control-label" for="inputAmount">Budgets amount</label>
       <div class="controls">
-        {{Form::input('number', 'amount',null,array('step' => 'any','autocomplete' => 'off', 'id' => 'inputAmount','placeholder' => '&euro;'))}}
+        <?php echo Form::input('number', 'amount',null,array('step' => 'any','autocomplete' => 'off', 'id' => 'inputAmount','placeholder' => '&euro;')); ?>
         &nbsp;&nbsp;<img class="tt" title="Enter 0 to give the budget no limit." src="/img/icons/help.png" alt="Help on this field" />
         <br /><span class="text-error"><?php echo $errors->first('amount'); ?></span>
       </div>
@@ -41,10 +40,8 @@
       </div>
     </div>
 
-    {{Form::close()}}
+    <?php echo Form::close(); ?>
 
   </div>
 </div>
-
-
-@endsection
+<?php require_once(__DIR__ . '/../layouts/top.php') ?>

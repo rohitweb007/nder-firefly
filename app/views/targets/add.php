@@ -1,5 +1,4 @@
-@extends('layouts.main')
-@section('content')
+<?php require_once(__DIR__ . '/../layouts/top.php') ?>
 <div class="row-fluid">
   <div class="span6">
     <h3>Add a new target</h3>
@@ -15,18 +14,18 @@
       Saving targets only work when you have two or more accounts.
     </p>
 
-    {{Form::open(array('class' => 'form-horizontal'))}}
+    <?php echo Form::open(array('class' => 'form-horizontal'));?>
     <div class="control-group">
       <label class="control-label" for="inputDescription">Target description</label>
       <div class="controls">
-        {{Form::text('description',null,array('id' => 'inputDescription','autocomplete' => 'off','class' => 'input-xxlarge','placeholder' => 'A new bike'))}}
+        <?php echo Form::text('description',null,array('id' => 'inputDescription','autocomplete' => 'off','class' => 'input-xxlarge','placeholder' => 'A new bike'));?>
         <br /><span class="text-error"><?php echo $errors->first('description'); ?></span>
       </div>
     </div>
     <div class="control-group">
       <label class="control-label" for="inputAmount">Target saving amount</label>
       <div class="controls">
-        {{Form::input('number', 'amount',null,array('step' => 'any','autocomplete' => 'off', 'id' => 'inputAmount','placeholder' => '&euro;'))}}
+        <?php echo Form::input('number', 'amount',null,array('step' => 'any','autocomplete' => 'off', 'id' => 'inputAmount','placeholder' => '&euro;'));?>
         &nbsp;&nbsp;<img  class="tt" title="How much do you want to save? Enter 0 for no limit." src="/img/icons/help.png" alt="Help on this field" />
         <br /><span class="text-error"><?php echo $errors->first('amount'); ?></span>
       </div>
@@ -35,7 +34,7 @@
     <div class="control-group">
       <label class="control-label" for="inputStartdate">Start date</label>
       <div class="controls">
-        {{Form::input('date', 'startdate',date('Y-m-d'),array('id' => 'inputStartdate','autocomplete' => 'off','placeholder' => date('m/d/Y')))}}
+        <?php echo Form::input('date', 'startdate',date('Y-m-d'),array('id' => 'inputStartdate','autocomplete' => 'off','placeholder' => date('m/d/Y')));?>
         &nbsp;&nbsp;<img class="tt" title="When did you start saving? Defaults to today" src="/img/icons/help.png" alt="Help on this field" />
         <br /><span class="text-error"><?php echo $errors->first('startdate'); ?></span>
       </div>
@@ -44,7 +43,7 @@
     <div class="control-group">
       <label class="control-label" for="inputDuedate">Due date</label>
       <div class="controls">
-        {{Form::input('date', 'duedate',date('Y-m-d',time() + (31*24*3600)),array('id' => 'inputDuedate','autocomplete' => 'off','placeholder' => date('m/d/Y')))}}
+        <?php echo Form::input('date', 'duedate',date('Y-m-d',time() + (31*24*3600)),array('id' => 'inputDuedate','autocomplete' => 'off','placeholder' => date('m/d/Y')));?>
         &nbsp;&nbsp;<img  class="tt" title="When do you want to have the money collected? Optional field." src="/img/icons/help.png" alt="Help on this field" />
         <br /><span class="text-error"><?php echo $errors->first('duedate'); ?></span>
       </div>
@@ -53,7 +52,7 @@
     <div class="control-group">
       <label class="control-label" for="inputAccount">Target saving account</label>
       <div class="controls">
-        {{Form::select('account',$accounts)}}
+        <?php echo Form::select('account',$accounts);?>
         <br /><span class="text-error"><?php echo $errors->first('account_id'); ?></span>
       </div>
     </div>
@@ -64,10 +63,8 @@
       </div>
     </div>
 
-    {{Form::close()}}
+    <?php echo Form::close();?>
 
   </div>
 </div>
-
-
-@endsection
+<?php require_once(__DIR__ . '/../layouts/top.php') ?>

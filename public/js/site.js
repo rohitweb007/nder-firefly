@@ -3,11 +3,7 @@ $(document).ready(function() {
   $('.tt').tooltip();
   $('.popover').popover();
 
-  $('.toggle-icon').on('click', function() {
-    $('.toggle-icon').toggleClass('icon-plus-sign icon-minus-sign');
-    $('#toggle-value').val($('#toggle-value').val() === 'min' ? 'plus' : 'min');
-
-  });
+ 
 
 });
 

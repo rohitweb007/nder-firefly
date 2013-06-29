@@ -2,68 +2,111 @@
 @section('content')
 <div class="row-fluid">
   <div class="span6">
-    <h3>Add a new target</h3>
+    <h3>Add a new transaction</h3>
     <p>
-      Please fill in the following details about your new saving target.
+      Please fill in the following details about the new transaction. It can be both
+      income and expense; use the icon next to the amount field to signify the difference.
     </p>
     <p>
-      Targets work by moving money (using transfers) to a certain account; Firefly
-      assumes you'll have two accounts: one normal, one savings-account. So
-      you'll need to define at least the account on which the saved money resides.
-    </p>
-    <p>
-      Saving targets only work when you have two or more accounts.
+      Categories and beneficiaries / payees (who you paid / who's paying you) are auto-saved, meaning
+      that whatever you fill in will be saved. If you have a bunch of them, the text-box will suggest
+      existing ones.
     </p>
 
     {{Form::open(array('class' => 'form-horizontal'))}}
     <div class="control-group">
-      <label class="control-label" for="inputDescription">Target description</label>
+      <label class="control-label" for="inputDescription">Description</label>
       <div class="controls">
-        {{Form::text('description',null,array('id' => 'inputDescription','autocomplete' => 'off','class' => 'input-xxlarge','placeholder' => 'A new bike'))}}
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::text('description',null,array('id' => 'inputDescription','autocomplete' => 'off','class' => 'input-xxlarge','placeholder' => 'Transaction description'))}}
         <br /><span class="text-error"><?php echo $errors->first('description'); ?></span>
       </div>
     </div>
+
     <div class="control-group">
-      <label class="control-label" for="inputAmount">Target saving amount</label>
+      <label class="control-label" for="inputAmount">Amount</label>
       <div class="controls">
-        {{Form::input('number', 'amount',null,array('step' => 'any','autocomplete' => 'off', 'id' => 'inputAmount','placeholder' => '&euro;'))}}
-        &nbsp;&nbsp;<img  class="tt" title="How much do you want to save? Enter 0 for no limit." src="/img/icons/help.png" alt="Help on this field" />
+        <i class="icon-minus-sign toggle-icon"></i>&nbsp;&nbsp;{{Form::input('number', 'amount',null,array('step' => 'any','autocomplete' => 'off', 'id' => 'inputAmount','placeholder' => '&euro;'))}}
+        &nbsp;&nbsp;<img  class="tt" title="Enter the amount for this transaction." src="/img/icons/help.png" alt="Help on this field" />
         <br /><span class="text-error"><?php echo $errors->first('amount'); ?></span>
       </div>
     </div>
 
+
+
     <div class="control-group">
-      <label class="control-label" for="inputStartdate">Start date</label>
+      <label class="control-label" for="inputDate">Transaction date</label>
       <div class="controls">
-        {{Form::input('date', 'startdate',date('Y-m-d'),array('id' => 'inputStartdate','autocomplete' => 'off','placeholder' => date('m/d/Y')))}}
-        &nbsp;&nbsp;<img class="tt" title="When did you start saving? Defaults to today" src="/img/icons/help.png" alt="Help on this field" />
-        <br /><span class="text-error"><?php echo $errors->first('startdate'); ?></span>
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::input('date', 'date',date('Y-m-d'),array('id' => 'inputDate','autocomplete' => 'off'))}}
+        &nbsp;&nbsp;<img  class="tt" title="When did the transaction occur?" src="/img/icons/help.png" alt="Help on this field" />
+        <br /><span class="text-error"><?php echo $errors->first('date'); ?></span>
       </div>
     </div>
 
     <div class="control-group">
-      <label class="control-label" for="inputDuedate">Due date</label>
+      <label class="control-label" for="inputOnetime">Check if this is a one time transaction</label>
       <div class="controls">
-        {{Form::input('date', 'duedate',date('Y-m-d',time() + (31*24*3600)),array('id' => 'inputDuedate','autocomplete' => 'off','placeholder' => date('m/d/Y')))}}
-        &nbsp;&nbsp;<img  class="tt" title="When do you want to have the money collected? Optional field." src="/img/icons/help.png" alt="Help on this field" />
-        <br /><span class="text-error"><?php echo $errors->first('duedate'); ?></span>
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::checkbox('onetime',null,false,array('id' => 'inputOnetime'))}}
+        &nbsp;&nbsp;<img class="tt" title="One-time transactions are large and occur rarely. Maybe a big new TV or something else expensive." src="/img/icons/help.png" alt="Help on this field" />
+        <br /><span class="text-error"><?php echo $errors->first('onetime'); ?></span>
       </div>
     </div>
 
     <div class="control-group">
-      <label class="control-label" for="inputAccount">Target saving account</label>
+      <label class="control-label" for="inputAccount">From account</label>
       <div class="controls">
-        {{Form::select('account',$accounts)}}
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::select('account',$accounts)}}
         <br /><span class="text-error"><?php echo $errors->first('account_id'); ?></span>
       </div>
     </div>
 
     <div class="control-group">
+      <label class="control-label" for="inputBudget">From budget</label>
       <div class="controls">
-        <input type="submit" class="btn btn-primary" value="Save new target" />
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::select('budget',$budgets)}}
+        <br /><span class="text-error"><?php echo $errors->first('budget_id'); ?></span>
       </div>
     </div>
 
+
+
+    <div class="control-group">
+      <label class="control-label" for="inputCategory">Category</label>
+      <div class="controls">
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::text('category',null,array('id' => 'inputCategory','autocomplete' => 'off','class' => 'input-large','placeholder' => 'Category','list' => 'addTransactionCategory'))}}
+        &nbsp;&nbsp;<img class="tt" title="This is a free field, which will suggest previous categories." src="/img/icons/help.png" alt="Help on this field" />
+        <br /><span class="text-error"><?php echo $errors->first('category_id'); ?></span>
+        <datalist id="addTransactionCategory">
+          @foreach($categories as $cat)
+          <option value="{{$cat}}"></option>
+          @endforeach
+        </datalist>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputBeneficiary">Beneficiary</label>
+      <div class="controls">
+        <i class="icon-bar"></i>&nbsp;&nbsp;{{Form::text('beneficiary',null,array('id' => 'inputBeneficiary','autocomplete' => 'off','class' => 'input-large','placeholder' => 'Beneficiary','list' => 'addTransactionBeneficiary'))}}
+        &nbsp;&nbsp;<img class="tt" title="This is a free field, which will suggest previous beneficiaries." src="/img/icons/help.png" alt="Help on this field" />
+        <br /><span class="text-error"><?php echo $errors->first('beneficiary_id'); ?></span>
+        <datalist id="addTransactionBeneficiary">
+          @foreach($beneficiaries as $ben)
+            <option value="{{$ben}}"></option>
+          @endforeach
+        </datalist>
+
+      </div>
+    </div>
+
+
+
+
+    <div class="control-group">
+      <div class="controls">
+        <input type="submit" class="btn btn-primary" value="Save new transaction" />
+      </div>
+    </div>
+    {{Form::hidden('type','min',array('id' => 'toggle-value'))}}
     {{Form::close()}}
 
   </div>

@@ -5,7 +5,7 @@ class Budget extends Eloquent {
   public static $rules = array(
       'fireflyuser_id' => 'required|exists:users,id|integer',
       'name'           => 'required|between:1,255',
-      'date'           => 'required|after:1900-01-01|before:2100-01-01',
+      'date'           => 'required|after:1900-01-01|before:2038-01-01',
       'amount'         => 'required|numeric|between:0,65535'
   );
 

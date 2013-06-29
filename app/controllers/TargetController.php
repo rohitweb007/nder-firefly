@@ -58,7 +58,7 @@ class TargetController extends BaseController {
         return Response::json($data);
       }
     } else {
-      return Response::error(404);
+      return App::abort(404);
     }
   }
 

@@ -15,7 +15,7 @@ class AccountController extends BaseController {
     if($account) {
       return View::make('accounts.overview')->with('account',$account);
     } else {
-      return Response::error(404);
+      return App::abort(404);
     }
 
   }
@@ -50,6 +50,11 @@ class AccountController extends BaseController {
     }
     // 30 days into the past.
     $today   = clone Session::get('period');
+    // we do some fixing in case we're in the future:
+    $actuallyToday = new DateTime('now');
+    if($today > $actuallyToday) {
+      $today->modify('last day of this month');
+    }
     $past    = clone $today;
     $past->sub(new DateInterval('P30D'));
     $account = Auth::user()->accounts()->find($id);

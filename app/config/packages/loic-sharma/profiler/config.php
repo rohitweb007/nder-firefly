@@ -23,12 +23,12 @@ return array(
 	| -----------------------------------------------------------------------------
 	|
 	| This password is required to enable the profiler on selected environments.
-	| 
+	|
 	| You should change it after installation.
 	|
 	*/
 
-	'password' => false,
+	'password' => 'sander',
 
 	/*
 	| -----------------------------------------------------------------------------

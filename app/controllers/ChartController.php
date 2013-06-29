@@ -96,7 +96,7 @@ class ChartController extends BaseController {
   public function showCategoriesByAccount($id) {
     $account = Auth::user()->accounts()->find($id);
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
-      return Response::error(404);
+      return App::abort(404);
     } else {
       $start = new DateTime(Input::get('start'));
       $end   = new DateTime(Input::get('end'));
@@ -170,7 +170,7 @@ class ChartController extends BaseController {
   public function showMovesByAccount($id) {
     $account = Auth::user()->accounts()->find($id);
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
-      return Response::error(404);
+      return App::abort(404);
     } else {
 
       $results = array();
@@ -242,7 +242,7 @@ class ChartController extends BaseController {
   public function showBudgetsByAccount($id) {
     $account = Auth::user()->accounts()->find($id);
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
-      return Response::error(404);
+      return App::abort(404);
     } else {
       $start = new DateTime(Input::get('start'));
       $end   = new DateTime(Input::get('end'));
@@ -329,7 +329,7 @@ class ChartController extends BaseController {
   public function showTransactionsByAccount($id) {
     $account = Auth::user()->accounts()->find($id);
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
-      return Response::error(404);
+      return App::abort(404);
     } else {
       $start = new DateTime(Input::get('start'));
       $end   = new DateTime(Input::get('end'));

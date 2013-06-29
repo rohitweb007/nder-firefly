@@ -81,7 +81,7 @@ class BudgetController extends BaseController {
     if ($budget) {
       return View::make('budgets.show')->with('budget', $budget)->with('categories',$categories)->with('beneficiaries',$beneficiaries);
     } else {
-      return Response::error(404);
+      return App::abort(404);
     }
   }
 
@@ -95,6 +95,8 @@ class BudgetController extends BaseController {
     $budget->date           = Session::get('period')->format('Y-m-d');
     $validator              = Validator::make($budget->toArray(), Budget::$rules);
     if ($validator->fails()) {
+      Log::error('Could not create Budget for user ' . Auth::user()->email.': '. print_r($validator->messages()->all(),true). ' Budget: ' .print_r($budget,true));
+
       return Redirect::to('/home/budget/add')->withErrors($validator)->withInput();
     } else {
       $budget->name = Crypt::encrypt($budget->name);

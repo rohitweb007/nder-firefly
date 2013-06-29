@@ -55,6 +55,7 @@ route::get('/home/transaction/add', 'TransactionController@addTransaction');
 route::post('/home/transaction/add', 'TransactionController@newTransaction');
 route::get('/home/transaction/edit/{id}', 'TransactionController@editTransaction')->where('id', '[0-9]+');
 route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransaction')->where('id', '[0-9]+');
+route::post('/home/transaction/delete/{id}', 'TransactionController@deleteTransaction')->where('id', '[0-9]+');
 
 // target management
 route::get('/home/target/add', 'TargetController@addTarget');
@@ -66,6 +67,10 @@ route::get('/home/target/overviewGraph/{id}', 'TargetController@homeOverviewGrap
 route::get('/home/transfers', 'TransferController@showAll');
 route::get('/home/transfer/add', 'TransferController@addTransfer');
 route::post('/home/transfer/add', 'TransferController@newTransfer');
+route::get('/home/transfer/edit/{id}', 'TransferController@editTransfer')->where('id', '[0-9]+');
+route::post('/home/transfer/edit/{id}', 'TransferController@doEditTransfer')->where('id', '[0-9]+');
+route::post('/home/transfer/delete/{id}', 'TransferController@deleteTransfer')->where('id', '[0-9]+');
+
 
 // category list:
 route::get('/home/categories', 'CategoryController@showAll');
