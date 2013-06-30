@@ -9,6 +9,27 @@ var start = new Date();
 var end = new Date();
 end.setMonth(end.getMonth() - 1);
 
+
+$(document).ready(function() {
+  $('.deleteAccount').on('click',deleteAccount);
+});
+
+function deleteAccount(ev) {
+  var target = $(ev.target);
+  if(target.hasClass('btn')) {
+    var row = target.parent().parent();
+  } else {
+    var row = target.parent().parent().parent();
+
+  }
+  $('#delAccountName').text($('td:nth-child(1) a',row).text())
+
+  var ID = $(ev.target).attr('data-value');
+  $('#modal form').attr('action','/home/account/delete/' + ID);
+  $('#modal').modal();
+}
+
+
 function drawCharts() {
   if ($('#accountDashboard').length > 0) {
     drawAccount();

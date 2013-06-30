@@ -37,6 +37,7 @@ Route::get('/home/chart/mba/{id}', 'ChartController@showMovesByAccount')->where(
 Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccount')->where('id', '[0-9]+');
 
 
+
 // account management:
 route::get('/home/account/add', 'AccountController@addAccount');
 route::post('/home/account/add', 'AccountController@newAccount');
@@ -45,6 +46,16 @@ route::get('/home/accounts/chart', 'AccountController@showAllChart');
 route::get('/home/account/overview/{id}', 'AccountController@showAccountOverview')->where('id', '[0-9]+');
 route::get('/home/account/overviewGraph/{id}', 'AccountController@homeOverviewGraph')->where('id', '[0-9]+');
 route::get('/home/account/chart/{id}', 'AccountController@overviewGraph')->where('id', '[0-9]+');
+route::post('/home/account/delete/{id}', 'AccountController@deleteAccount')->where('id', '[0-9]+');
+route::get('/home/account/edit/{id}', 'AccountController@editAccount')->where('id', '[0-9]+');
+route::post('/home/account/edit/{id}', 'AccountController@doEditAccount')->where('id', '[0-9]+');
+
+// beneficiary management
+route::get('/home/beneficiaries','BeneficiaryController@showAll');
+route::get('/home/beneficiary/overview/{id}','BeneficiaryController@showOverview')->where('id', '[0-9]+');
+route::get('/home/beneficiary/edit/{id}','BeneficiaryController@editBeneficiary')->where('id', '[0-9]+');
+route::post('/home/beneficiary/edit/{id}','BeneficiaryController@doEditBeneficiary')->where('id', '[0-9]+');
+route::post('/home/beneficiary/delete/{id}','BeneficiaryController@deleteBeneficiary')->where('id', '[0-9]+');
 
 // budget management
 route::get('/home/budgets', 'BudgetController@showAll');

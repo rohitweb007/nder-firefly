@@ -5,6 +5,7 @@
 <div class="row-fluid">
   <div class="span12">
     <h3>Account <?php echo Crypt::decrypt($account->name);?> <span id="date"></span></h3>
+    <a href="/home/account/edit/<?php echo $account->id; ?>" class="btn"><i class="icon-pencil"></i> Edit <?php echo Crypt::decrypt($account->name); ?></a>
   </div>
 </div>
 

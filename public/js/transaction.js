@@ -39,6 +39,4 @@ function deleteTransaction(ev) {
   var ID = $(ev.target).attr('data-value');
   $('#modal form').attr('action','/home/transaction/delete/' + ID);
   $('#modal').modal();
-
-
 }

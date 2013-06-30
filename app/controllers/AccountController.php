@@ -239,4 +239,48 @@ class AccountController extends BaseController {
     return Response::json($data);
   }
 
+  public function deleteAccount($id) {
+    $a = Auth::user()->accounts()->find($id);
+    if ($a) {
+      $a->delete();
+      Cache::flush();
+      Session::flash('success', 'Account deleted');
+      return Redirect::to('/home');
+    } else {
+      return App::abort(404);
+    }
+  }
+
+  public function editAccount($id) {
+
+    $account = Auth::user()->accounts()->find($id);
+    if ($account) {
+      return View::make('accounts.edit')->with('account', $account);
+    } else {
+      return App::abort(404);
+    }
+  }
+
+  public function doEditAccount($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if ($account) {
+      $account->name           = Input::get('name');
+      $account->balance        = floatval(Input::get('balance'));
+      $account->date           = Input::get('date');
+      $validator = Validator::make($account->toArray(), Account::$rules);
+      $validator->fails();
+      if ($validator->fails()) {
+        return Redirect::to('/home/account/edit/' . $account->id)->withErrors($validator)->withInput();
+      } else {
+        $account->name = Crypt::encrypt($account->name);
+        $account->save();
+        Cache::flush();
+        Session::flash('success', 'The account has been edited.');
+        return Redirect::to('/home');
+      }
+    } else {
+      return App::abort(404);
+    }
+  }
+
 }
