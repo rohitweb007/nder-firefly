@@ -32,7 +32,9 @@
           <td><?php echo !is_null($t['budget_id']) ? HTML::Link('/home/budget/overview/' . $t['budget_id'],$t['budget_name']) : '';?></td>
           <td><?php echo !is_null($t['category_id']) ? HTML::Link('/home/category/overview/' . $t['category_id'],$t['category_name']) : '';?></td>
           <td><?php echo !is_null($t['beneficiary_id']) ? HTML::Link('/home/beneficiary/overview/' . $t['beneficiary_id'],$t['beneficiary_name']) : '';?></td>
-          <td><a href="#"  data-value="<?php echo $t['id']; ?>" title="Delete <?php echo $t['description'];?>" class="btn btn-danger deleteTransaction"><i data-value="<?php echo $t['id']; ?>" class="icon-white icon-remove"></i></a>
+          <td>
+            <a href="/home/transaction/edit/<?php echo $t['id'];?>" class="btn"><i class="icon-pencil"></i></a>
+            <a href="#"  data-value="<?php echo $t['id']; ?>" title="Delete <?php echo $t['description'];?>" class="btn btn-danger deleteTransaction"><i data-value="<?php echo $t['id']; ?>" class="icon-white icon-remove"></i></a>
         </tr>
         <?php endforeach;?>
 </table>
@@ -48,7 +50,7 @@
   </div>
   <div class="modal-body">
     <p>
-      Are you sure you want to "<span id="delTransactionName"></span>"? You cannot undo this!
+      Are you sure you want to delete "<span id="delTransactionName"></span>"? You cannot undo this!
     </p>
   </div>
   <div class="modal-footer">

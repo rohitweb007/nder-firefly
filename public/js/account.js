@@ -1,5 +1,5 @@
-google.load('visualization', '1.0', {'packages': ['controls', 'table']});
-google.setOnLoadCallback(drawDashboard);
+google.load('visualization', '1.0', {'packages': ['controls','corechart', 'table']});
+google.setOnLoadCallback(drawCharts);
 
 var accountDashboard;
 var accountControl;
@@ -9,13 +9,30 @@ var start = new Date();
 var end = new Date();
 end.setMonth(end.getMonth() - 1);
 
-function drawDashboard() {
-  drawAccount();
-  updateHeader();
-  drawBudget();
-  drawCategory();
-  drawMoves();
-  drawTransactions();
+function drawCharts() {
+  if ($('#accountDashboard').length > 0) {
+    drawAccount();
+    updateHeader();
+    drawBudget();
+    drawCategory();
+    drawMoves();
+    drawTransactions();
+  }
+  if($('#allChart').length > 0) {
+    drawAllChart();
+  }
+}
+
+function drawAllChart() {
+  $.getJSON('/home/accounts/chart', function(data) {
+      var chart = new google.visualization.AreaChart(document.getElementById('allChart'));
+      var gdata = new google.visualization.DataTable(data);
+      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+        money.format(gdata, i);
+      }
+      chart.draw(gdata);
+    });
 }
 
 

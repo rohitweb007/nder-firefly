@@ -151,8 +151,8 @@
                 <?php elseif ($budget['amount'] > 0 && $budget['widthpct'] > 100): ?>
                   <?php $orangePCT = (100 / $budget['widthpct']) * 100; ?>
                   <div style="margin:0;" class="progress progress-striped">
-                    <div class="bar bar-danger" style="text-align:left;width:<?php echo $orangePCT; ?>%">&nbsp;<?php echo mf($budget['spent']); ?></div>
-                    <div class="bar bar-warning" style="width:<?php echo 100 - $orangePCT; ?>%"></div>
+                    <div class="bar bar-warning" style="text-align:left;width:<?php echo $orangePCT; ?>%">&nbsp;<?php echo mf($budget['spent']); ?></div>
+                    <div class="bar bar-danger" style="width:<?php echo 100 - $orangePCT; ?>%"></div>
                   </div>
 
                 <?php endif; ?>

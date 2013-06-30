@@ -56,36 +56,76 @@ class BaseController extends Controller {
    * Returns date of very first transaction or
    * transfer
    */
-  public static function getFirst() {
-    $tr  = cacheKey('firstTransactionDate');
-    $trf = cacheKey('firstTransferDate');
-    if (Cache::has($tr)) {
-      $firstTransactionDate = Cache::get($tr);
+  public static function getFirst($accountID = null) {
+    if (!is_null($accountID)) {
+      $account = Auth::user()->accounts()->find($accountID);
+      $first = cacheKey('getFirst', $account->id);
     } else {
-      $firstTransaction = Auth::user()->transactions()->orderBy('date', 'ASC')->first();
-      if (!is_null($firstTransaction)) {
-        $firstTransactionDate = new DateTime($firstTransaction->date);
-        unset($firstTransaction);
-      } else {
-        $firstTransactionDate = new DateTime('now');
-      }
-      Cache::put($tr, $firstTransactionDate, 5000);
+      $account = null;
+      $first = cacheKey('getFirst');
     }
 
-    if (Cache::has($trf)) {
-      $firstTransferDate = Cache::get($trf);
-    } else {
-      $firstTransfer = Auth::user()->transfers()->orderBy('date', 'ASC')->first();
-
-      if (!is_null($firstTransfer)) {
-        $firstTransferDate = new DateTime($firstTransfer->date);
-        unset($firstTransaction);
-      } else {
-        $firstTransferDate = new DateTime('now');
-      }
-      Cache::put($trf, $firstTransferDate, 5000);
+    if (Cache::has($first)) {
+      return Cache::get($first);
     }
-    return min($firstTransactionDate, $firstTransferDate);
+    // build the query:
+    $transf_query = Auth::user()->transfers()->orderBy('date', 'ASC');
+    $transa_query = Auth::user()->transactions()->orderBy('date', 'ASC');
+
+    if (!is_null($account)) {
+      $transa_query->where('account_id', '=', $account->id);
+      $transf_query->where(function($query) use ($account) {
+                $query->where('account_from', '=', $account->id);
+                $query->orWhere('account_to', '=', $account->id);
+              });
+    }
+
+    $transfer    = $transf_query->first();
+    $transaction = $transa_query->first();
+
+    $transf_date = is_null($transfer) ? new DateTime('now') : new DateTime($transfer->date);
+    $transa_date = is_null($transaction) ? new DateTime('now') : new DateTime($transaction->date);
+    $result      = min($transf_date, $transa_date);
+    Cache::put($first, $result, 5000);
+    return $result;
+  }
+
+  /**
+   * Returns date of very last transaction or
+   * transfer
+   */
+  public static function getLast($accountID = null) {
+    if (!is_null($accountID)) {
+      $account = Auth::user()->accounts()->find($accountID);
+      $last = cacheKey('getLast', $account->id);
+    } else {
+      $account = null;
+      $last = cacheKey('getLast');
+    }
+
+    if (Cache::has($last)) {
+      return Cache::get($last);
+    }
+    // build the query:
+    $transf_query = Auth::user()->transfers()->orderBy('date', 'DESC');
+    $transa_query = Auth::user()->transactions()->orderBy('date', 'DESC');
+
+    if (!is_null($account)) {
+      $transa_query->where('account_id', '=', $account->id);
+      $transf_query->where(function($query) use ($account) {
+                $query->where('account_from', '=', $account->id);
+                $query->orWhere('account_to', '=', $account->id);
+              });
+    }
+
+    $transfer    = $transf_query->first();
+    $transaction = $transa_query->first();
+
+    $transf_date = is_null($transfer) ? new DateTime('now') : new DateTime($transfer->date);
+    $transa_date = is_null($transaction) ? new DateTime('now') : new DateTime($transaction->date);
+    $result      = max($transf_date, $transa_date);
+    Cache::put($last, $result, 5000);
+    return $result;
   }
 
 }

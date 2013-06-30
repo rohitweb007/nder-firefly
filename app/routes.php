@@ -2,6 +2,7 @@
 
 require_once 'google/appengine/api/users/User.php';
 require_once 'google/appengine/api/users/UserService.php';
+
 use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 
@@ -39,15 +40,21 @@ Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccoun
 // account management:
 route::get('/home/account/add', 'AccountController@addAccount');
 route::post('/home/account/add', 'AccountController@newAccount');
+route::get('/home/accounts', 'AccountController@showAll');
+route::get('/home/accounts/chart', 'AccountController@showAllChart');
 route::get('/home/account/overview/{id}', 'AccountController@showAccountOverview')->where('id', '[0-9]+');
 route::get('/home/account/overviewGraph/{id}', 'AccountController@homeOverviewGraph')->where('id', '[0-9]+');
 route::get('/home/account/chart/{id}', 'AccountController@overviewGraph')->where('id', '[0-9]+');
 
 // budget management
+route::get('/home/budgets', 'BudgetController@showAll');
 route::get('/home/budget/add', 'BudgetController@addBudget');
+route::get('/home/budget/edit/{id}', 'BudgetController@editBudget');
+route::post('/home/budget/edit/{id}', 'BudgetController@doEditBudget');
 route::post('/home/budget/add', 'BudgetController@newBudget');
 route::get('/home/budget/overview/{id}', 'BudgetController@showBudgetOverview')->where('id', '[0-9]+');
 route::get('/home/budget/overviewGraph/{id}', 'BudgetController@homeOverviewGraph')->where('id', '[0-9]+');
+route::post('/home/budget/delete/{id}', 'BudgetController@deleteBudget')->where('id', '[0-9]+');
 
 // transaction management
 route::get('/home/transactions', 'TransactionController@showAll');

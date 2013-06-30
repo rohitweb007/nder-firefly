@@ -90,6 +90,8 @@ function cacheKey() {
       $cKey .= $key->format('Ymd');
     } else if (is_int($key) || is_float($key)) {
       $cKey .= (string) $key;
+    } else if (is_null($key)) {
+      $cKey .= 'NULL';
     }
   }
   return $cKey;
