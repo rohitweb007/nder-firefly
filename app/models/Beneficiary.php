@@ -4,4 +4,9 @@ class Beneficiary extends Eloquent {
       'fireflyuser_id' => 'required|exists:users,id',
       'name'    => 'required|between:1,50'
   );
+
+  public function transactions() {
+    return $this->hasMany('Transaction');
+  }
+
 }

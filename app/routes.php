@@ -39,59 +39,66 @@ Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccoun
 
 
 // account management:
-route::get('/home/account/add', 'AccountController@addAccount');
-route::post('/home/account/add', 'AccountController@newAccount');
-route::get('/home/accounts', 'AccountController@showAll');
-route::get('/home/accounts/chart', 'AccountController@showAllChart');
-route::get('/home/account/overview/{id}', 'AccountController@showAccountOverview')->where('id', '[0-9]+');
-route::get('/home/account/overviewGraph/{id}', 'AccountController@homeOverviewGraph')->where('id', '[0-9]+');
-route::get('/home/account/chart/{id}', 'AccountController@overviewGraph')->where('id', '[0-9]+');
-route::post('/home/account/delete/{id}', 'AccountController@deleteAccount')->where('id', '[0-9]+');
-route::get('/home/account/edit/{id}', 'AccountController@editAccount')->where('id', '[0-9]+');
-route::post('/home/account/edit/{id}', 'AccountController@doEditAccount')->where('id', '[0-9]+');
+Route::get('/home/account/add', 'AccountController@addAccount');
+Route::post('/home/account/add', 'AccountController@newAccount');
+Route::get('/home/accounts', 'AccountController@showAll');
+Route::get('/home/accounts/chart', 'AccountController@showAllChart');
+Route::get('/home/account/overview/{id}', 'AccountController@showAccountOverview')->where('id', '[0-9]+');
+Route::get('/home/account/overviewGraph/{id}', 'AccountController@homeOverviewGraph')->where('id', '[0-9]+');
+Route::get('/home/account/chart/{id}', 'AccountController@overviewGraph')->where('id', '[0-9]+');
+Route::post('/home/account/delete/{id}', 'AccountController@deleteAccount')->where('id', '[0-9]+');
+Route::get('/home/account/edit/{id}', 'AccountController@editAccount')->where('id', '[0-9]+');
+Route::post('/home/account/edit/{id}', 'AccountController@doEditAccount')->where('id', '[0-9]+');
 
 // beneficiary management
-route::get('/home/beneficiaries','BeneficiaryController@showAll');
-route::get('/home/beneficiary/overview/{id}','BeneficiaryController@showOverview')->where('id', '[0-9]+');
-route::get('/home/beneficiary/edit/{id}','BeneficiaryController@editBeneficiary')->where('id', '[0-9]+');
-route::post('/home/beneficiary/edit/{id}','BeneficiaryController@doEditBeneficiary')->where('id', '[0-9]+');
-route::post('/home/beneficiary/delete/{id}','BeneficiaryController@deleteBeneficiary')->where('id', '[0-9]+');
+Route::get('/home/beneficiaries', 'BeneficiaryController@showAll');
+Route::get('/home/beneficiary/overview/{id}', 'BeneficiaryController@showOverview')->where('id', '[0-9]+');
+Route::get('/home/beneficiary/edit/{id}', 'BeneficiaryController@editBeneficiary')->where('id', '[0-9]+');
+Route::post('/home/beneficiary/edit/{id}', 'BeneficiaryController@doEditBeneficiary')->where('id', '[0-9]+');
+Route::post('/home/beneficiary/delete/{id}', 'BeneficiaryController@deleteBeneficiary')->where('id', '[0-9]+');
+
+
 
 // budget management
-route::get('/home/budgets', 'BudgetController@showAll');
-route::get('/home/budget/add', 'BudgetController@addBudget');
-route::get('/home/budget/edit/{id}', 'BudgetController@editBudget');
-route::post('/home/budget/edit/{id}', 'BudgetController@doEditBudget');
-route::post('/home/budget/add', 'BudgetController@newBudget');
-route::get('/home/budget/overview/{id}', 'BudgetController@showBudgetOverview')->where('id', '[0-9]+');
-route::get('/home/budget/overviewGraph/{id}', 'BudgetController@homeOverviewGraph')->where('id', '[0-9]+');
-route::post('/home/budget/delete/{id}', 'BudgetController@deleteBudget')->where('id', '[0-9]+');
+Route::get('/home/budgets', 'BudgetController@showAll');
+Route::get('/home/budget/add', 'BudgetController@addBudget');
+Route::get('/home/budget/edit/{id}', 'BudgetController@editBudget');
+Route::post('/home/budget/edit/{id}', 'BudgetController@doEditBudget');
+Route::post('/home/budget/add', 'BudgetController@newBudget');
+Route::get('/home/budget/overview/{id}', 'BudgetController@showBudgetOverview')->where('id', '[0-9]+');
+Route::get('/home/budget/overviewGraph/{id}', 'BudgetController@homeOverviewGraph')->where('id', '[0-9]+');
+Route::post('/home/budget/delete/{id}', 'BudgetController@deleteBudget')->where('id', '[0-9]+');
 
 // transaction management
-route::get('/home/transactions', 'TransactionController@showAll');
-route::get('/home/transaction/add', 'TransactionController@addTransaction');
-route::post('/home/transaction/add', 'TransactionController@newTransaction');
-route::get('/home/transaction/edit/{id}', 'TransactionController@editTransaction')->where('id', '[0-9]+');
-route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransaction')->where('id', '[0-9]+');
-route::post('/home/transaction/delete/{id}', 'TransactionController@deleteTransaction')->where('id', '[0-9]+');
+Route::get('/home/transactions', 'TransactionController@showAll');
+Route::get('/home/transaction/add', 'TransactionController@addTransaction');
+Route::post('/home/transaction/add', 'TransactionController@newTransaction');
+Route::get('/home/transaction/edit/{id}', 'TransactionController@editTransaction')->where('id', '[0-9]+');
+Route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransaction')->where('id', '[0-9]+');
+Route::post('/home/transaction/delete/{id}', 'TransactionController@deleteTransaction')->where('id', '[0-9]+');
 
 // target management
-route::get('/home/target/add', 'TargetController@addTarget');
-route::post('/home/target/add', 'TargetController@newTarget');
-route::get('/home/target/overviewGraph/{id}', 'TargetController@homeOverviewGraph')->where('id', '[0-9]+');
+Route::get('/home/target/add', 'TargetController@addTarget');
+Route::post('/home/target/add', 'TargetController@newTarget');
+Route::get('/home/target/overviewGraph/{id}', 'TargetController@homeOverviewGraph')->where('id', '[0-9]+');
 
 
 // transfer management
-route::get('/home/transfers', 'TransferController@showAll');
-route::get('/home/transfer/add', 'TransferController@addTransfer');
-route::post('/home/transfer/add', 'TransferController@newTransfer');
-route::get('/home/transfer/edit/{id}', 'TransferController@editTransfer')->where('id', '[0-9]+');
-route::post('/home/transfer/edit/{id}', 'TransferController@doEditTransfer')->where('id', '[0-9]+');
-route::post('/home/transfer/delete/{id}', 'TransferController@deleteTransfer')->where('id', '[0-9]+');
+Route::get('/home/transfers', 'TransferController@showAll');
+Route::get('/home/transfer/add', 'TransferController@addTransfer');
+Route::post('/home/transfer/add', 'TransferController@newTransfer');
+Route::get('/home/transfer/edit/{id}', 'TransferController@editTransfer')->where('id', '[0-9]+');
+Route::post('/home/transfer/edit/{id}', 'TransferController@doEditTransfer')->where('id', '[0-9]+');
+Route::post('/home/transfer/delete/{id}', 'TransferController@deleteTransfer')->where('id', '[0-9]+');
 
 
 // category list:
-route::get('/home/categories', 'CategoryController@showAll');
-route::get('/home/categories/{id}', 'CategoryController@showSingle');
+Route::get('/home/categories', 'CategoryController@showAll');
+Route::get('/home/categories/{id}', 'CategoryController@showSingle');
+Route::get('/home/category/edit/{id}', 'CategoryController@editCategory')->where('id', '[0-9]+');
+Route::post('/home/category/edit/{id}', 'CategoryController@doEditCategory')->where('id', '[0-9]+');
+Route::post('/home/category/delete/{id}', 'CategoryController@deleteCategory')->where('id', '[0-9]+');
+
+
 
 Route::get('/home/{year?}/{month?}', 'HomeController@getHome');

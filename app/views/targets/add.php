@@ -67,4 +67,4 @@
 
   </div>
 </div>
-<?php require_once(__DIR__ . '/../layouts/top.php') ?>
+<?php require_once(__DIR__ . '/../layouts/bottom.php') ?>

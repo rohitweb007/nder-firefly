@@ -4,7 +4,6 @@
 
     <?php
     if (count($data['accounts']) > 0) {
-
       echo '<h4>Accounts</h4><table class="table table-condensed table-striped">';
       foreach ($data['accounts'] as $account):
         ?>
@@ -137,17 +136,15 @@
               </th>
               <td style="width:65%;">
                 <?php if ($budget['amount'] > 0 && $budget['amount'] >= $budget['spent']): ?>
-                  <div style="margin:0;" class="progress progress-striped"><div class="bar
-                    <?php if ($budget['overflow'] && $budget['widthpct'] < 100): ?>
-                                                                                  bar-warning
-                                                                                <?php else: ?>
-                                                                                  bar-success
-                                                                                <?php endif; ?>
-                                                                                " style="width:<?php echo ($budget['widthpct'] < 100 ? $budget['widthpct'] : 100); ?>%;text-align:left;">
-                                                                                <?php if ($budget['widthpct'] > 5): ?>
+                  <div style="margin:0;" class="progress progress-striped"><div class="bar<?php if ($budget['overflow'] && $budget['widthpct'] < 100): ?> bar-warning<?php else: ?> bar-success<?php endif; ?>" style="width:<?php echo ($budget['widthpct'] < 100 ? $budget['widthpct'] : 100); ?>%;text-align:left;">
+                    <?php if ($budget['widthpct'] > 5): ?>
                         &nbsp;<?php echo mf($budget['spent']); ?>
-                      <?php endif; ?>
-                    </div></div>
+                    <?php endif; ?>
+                    </div>
+                    <?php if(100-$budget['widthpct'] > 10): ?>
+                    <small>&nbsp;<?php echo mf($budget['left']);?></small>
+                    <?php endif; ?>
+                    </div>
                 <?php elseif ($budget['amount'] > 0 && $budget['widthpct'] > 100): ?>
                   <?php $orangePCT = (100 / $budget['widthpct']) * 100; ?>
                   <div style="margin:0;" class="progress progress-striped">

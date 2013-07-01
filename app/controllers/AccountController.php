@@ -57,7 +57,7 @@ class AccountController extends BaseController {
   }
 
   public function showAll() {
-    $key = cacheKey('Budgets', 'showAll');
+    $key = cacheKey('Accounts', 'showAll');
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
