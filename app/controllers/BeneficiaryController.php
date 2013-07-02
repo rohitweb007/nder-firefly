@@ -80,4 +80,13 @@ class BeneficiaryController extends BaseController {
     }
   }
 
+  public function showOverview($id) {
+    $beneficiary = Auth::user()->beneficiaries()->find($id);
+    if ($beneficiary) {
+      return View::make('beneficiaries.overview')->with('beneficiary', $beneficiary);
+    } else {
+      return App::abort(404);
+    }
+  }
+
 }

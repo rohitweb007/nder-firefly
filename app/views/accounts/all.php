@@ -7,7 +7,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <div id="allChart"></div>
+    <div id="allChart" class="loading" style="height:240px;"></div>
   </div>
 </div>
 

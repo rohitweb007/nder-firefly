@@ -95,19 +95,19 @@
         <td><?php echo date('d F',strtotime($t->date)); ?></td>
         <td><?php echo Crypt::decrypt($t->description); ?></td>
         <td>
-          @if(!is_null($t->account_id))
+          <?php if(!is_null($t->account_id)): ?>
             <?php echo Crypt::decrypt($t->account()->first()->name); ?>
-          @endif
+          <?php endif; ?>
         </td>
         <td>
-          @if(!is_null($t->category_id))
+          <?php if(!is_null($t->category_id)): ?>
             <?php echo Crypt::decrypt($t->category()->first()->name); ?>
-          @endif
+          <?php endif; ?>
         </td>
         <td>
-          @if(!is_null($t->beneficiary_id))
+          <?php if(!is_null($t->beneficiary_id)): ?>
             <?php echo Crypt::decrypt($t->beneficiary()->first()->name); ?>
-          @endif
+          <?php endif; ?>
         </td>
         <td><?php echo mf($t->amount); ?></td>
         <td>

@@ -9,7 +9,7 @@ use google\appengine\api\users\UserService;
 class HomeController extends BaseController {
 
   public function __construct() {
-    $this->beforeFilter('gs', array('only' => 'getHome')); // do Google "sync".
+    $this->beforeFilter('gs', array('only' => 'getHome','askDelete','doDelete','doLogout')); // do Google "sync".
   }
 
   public function getHome() {

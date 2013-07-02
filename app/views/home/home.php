@@ -34,7 +34,7 @@
               <div style="margin:0;" class="progress progress-striped"><div class="bar bar-success" style="width:<?php echo $account['maxpct']; ?>%;text-align:left;">
                   <?php
                   if ($account['maxpct']> 30) {
-                    echo '&nbsp;' . mf($account['currentbalance']);
+                    echo '<small>&nbsp;' . mf($account['currentbalance']).'</small>';
                   }
                   ?>
                 </div></div>
@@ -138,7 +138,7 @@
                 <?php if ($budget['amount'] > 0 && $budget['amount'] >= $budget['spent']): ?>
                   <div style="margin:0;" class="progress progress-striped"><div class="bar<?php if ($budget['overflow'] && $budget['widthpct'] < 100): ?> bar-warning<?php else: ?> bar-success<?php endif; ?>" style="width:<?php echo ($budget['widthpct'] < 100 ? $budget['widthpct'] : 100); ?>%;text-align:left;">
                     <?php if ($budget['widthpct'] > 5): ?>
-                        &nbsp;<?php echo mf($budget['spent']); ?>
+                        <small>&nbsp;<?php echo mf($budget['spent']); ?></small>
                     <?php endif; ?>
                     </div>
                     <?php if(100-$budget['widthpct'] > 10): ?>
@@ -148,7 +148,7 @@
                 <?php elseif ($budget['amount'] > 0 && $budget['widthpct'] > 100): ?>
                   <?php $orangePCT = (100 / $budget['widthpct']) * 100; ?>
                   <div style="margin:0;" class="progress progress-striped">
-                    <div class="bar bar-warning" style="text-align:left;width:<?php echo $orangePCT; ?>%">&nbsp;<?php echo mf($budget['spent']); ?></div>
+                    <div class="bar bar-warning" style="text-align:left;width:<?php echo $orangePCT; ?>%"><small>&nbsp;<?php echo mf($budget['spent']); ?></small></div>
                     <div class="bar bar-danger" style="width:<?php echo 100 - $orangePCT; ?>%"></div>
                   </div>
 
@@ -159,7 +159,6 @@
                   <i data-value="Budget<?php echo $budget['id']; ?>" class="showTransactions icon-folder-close"></i>
                 <?php endif; ?>
               </td>
-              <!--<td><small><span class="tt" title="The total amount of money in the budget."><?php echo mf($budget['amount']); ?></span> / <span class="tt" title="The amount of money left"><?php echo mf($budget['left']); ?></span> / <span class="tt" title="The adviced spending per day."><?php echo mf($budget['advice']); ?></span> / <span class="tt" title="Expected expenses for this budget"><?php echo mf($budget['expected']); ?></span></small></td>-->
             </tr>
             <tr>
 
@@ -261,7 +260,7 @@ if ($diff->m > 1) {
   <div class="row-fluid">
     <div class="span12">
       <h4>Overspending</h4>
-      <div id="ovcat"></div>
+      <div id="ovcat"><em>You're doing fine!</em></div>
     </div>
   </div>
 <?php } ?>

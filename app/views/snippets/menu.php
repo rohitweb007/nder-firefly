@@ -54,7 +54,14 @@ if(intval($next->format('m')) == intval($currentPeriod->format('m'))+2  ) {
 
       </li>
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Manage <b class="caret"></b></a></li>
-      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Graphs <b class="caret"></b></a></li>
+      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Charts <b class="caret"></b></a>
+
+      <ul class="dropdown-menu" role="menu" aria-labelledby="drop-2">
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/charts/prediction"><i class="icon-signal"></i> Prediction</a></li>
+        </ul>
+
+
+      </li>
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Other <b class="caret"></b></a>
 
       <ul class="dropdown-menu" role="menu" aria-labelledby="drop-1">
