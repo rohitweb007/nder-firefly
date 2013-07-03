@@ -30,6 +30,7 @@ Route::post('/home/delete', 'HomeController@doDelete');
 Route::get('/home', 'HomeController@getHome');
 
 Route::get('/home/settings','SettingsController@settings');
+Route::post('/home/settings','SettingsController@save');
 Route::post('/home/settings/update','SettingsController@update');
 Route::post('/home/settings/add','SettingsController@addSetting');
 Route::post('/home/settings/delete','SettingsController@deleteSetting');

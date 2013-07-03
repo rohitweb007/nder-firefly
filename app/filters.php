@@ -61,6 +61,17 @@ Route::filter('gs', function() {
           $defaultAmount->value = Crypt::encrypt(1000);
           $defaultAmount->save();
         }
+        // budget behaviour:
+        $bb = $dbUser->settings()->where('name','=','budgetBehaviour')->first();
+        if(is_null($bb)) {
+          $bb = new Setting;
+          $bb->fireflyuser_id = $dbUser->id;
+          $bb->name = 'budgetBehaviour';
+          $bb->value = Crypt::encrypt('substract');
+          $bb->save();
+        }
+        
+
 
         Auth::loginUsingId($dbUser->id);
 

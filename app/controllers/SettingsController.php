@@ -13,8 +13,30 @@ class SettingsController extends BaseController {
     $this->beforeFilter('gs'); // do Google "sync".
   }
 
+  public function save() {
+    foreach(Input::all() as $name => $value) {
+      if($name != '_token') {
+        $setting = Auth::user()->settings()->where('name','=',$name)->first();
+        if(is_null($setting)) {
+          $setting = new Setting;
+          $setting->fireflyuser_id = Auth::user()->id;
+          $setting->name = $name;
+          $setting->date = null;
+        }
+        $setting->value = Crypt::encrypt($value);
+        $setting->save();
+      }
+    }
+    Session::flash('success','Your settings have been saved.');
+    return Redirect::to('/home/settings');
+  }
+
   public function settings() {
-    return View::make('settings.index');
+    // get all settings but those related to amounts:
+    $settings = Auth::user()->settings()->
+            where('name','!=','defaultAmount')->
+            where('name','!=','monthlyAmount')->get();
+    return View::make('settings.index')->with('settings',$settings);
   }
 
   public function amounts() {
