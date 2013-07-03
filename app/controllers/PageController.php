@@ -8,4 +8,6 @@ class PageController extends BaseController {
   public function predictionChart() {
     return View::make('pages.prediction');
   }
+
+  
 }

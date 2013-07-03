@@ -50,6 +50,10 @@ class Fireflyuser extends Eloquent implements UserInterface, RemindableInterface
     return $this->hasMany('Account');
   }
 
+  public function settings() {
+    return $this->hasMany('Setting');
+  }
+
   public function budgets() {
     return $this->hasMany('Budget');
   }

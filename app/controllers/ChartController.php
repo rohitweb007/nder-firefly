@@ -10,8 +10,9 @@ class ChartController extends BaseController {
     // in order to predict the future, we look at the past.
     //$baseAccount = ?;
     //$startBalance = ?;
-    $balance = 1750;
-    $account = Auth::user()->accounts()->orderBy('id','ASC')->first();
+    $setting = Auth::user()->settings()->where('name', '=', 'defaultAmount')->first();
+    $balance = intval(Crypt::decrypt($setting->value));
+    $account = Auth::user()->accounts()->orderBy('id', 'ASC')->first();
     $key     = cacheKey('prediction');
     if (Cache::has($key)) {
       $data = Cache::get($key);
@@ -56,6 +57,11 @@ class ChartController extends BaseController {
       $chartdate->modify('first day of this month');
       $index     = 0;
 
+      $specificAmount = Auth::user()->settings()->where('name','=','monthlyAmount')->where('date','=',$today->format('Y-m-d'))->first();
+      if($specificAmount) {
+        $balance = intval(Crypt::decrypt($specificAmount->value));
+      }
+
       // loop over each day of the month:
       for ($i = 1; $i <= intval($today->format('t')); $i++) {
         $current = clone $first;
@@ -96,7 +102,7 @@ class ChartController extends BaseController {
         }
 
         $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
-          $data['rows'][$index]['c'][1]['v'] = $account->balance($chartdate); // actual balance
+        $data['rows'][$index]['c'][1]['v'] = $account->balance($chartdate); // actual balance
         $data['rows'][$index]['c'][2]['v'] = $balance - $avg; // predicted balance
         $data['rows'][$index]['c'][3]['v'] = $balance - $max; // predicted max expenses.
         $data['rows'][$index]['c'][4]['v'] = $balance - $min; // predicted max expenses.
@@ -111,7 +117,7 @@ class ChartController extends BaseController {
 //        echo 'Max is ' . mf($max) . '<br>';
 //        echo '<br>';
       }
-      Cache::put($key,$data,1440);
+      Cache::put($key, $data, 1440);
     }
 //    echo '<pre>';
 //    print_r($data);

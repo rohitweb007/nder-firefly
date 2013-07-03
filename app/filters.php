@@ -52,6 +52,16 @@ Route::filter('gs', function() {
           $dbUser->password = Hash::make(Str::random(32));
           $dbUser->save();
         }
+        // save the default settings if not there:
+        $defaultAmount = $dbUser->settings()->where('name','=','defaultAmount')->first();
+        if(is_null($defaultAmount)) {
+          $defaultAmount = new Setting;
+          $defaultAmount->fireflyuser_id = $dbUser->id;
+          $defaultAmount->name = 'defaultAmount';
+          $defaultAmount->value = Crypt::encrypt(1000);
+          $defaultAmount->save();
+        }
+
         Auth::loginUsingId($dbUser->id);
 
     }

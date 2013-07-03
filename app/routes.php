@@ -29,6 +29,12 @@ Route::get('/home/delete', 'HomeController@askDelete');
 Route::post('/home/delete', 'HomeController@doDelete');
 Route::get('/home', 'HomeController@getHome');
 
+Route::get('/home/settings','SettingsController@settings');
+Route::post('/home/settings/update','SettingsController@update');
+Route::post('/home/settings/add','SettingsController@addSetting');
+Route::post('/home/settings/delete','SettingsController@deleteSetting');
+Route::get('/home/amounts',array('as' => 'amounts','uses' => 'SettingsController@amounts'));
+
 # charts
 Route::get('/home/chart/ovcat', 'ChartController@showOverExpendingCategories');
 Route::get('/home/chart/predict', 'ChartController@predictionChart');
@@ -36,7 +42,6 @@ Route::get('/home/chart/bba/{id}', 'ChartController@showBudgetsByAccount')->wher
 Route::get('/home/chart/cba/{id}', 'ChartController@showCategoriesByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/mba/{id}', 'ChartController@showMovesByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccount')->where('id', '[0-9]+');
-
 Route::get('/home/charts/prediction', 'PageController@predictionChart');
 
 

@@ -41,7 +41,7 @@ if(intval($next->format('m')) == intval($currentPeriod->format('m'))+2  ) {
         </ul>
 
       </li>
-      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Lists <b class="caret"></b></a>
+      <!-- <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Lists <b class="caret"></b></a>-->
 
       <ul class="dropdown-menu" role="menu" aria-labelledby="drop-3">
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/accounts"><i class="icon-th-list"></i> Accounts</a></li>
@@ -53,7 +53,13 @@ if(intval($next->format('m')) == intval($currentPeriod->format('m'))+2  ) {
         </ul>
 
       </li>
-      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Manage <b class="caret"></b></a></li>
+      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Options <b class="caret"></b></a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="drop-2">
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/settings"><i class="icon-cog"></i> Settings</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/amounts"><i class="icon-cog"></i> Amounts</a></li>
+        </ul>
+
+      </li>
       <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Charts <b class="caret"></b></a>
 
       <ul class="dropdown-menu" role="menu" aria-labelledby="drop-2">
