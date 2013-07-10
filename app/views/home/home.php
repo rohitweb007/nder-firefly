@@ -125,7 +125,8 @@
         </p>
       <?php else: ?>
         <table class="table table-condensed table-striped">
-          <?php foreach ($data['budgets'] as $budget): ?>
+          <?php $sum = 0;$spent=0; foreach ($data['budgets'] as $budget): $sum += $budget['amount']; $spent += $budget['spent'];?>
+
             <tr>
               <th style="width:30%;">
                 <?php if ($budget['overflow'] === false): ?>
@@ -210,6 +211,14 @@
             <?php endif; ?>
           <?php endforeach; ?>
         </table>
+        <p>
+          Amount for month: <?php echo mf($data['budget_data']['amount']); ?><br />
+          Budgeted: <?php echo mf($sum); ?><br />
+          Diff: <?php echo mf($data['budget_data']['amount'] - $sum); ?><br />
+          <br />
+          Spent in budgets: <?php echo mf($spent); ?><br />
+          Spent outside budgets: <?php echo mf($data['budget_data']['spent_outside']); ?><br />
+          Left: <?php echo mf($data['budget_data']['amount'] - $data['budget_data']['spent_outside'] - $spent); ?><br />
       <?php endif; ?>
     </div>
   <?php endif; ?>

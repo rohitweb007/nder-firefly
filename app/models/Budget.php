@@ -2,7 +2,8 @@
 
 class Budget extends Eloquent {
 
-  public static $rules = array(
+  protected $guarded = array('id', 'created_at', 'updated_at');
+  public static $rules   = array(
       'fireflyuser_id' => 'required|exists:users,id|integer',
       'name'           => 'required|between:1,255',
       'date'           => 'required|after:1900-01-01|before:2038-01-01',
@@ -100,7 +101,7 @@ class Budget extends Eloquent {
         $similar[] = intval($b->id);
       }
     }
-    if(count($similar) == 0) {
+    if (count($similar) == 0) {
       return 0;
     }
     $similar[] = $this->id;
@@ -110,17 +111,16 @@ class Budget extends Eloquent {
      * en flikker ze op een hoop (sum amount).
      * Gedeeld door aantal maanden bezig nu (5) == antwoord.
      */
-    $total = Auth::user()->transactions()->
-            where(DB::Raw('DATE_FORMAT(`date`,"%d")'),'=',$date->format('d'))->
+    $total     = Auth::user()->transactions()->
+            where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '=', $date->format('d'))->
             //where(DB::Raw('DATE_FORMAT(`date`,"%m")'),'!=',$date->format('m'))->
-            whereIn('budget_id',$similar)->
-            where('amount','<',0)->
+            whereIn('budget_id', $similar)->
+            where('amount', '<', 0)->
             sum('amount');
-    $oldest = BaseController::getFirst();
-    $diff   = $oldest->diff($date);
+    $oldest    = BaseController::getFirst();
+    $diff      = $oldest->diff($date);
 
-    return (($total*-1) / $diff->m);
-
+    return (($total * -1) / $diff->m);
   }
 
   /**

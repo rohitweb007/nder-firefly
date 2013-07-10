@@ -89,7 +89,7 @@ class HomeController extends BaseController {
       $data['acc_data']['sum'] = $sum;
 
 
-// now everything for budgets:
+      // now everything for budgets:
       $budgets = Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get();
       foreach ($budgets as $b) {
         $budget             = array(
@@ -128,6 +128,14 @@ class HomeController extends BaseController {
         $budget['list']    = $list;
         $data['budgets'][] = $budget;
       }
+      // some extra budget data:
+      $monthlyAmount = Setting::getSetting('monthlyAmount',Session::get('period')->format('Y-m-').'01');
+      if(is_null($monthlyAmount)) {
+        $monthlyAmount = intval(Setting::getSetting('defaultAmount'));
+      }
+      $data['budget_data']['amount'] = $monthlyAmount;
+      $data['budget_data']['spent_outside'] =  floatval(Auth::user()->transactions()->where('amount','<',0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'),'=',Session::get('period')->format('m-Y'))->sum('amount')) * -1;
+      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense','=',1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'),'=',Session::get('period')->format('m-Y'))->sum('amount'));
 
       // targets
       $db = Auth::user()->targets()->orderBy('duedate', 'DESC')->get();

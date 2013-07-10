@@ -2,7 +2,8 @@
 
 class Transfer extends Eloquent {
 
-  public static $rules = array(
+  protected $guarded = array('id', 'created_at', 'updated_at');
+  public static $rules   = array(
       'fireflyuser_id'   => 'required|exists:users,id',
       'description'      => 'required|between:1,500',
       'ignoreprediction' => 'required|between:0,1',
@@ -17,21 +18,23 @@ class Transfer extends Eloquent {
   );
 
   public function accountFrom() {
-    return $this->belongsTo('Account','account_from');
+    return $this->belongsTo('Account', 'account_from');
   }
+
   public function category() {
     return $this->belongsTo('Category');
   }
 
   public function accountTo() {
-    return $this->belongsTo('Account','account_to');
+    return $this->belongsTo('Account', 'account_to');
   }
+
   public function budget() {
     return $this->belongsTo('Budget');
   }
+
   public function target() {
     return $this->belongsTo('Target');
   }
-
 
 }

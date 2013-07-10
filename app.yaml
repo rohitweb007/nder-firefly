@@ -26,3 +26,11 @@ handlers:
 
 - url: /.*
   script: public/index.php
+
+pagespeed:
+  enabled_rewriters:
+    - CollapseWhitespace
+    - ElideAttributes
+    - RemoveComments
+    - RemoveQuotes
+    - MinifyCss

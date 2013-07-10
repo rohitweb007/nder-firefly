@@ -4,3 +4,6 @@
 .showTransactions {cursor:pointer;}
 
 .loading {background:url('/img/ajax-loader.gif') center center no-repeat;}
+
+#compareContent {min-height:60px;}
+#basicChart {height:300px;}

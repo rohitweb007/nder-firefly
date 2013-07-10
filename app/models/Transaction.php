@@ -2,7 +2,8 @@
 
 class Transaction extends Eloquent {
 
-  public static $rules = array(
+  protected $guarded = array('id', 'created_at', 'updated_at');
+  public static $rules   = array(
       'fireflyuser_id' => 'required|exists:users,id|numeric',
       'account_id'     => 'required|integer|exists:accounts,id',
       'beneficiary_id' => 'integer|exists:beneficiaries,id',

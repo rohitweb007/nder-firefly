@@ -23,6 +23,8 @@ Route::get('/home/flush', function() {
           return Redirect::to('/home');
         });
 Route::get('/home/export', 'ImportController@doExport');
+Route::get('/home/import', 'ImportController@showImport');
+Route::post('/home/import', 'ImportController@doImport');
 Route::get('/concept', 'HomeController@showConcept');
 Route::get('/home/logout', 'HomeController@doLogout');
 Route::get('/home/delete', 'HomeController@askDelete');
@@ -36,6 +38,11 @@ Route::post('/home/settings/add','SettingsController@addSetting');
 Route::post('/home/settings/delete','SettingsController@deleteSetting');
 Route::get('/home/amounts',array('as' => 'amounts','uses' => 'SettingsController@amounts'));
 
+# compare things:
+Route::get('/home/compare/basictable','ComparisionController@basicTable');
+Route::get('/home/compare/basicchart','ComparisionController@basicChart');
+Route::get('/home/compare/categories','ComparisionController@compareCategories');
+Route::get('/home/compare/budgets','ComparisionController@compareBudgets');
 # charts
 Route::get('/home/chart/ovcat', 'ChartController@showOverExpendingCategories');
 Route::get('/home/chart/predict', 'ChartController@predictionChart');
@@ -44,6 +51,7 @@ Route::get('/home/chart/cba/{id}', 'ChartController@showCategoriesByAccount')->w
 Route::get('/home/chart/mba/{id}', 'ChartController@showMovesByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccount')->where('id', '[0-9]+');
 Route::get('/home/charts/prediction', 'PageController@predictionChart');
+Route::get('/home/charts/compare', 'PageController@compare');
 
 
 // account management:

@@ -2,7 +2,7 @@
 
 class Account extends Eloquent {
 
-  protected $guarded = array('id');
+  protected $guarded = array('id', 'created_at', 'updated_at');
   public static $rules  = array(
       'name'           => 'required|between:1,50',
       'balance'        => 'required|numeric',

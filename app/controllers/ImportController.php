@@ -6,6 +6,134 @@ class ImportController extends BaseController {
     $this->beforeFilter('gs', array('only' => 'getHome')); // do Google "sync".
   }
 
+  public function showImport() {
+    return View::make('home.import');
+  }
+
+  public function doImport() {
+    $payload   = Input::file('payload');
+    $raw       = File::get($payload);
+    $json      = json_decode($raw, true);
+    $firstIcon = Icon::first();
+    $old       = array(
+        Auth::user()->accounts()->get(),
+        Auth::user()->budgets()->get(),
+        Auth::user()->categories()->get(),
+        Auth::user()->beneficiaries()->get(),
+        Auth::user()->settings()->get()
+    );
+
+
+    $mapping = array();
+    $order   = array(
+        'account',
+        'beneficiary',
+        'budget',
+        'category',
+        'target',
+        'transaction',
+        'transfer',
+        'setting'
+    );
+    if (is_null($json)) {
+      Session::flash('error', 'This is not a valid JSON file.');
+      return View::make('home.import');
+    }
+
+    foreach ($order as $name) {
+      $names = Str::plural($name);
+      foreach ($json[$names] as $item) {
+        $class = ucfirst($name);
+        // overrule user ID
+        if (isset($item['fireflyuser_id'])) {
+          $item['fireflyuser_id'] = Auth::user()->id;
+        }
+
+        // overrule possible account ID since we might need it here:
+        if (isset($item['account_id'])) {
+          $item['account_id'] = $mapping['accounts'][intval($item['account_id'])];
+        }
+        // overrule account_from and account_to (only for transfers)
+        if ($class == 'Transfer') {
+          $item['account_from'] = $mapping['accounts'][intval($item['account_from'])];
+          $item['account_to']   = $mapping['accounts'][intval($item['account_to'])];
+        }
+        // overrule possible icon ID
+        if (isset($item['icon_id'])) {
+          $item['icon_id'] = intval($firstIcon->id);
+        }
+        // overrule possible beneficiary ID
+        if (isset($item['beneficiary_id'])) {
+          $item['beneficiary_id'] = $mapping['beneficiaries'][intval($item['beneficiary_id'])];
+        }
+        // overrule possible category ID
+        if (isset($item['category_id'])) {
+          $item['category_id'] = $mapping['categories'][intval($item['category_id'])];
+        }
+        // overrule possible budget ID
+        if (isset($item['budget_id'])) {
+          $item['budget_id'] = $mapping['budgets'][intval($item['budget_id'])];
+        }
+        // overrule possible target ID
+        if (isset($item['target_id'])) {
+          $item['target_id'] = $mapping['targets'][intval($item['target_id'])];
+        }
+
+        // remap settings:
+        if($class == 'Setting') {
+          if($item['name'] == 'defaultCheckingAccount') {
+            $item['value'] = $mapping['accounts'][intval($item['value'])];
+          }
+          if($item['name'] == 'defaultSavingsAccount') {
+            $item['value'] = $mapping['accounts'][intval($item['value'])];
+          }
+
+        }
+
+        // make validator:
+        $validator = Validator::make($item, $class::$rules);
+        // validate!
+        if ($validator->fails()) {
+          // fail gracefully, log error:
+          Log::error('Validator failed on ' . $class . ': ' . print_r($validator->messages()->all(), true));
+          // show error
+          Session::flash('error', 'There is invalid ' . $class . ' data in the file.');
+          return View::make('home.import');
+        } else {
+          // create the object, remember the ID.
+          $object = new $class($item);
+          // encrypt some fields:
+          if (isset($object->description)) {
+            $object->description = Crypt::encrypt($object->description);
+          }
+          if (isset($object->name) && $class != 'Setting') {
+            $object->name = Crypt::encrypt($object->name);
+          }
+          if($class == 'Setting') {
+            $object->value = Crypt::encrypt($object->value);
+          }
+          // save:
+          $object->save();
+
+          // remember the mapping:
+          $oldID                   = intval($item['id']);
+          $newID                   = intval($object->id);
+          $mapping[$names][$oldID] = $newID;
+        }
+      }
+    }
+    // if this is where we end up we can safely delete
+    // the old accounts. Deleting those drag EVERYTHING along with it.
+    foreach ($old as $items) {
+      foreach ($items as $item) {
+        $item->delete();
+      }
+    }
+    Session::flash('success', 'All data imported!');
+    Cache::flush();
+    return Redirect::to('/home');
+  }
+
   public function doExport() {
     $filename = 'firefly-export-' . date('Y-m-d') . '.json';
     $data     = array();
@@ -62,7 +190,13 @@ class ImportController extends BaseController {
       $transfer->amount      = floatval($transfer->amount);
       $data['transfers'][]   = $transfer->toArray();
     }
-    $payload = json_encode($data);
+    // settings:
+    $settings = Auth::user()->settings()->get();
+    foreach($settings as $setting) {
+      $setting->value = Crypt::decrypt($setting->value);
+      $data['settings'][] = $setting->toArray();
+    }
+    $payload = json_encode($data, JSON_PRETTY_PRINT);
     // We'll be outputting a PDF
     header('Content-Description: File Transfer');
     header('Content-Type: application/octet-stream');
