@@ -10,6 +10,7 @@
   </head>
   <body>
     <?php require_once(__DIR__.'/../snippets/menu.php'); ?>
+    
 
     <?php if(Session::has('error')): ?>
       <div class="row-fluid">
