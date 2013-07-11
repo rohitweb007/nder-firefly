@@ -156,7 +156,7 @@ class ComparisionController extends BaseController {
             array(
                 'id'    => 'day',
                 'label' => 'Day',
-                'type'  => 'string',
+                'type'  => 'date',
                 'p'     => array('role' => 'domain')
             ),
             array(
@@ -204,7 +204,10 @@ class ComparisionController extends BaseController {
     for ($day = 1; $day <= 31; $day++) {
       $currentBaseDate                   = new DateTime($this->_base->format('Y-m-') . $day);
       // first the base information:
-      $data['rows'][$index]['c'][0]['v'] = $day;
+      $month                             = intval($currentBaseDate->format('n')) - 1;
+      $year                              = intval($currentBaseDate->format('Y'));
+      $day                               = intval($currentBaseDate->format('j'));
+      $data['rows'][$index]['c'][0]['v'] ='Date(' . $year . ', ' . $month . ', ' . $day . ')';
 
       // if accountID, work on balance for this month:
       if (!is_null($account)) {

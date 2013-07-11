@@ -158,7 +158,7 @@ class AccountController extends BaseController {
             array(
                 'id'    => 'date',
                 'label' => 'Date',
-                'type'  => 'string',
+                'type'  => 'date',
                 'p'     => array('role' => 'domain')
             ),
             array(
@@ -173,7 +173,10 @@ class AccountController extends BaseController {
 
     $index = 0;
     while ($past <= $today) {
-      $data['rows'][$index]['c'][0]['v'] = $past->format('d M');
+      $month                             = intval($past->format('n')) - 1;
+      $year                              = intval($past->format('Y'));
+      $day                               = intval($past->format('j'));
+      $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
       $balance                           = $account->balance($past);
       $data['rows'][$index]['c'][1]['v'] = $balance;
       $past->add(new DateInterval('P1D'));
@@ -213,12 +216,6 @@ class AccountController extends BaseController {
                 'type'  => 'number',
                 'p'     => array('role' => 'data')
             ),
-            array(
-                'id'    => 'lowbalance',
-                'label' => 'Balance',
-                'type'  => 'number',
-                'p'     => array('role' => 'data')
-            )
         ),
         'rows' => array()
     );
@@ -264,10 +261,10 @@ class AccountController extends BaseController {
   public function doEditAccount($id) {
     $account = Auth::user()->accounts()->find($id);
     if ($account) {
-      $account->name           = Input::get('name');
-      $account->balance        = floatval(Input::get('balance'));
-      $account->date           = Input::get('date');
-      $validator = Validator::make($account->toArray(), Account::$rules);
+      $account->name    = Input::get('name');
+      $account->balance = floatval(Input::get('balance'));
+      $account->date    = Input::get('date');
+      $validator        = Validator::make($account->toArray(), Account::$rules);
       $validator->fails();
       if ($validator->fails()) {
         return Redirect::to('/home/account/edit/' . $account->id)->withErrors($validator)->withInput();

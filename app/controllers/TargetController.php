@@ -13,12 +13,12 @@ class TargetController extends BaseController {
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
       } else {
-        $data = array(
+        $data  = array(
             'cols' => array(
                 array(
                     'id'    => 'date',
                     'label' => 'Date',
-                    'type'  => 'string',
+                    'type'  => 'date',
                     'p'     => array('role' => 'domain')
                 ),
                 array(
@@ -37,24 +37,27 @@ class TargetController extends BaseController {
             'rows' => array()
         );
         $start = new DateTime($target->startdate);
-        if($target->duedate == '0000-00-00') {
+        if ($target->duedate == '0000-00-00') {
           $end = new DateTime('today');
         } else {
           $end = new DateTime($target->duedate);
         }
         $current = clone($start);
-        $index = 0;
-        $guide = 0;
-        $step = $target->guide($start,true);
-        while($current <= $end) {
-          $data['rows'][$index]['c'][0]['v'] = $current->format('d F');
+        $index   = 0;
+        $guide   = 0;
+        $step    = $target->guide($start, true);
+        while ($current <= $end) {
+          $month                             = intval($current->format('n')) - 1;
+          $year                              = intval($current->format('Y'));
+          $day                               = intval($current->format('j'));
+          $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
           $data['rows'][$index]['c'][1]['v'] = $guide;
           $data['rows'][$index]['c'][2]['v'] = $target->hassaved($current);
           $current->add(new DateInterval('P1D'));
           $guide += $step;
           $index++;
         }
-        Cache::put($key,$data,1440);
+        Cache::put($key, $data, 1440);
         return Response::json($data);
       }
     } else {

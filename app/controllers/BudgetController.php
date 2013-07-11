@@ -218,7 +218,7 @@ class BudgetController extends BaseController {
             array(
                 'id'    => 'date',
                 'label' => 'Date',
-                'type'  => 'string',
+                'type'  => 'date',
                 'p'     => array('role' => 'domain')
             ),
             array(
@@ -240,7 +240,10 @@ class BudgetController extends BaseController {
     $index   = 0;
     $balance = $budget->amount;
     while ($past <= $end) {
-      $data['rows'][$index]['c'][0]['v'] = $past->format('d M');
+      $month                             = intval($past->format('n')) - 1;
+      $year                              = intval($past->format('Y'));
+      $day                               = intval($past->format('j'));
+      $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
       if ($past <= $today) {
         $balance                           = $budget->left($past);
         $data['rows'][$index]['c'][1]['v'] = $balance;
