@@ -1,8 +1,9 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 
 <div class="row-fluid">
+  <div class="span2"></div>
   <div class="span6">
-    <h2>Amounts</h2>
+    <h3>Amounts</h3>
     <p>
       Each month starts with a certain amount of money. This can be your
       salary or any other (combined) income. On this page you can set a
@@ -14,7 +15,8 @@
 </div>
 
 <div class="row-fluid">
-  <div class="span6">
+  <div class="span2"></div>
+  <div class="span4">
     <h4>Default amount</h4>
 
     <?php echo Form::open(array('class' => 'form-inline', 'url'   => '/home/settings/update')); ?>
@@ -26,6 +28,7 @@
 </div>
 
 <div class="row-fluid">
+  <div class="span2"></div>
   <div class="span6">
     <h4>Amounts for specific months</h4>
 
@@ -56,7 +59,6 @@
     ?>
 
   </div>
-
 </div>
 
 

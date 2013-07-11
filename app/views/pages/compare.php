@@ -26,7 +26,7 @@
   <div class="span10">
     <div class="row-fluid">
       <div class="span12">
-        <h2>Comparision</h2>
+        <h3>Comparision</h3>
         <p>
           This page lets you compare your expenses with other months. Select some options
           to the left and see what happens!

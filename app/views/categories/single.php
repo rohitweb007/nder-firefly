@@ -2,7 +2,7 @@
 @section('content')
 <div class="row-fluid">
   <div class="span12">
-    <h2>Category {{Crypt::decrypt($category->name)}}</h2>
+    <h3>Category {{Crypt::decrypt($category->name)}}</h3>
   </div>
 </div>
 <div class="row-fluid">

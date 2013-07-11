@@ -2,7 +2,7 @@
 <div class="row-fluid">
   <div class="span2"></div>
   <div class="span10">
-    <h2>Import data</h2>
+    <h3>Import data</h3>
     <p>
       This form allows you to re-import old data. Everything else will
       be deleted!</p>

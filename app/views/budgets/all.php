@@ -2,7 +2,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <h2>All your budgets!</h2>
+    <h3>All your budgets!</h3>
 
 
     <?php foreach ($budgets as $period => $bdgts): ?>

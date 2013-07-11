@@ -2,7 +2,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <h2>All your categories</h2>
+    <h3>All your categories</h3>
       <table class="table table-bordered table-condensed table-striped">
         <tr>
           <th>Name</th>

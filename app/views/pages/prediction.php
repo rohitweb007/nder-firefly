@@ -1,7 +1,7 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 <div class="row-fluid">
   <div class="span12">
-    <h2>Predicted expenses</h2>
+    <h3>Predicted expenses</h3>
   </div>
 </div>
 

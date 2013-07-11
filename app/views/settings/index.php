@@ -4,8 +4,8 @@
   <div class="span2">
 
   </div>
-  <div class="span10">
-    <h2>Settings</h2>
+  <div class="span6">
+    <h3>Settings</h3>
     <p>
       On this page you can set various settings.
     </p>

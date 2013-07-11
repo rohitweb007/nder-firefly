@@ -2,11 +2,11 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <h2>All transactions you ever made!</h2>
+    <h3>All transactions</h3>
 
 
       <?php foreach ($transactions as $period => $tr): ?>
-        <h3><?php echo $period;?></h3>
+        <h4><?php echo $period;?></h4>
         <table class="table table-bordered table-condensed table-striped">
           <tr>
             <th>Date</th>
