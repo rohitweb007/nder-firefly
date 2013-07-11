@@ -1,5 +1,7 @@
 <?php
 
+use Holmes\Holmes;
+
 class TransactionController extends BaseController {
 
   public function __construct() {
@@ -89,10 +91,15 @@ class TransactionController extends BaseController {
     foreach (Auth::user()->beneficiaries()->get() as $ben) {
       $beneficiaries[] = Crypt::decrypt($ben->name);
     }
-
-    return View::make('transactions.add')->with('accounts', $accounts)->with('budgets', $budgets)
-                    ->with('categories', $categories)
-                    ->with('beneficiaries', $beneficiaries);
+    if (Holmes::isMobile()) {
+      return View::make('mobile.transactions.add')->with('accounts', $accounts)->with('budgets', $budgets)
+                      ->with('categories', $categories)
+                      ->with('beneficiaries', $beneficiaries);
+    } else {
+      return View::make('transactions.add')->with('accounts', $accounts)->with('budgets', $budgets)
+                      ->with('categories', $categories)
+                      ->with('beneficiaries', $beneficiaries);
+    }
   }
 
   public function newTransaction() {
