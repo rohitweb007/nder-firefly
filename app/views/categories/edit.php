@@ -12,7 +12,7 @@
     </div>
     <div class="control-group">
       <div class="controls">
-        <input type="submit" class="btn btn-primary" value="Save category" />
+        <input type="submit" class="btn btn-primary" value="Save edits to <?php echo Crypt::decrypt($category->name); ?>" />
       </div>
     </div>
     <?php echo Form::close(); ?>

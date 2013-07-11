@@ -30,7 +30,7 @@
 
     <div class="control-group">
       <div class="controls">
-        <input type="submit" class="btn btn-primary" value="Save new budget" />
+        <input type="submit" class="btn btn-primary" value="Save edits to <?php echo Crypt::decrypt($budget->name); ?>" />
       </div>
     </div>
 

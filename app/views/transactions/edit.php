@@ -128,7 +128,7 @@
 
     <div class="control-group">
       <div class="controls">
-        <input type="submit" class="btn btn-primary" value="Save new transaction" />
+        <input type="submit" class="btn btn-primary" value="Save edits to transaction" />
       </div>
     </div>
     <?php
