@@ -42,15 +42,16 @@
         <div id="basicTable"></div>
       </div>
       <div class="span5 loading">
-        <h4>Categories</h4>
-        <div id="categories"></div>
+        <h4>Budgets</h4>
+        <div id="budgets"></div>
       </div>
     </div>
     <div class="row-fluid">
       <div class="span6 loading">
-        <h4>Budgets</h4>
-        <div id="budgets"></div>
+        <h4>Categories</h4>
+        <div id="categories"></div>
       </div>
+
     </div>
   </div>
 </div>

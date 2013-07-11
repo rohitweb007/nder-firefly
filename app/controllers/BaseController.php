@@ -1,5 +1,7 @@
 <?php
 
+use Holmes\Holmes;
+
 class BaseController extends Controller {
 
   /**
@@ -59,10 +61,10 @@ class BaseController extends Controller {
   public static function getFirst($accountID = null) {
     if (!is_null($accountID)) {
       $account = Auth::user()->accounts()->find($accountID);
-      $first = cacheKey('getFirst', $account->id);
+      $first   = cacheKey('getFirst', $account->id);
     } else {
       $account = null;
-      $first = cacheKey('getFirst');
+      $first   = cacheKey('getFirst');
     }
 
     if (Cache::has($first)) {
@@ -97,10 +99,10 @@ class BaseController extends Controller {
   public static function getLast($accountID = null) {
     if (!is_null($accountID)) {
       $account = Auth::user()->accounts()->find($accountID);
-      $last = cacheKey('getLast', $account->id);
+      $last    = cacheKey('getLast', $account->id);
     } else {
       $account = null;
-      $last = cacheKey('getLast');
+      $last    = cacheKey('getLast');
     }
 
     if (Cache::has($last)) {

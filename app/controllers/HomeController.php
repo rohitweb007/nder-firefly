@@ -5,6 +5,7 @@ require_once 'google/appengine/api/users/UserService.php';
 
 use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
+use Holmes\Holmes;
 
 class HomeController extends BaseController {
 
@@ -164,8 +165,11 @@ class HomeController extends BaseController {
     }
 
 
-
-    return View::make('home.home')->with('data', $data);
+    if(Holmes::isMobile()) {
+      return View::make('mobile.home.home')->with('data', $data);
+    } else {
+      return View::make('home.home')->with('data', $data);
+    }
   }
 
   public function getIndex() {

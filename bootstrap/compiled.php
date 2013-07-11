@@ -3085,9 +3085,9 @@ abstract class ServiceProvider
         }
         return $namespace;
     }
-    public function commands()
+    public function commands($commands)
     {
-        $commands = func_get_args();
+        $commands = is_array($commands) ? $commands : func_get_args();
         $events = $this->app['events'];
         $events->listen('artisan.start', function ($artisan) use($commands) {
             $artisan->resolveCommands($commands);
@@ -5536,7 +5536,8 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
     {
         $query = $this->newQuery()->where($this->getKeyName(), $this->getKey());
         if ($this->softDelete) {
-            $query->update(array(static::DELETED_AT => $this->freshTimestamp()));
+            $this->{static::DELETED_AT} = $time = $this->freshTimestamp();
+            $query->update(array(static::DELETED_AT => $time));
         } else {
             $query->delete();
         }
@@ -6717,8 +6718,7 @@ class Encrypter
     {
         $iv = mcrypt_create_iv($this->getIvSize(), $this->getRandomizer());
         $value = base64_encode($this->padAndMcrypt($value, $iv));
-        $iv = base64_encode($iv);
-        $mac = $this->hash($value);
+        $mac = $this->hash($iv = base64_encode($iv), $value);
         return base64_encode(json_encode(compact('iv', 'value', 'mac')));
     }
     protected function padAndMcrypt($value, $iv)
@@ -6741,16 +6741,16 @@ class Encrypter
     {
         $payload = json_decode(base64_decode($payload), true);
         if (!$payload or $this->invalidPayload($payload)) {
-            throw new DecryptException('Invalid data passed to encrypter.');
+            throw new DecryptException('Invalid data.');
         }
-        if ($payload['mac'] != $this->hash($payload['value'])) {
-            throw new DecryptException('MAC for payload is invalid.');
+        if ($payload['mac'] !== $this->hash($payload['iv'], $payload['value'])) {
+            throw new DecryptException('MAC is invalid.');
         }
         return $payload;
     }
-    protected function hash($value)
+    protected function hash($iv, $value)
     {
-        return hash_hmac('sha256', $value, $this->key);
+        return hash_hmac('sha256', $iv . $value, $this->key);
     }
     protected function addPadding($value)
     {
@@ -9865,15 +9865,18 @@ class Run
             }
         }
         $output = ob_get_clean();
-        if ($this->allowQuit()) {
-            echo $output;
-            die;
-        } else {
-            if ($this->writeToOutput()) {
-                echo $output;
+        if ($this->writeToOutput()) {
+            if ($handlerResponse == Handler::QUIT && $this->allowQuit()) {
+                while (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
             }
-            return $output;
+            echo $output;
         }
+        if ($handlerResponse == Handler::QUIT && $this->allowQuit()) {
+            die;
+        }
+        return $output;
     }
     public function handleError($level, $message, $file = null, $line = null)
     {

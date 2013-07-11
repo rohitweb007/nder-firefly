@@ -11,8 +11,12 @@ class ImportController extends BaseController {
   }
 
   public function doImport() {
-    $payload   = Input::file('payload');
-    $raw       = File::get($payload);
+    if (strlen(Input::get('payload_text')) == 0) {
+      $payload = Input::file('payload');
+      $raw     = File::get($payload);
+    } else {
+      $raw = Input::get('payload_text');
+    }
     $json      = json_decode($raw, true);
     $firstIcon = Icon::first();
     $old       = array(
@@ -80,14 +84,13 @@ class ImportController extends BaseController {
         }
 
         // remap settings:
-        if($class == 'Setting') {
-          if($item['name'] == 'defaultCheckingAccount') {
+        if ($class == 'Setting') {
+          if ($item['name'] == 'defaultCheckingAccount') {
             $item['value'] = $mapping['accounts'][intval($item['value'])];
           }
-          if($item['name'] == 'defaultSavingsAccount') {
+          if ($item['name'] == 'defaultSavingsAccount') {
             $item['value'] = $mapping['accounts'][intval($item['value'])];
           }
-
         }
 
         // make validator:
@@ -109,7 +112,7 @@ class ImportController extends BaseController {
           if (isset($object->name) && $class != 'Setting') {
             $object->name = Crypt::encrypt($object->name);
           }
-          if($class == 'Setting') {
+          if ($class == 'Setting') {
             $object->value = Crypt::encrypt($object->value);
           }
           // save:
@@ -192,8 +195,8 @@ class ImportController extends BaseController {
     }
     // settings:
     $settings = Auth::user()->settings()->get();
-    foreach($settings as $setting) {
-      $setting->value = Crypt::decrypt($setting->value);
+    foreach ($settings as $setting) {
+      $setting->value     = Crypt::decrypt($setting->value);
       $data['settings'][] = $setting->toArray();
     }
     $payload = json_encode($data, JSON_PRETTY_PRINT);

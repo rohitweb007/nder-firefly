@@ -5,7 +5,7 @@ $(document).ready(function() {
   $('#updateCompare').on('click', updateCompare);
 });
 
-var basicTable, basicChart,catTable,budTable;
+var basicTable, basicChart,catTable,budTable,pageTitle;
 
 function updateCompare() {
   var holder = $('#compareContent');
@@ -49,7 +49,8 @@ function updateCompare() {
     $('#basicChart').removeClass('loading');
     basicChart.draw(gdata,{
       legend: {position:'bottom'},
-      lineWidth: 1
+      lineWidth: 1,
+      title: title
     });
   });
   // category table
@@ -110,23 +111,24 @@ function makeTitle() {
     i++;
   }
   // we reageren toch gewoon op compares:
-  var title = 'X';
+  var pageTitle = 'X';
   if (compares.length === 1) {
-    title = compares[0];
+    pageTitle = compares[0];
   } else if (compares.length === 2) {
-    title = compares[1] + " and " + compares[2];
+    pageTitle = compares[1] + " and " + compares[2];
   } else if (compares.length > 2) {
-    title = subset.join(', ');
-    title = title + " and " + compares[i];
+    pageTitle = subset.join(', ');
+    pageTitle = pageTitle + " and " + compares[i];
   }
   if (subset.length > 2) {
-    title = title + " and " + compares[i];
+    pageTitle = pageTitle + " and " + compares[i];
   } else if (compares.length === 2) {
-    title = compares[0] + " and " + compares[1];
+    pageTitle = compares[0] + " and " + compares[1];
   } else {
 
   }
+  title = "Comparing " + baseMonth + " with " + pageTitle;
 
-  holder.prepend($('<h3>').text("Comparing " + baseMonth + " with " + title));
+  holder.prepend($('<h3>').text(title));
 
 }

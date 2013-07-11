@@ -8,6 +8,10 @@
       be deleted!</p>
     <?php echo Form::open(array('files' => true));
       echo Form::file('payload');
+      ?>
+    <br />Or paste here<br />
+    <?
+      echo Form::textarea('payload_text');
       echo '<br />';
       echo Form::submit('Upload',array('class' => 'btn'));
     echo Form::close(); ?>
