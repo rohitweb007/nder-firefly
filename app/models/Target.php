@@ -24,7 +24,7 @@ class Target extends Eloquent {
     foreach ($transfers as $t) {
       if ($t->account_from == $this->account_id) {
         $sum -= floatval($t->amount);
-      } else {
+      } else if(($t->account_to == $this->account_id)) {
         $sum += floatval($t->amount);
       }
     }

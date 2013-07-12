@@ -94,10 +94,13 @@ Route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransact
 Route::post('/home/transaction/delete/{id}', 'TransactionController@deleteTransaction')->where('id', '[0-9]+');
 
 // target management
+Route::get('/home/targets','TargetController@showAll');
 Route::get('/home/target/add', 'TargetController@addTarget');
 Route::post('/home/target/add', 'TargetController@newTarget');
+Route::get('/home/target/edit/{id}', 'TargetController@editTarget');
+Route::post('/home/target/edit/{id}', 'TargetController@doEditTarget');
 Route::get('/home/target/overviewGraph/{id}', 'TargetController@homeOverviewGraph')->where('id', '[0-9]+');
-
+Route::post('/home/target/delete/{id}', 'TargetController@deleteTarget')->where('id', '[0-9]+');
 
 // transfer management
 Route::get('/home/transfers', 'TransferController@showAll');

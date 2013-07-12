@@ -11,7 +11,7 @@
   </div>
 </div>
 
-<div clas="row-fluid">
+<div class="row-fluid">
   <div class="span12">
     <table class="table table-striped">
       <tr>

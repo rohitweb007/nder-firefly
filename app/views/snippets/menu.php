@@ -48,6 +48,7 @@ if(intval($next->format('m')) == intval($currentPeriod->format('m'))+2  ) {
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/beneficiaries"><i class="icon-th-list"></i> Beneficiaries</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/budgets"><i class="icon-th-list"></i> Budgets</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/categories"><i class="icon-th-list"></i> Categories</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/targets"><i class="icon-th-list"></i> Saving targets</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/transactions"><i class="icon-th-list"></i> Transactions</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/home/transfers"><i class="icon-th-list"></i> Transfers</a></li>
         </ul>

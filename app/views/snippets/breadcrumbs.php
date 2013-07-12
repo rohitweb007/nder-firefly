@@ -31,6 +31,7 @@ $segments = Request::segments();
         case 'budgets':
         case 'categories':
         case 'beneficiaries':
+        case 'targets':
         case 'transactions':
         case 'transfers':
           echo '<li><a href="/home/' . $segments[1] . '">' . ucfirst($segments[1]) . '</a> <span class="divider">/</span></li>';
@@ -52,7 +53,7 @@ $segments = Request::segments();
                 echo '<li class="active">Add a new ' . $segments[1] . '</li>';
                 break;
               case 'edit':
-                if(!in_array($segments[1], array('transaction','transfer'))) {
+                if (!in_array($segments[1], array('transaction', 'transfer'))) {
                   echo '<li><a href="/home/' . $segments[1] . '/overview/' . $segments[3] . '">' . ucfirst($segments[1]) . ' overview</a> <span class="divider">/</span></li>';
                 }
                 echo '<li class="active">Edit ' . $segments[1] . '</li>';
