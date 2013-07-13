@@ -57,8 +57,8 @@ class ChartController extends BaseController {
       $chartdate->modify('first day of this month');
       $index     = 0;
 
-      $specificAmount = Auth::user()->settings()->where('name','=','monthlyAmount')->where('date','=',$today->format('Y-m-d'))->first();
-      if($specificAmount) {
+      $specificAmount = Auth::user()->settings()->where('name', '=', 'monthlyAmount')->where('date', '=', $today->format('Y-m-d'))->first();
+      if ($specificAmount) {
         $balance = intval(Crypt::decrypt($specificAmount->value));
       }
 
@@ -225,26 +225,30 @@ class ChartController extends BaseController {
       $categories = Auth::user()->categories()->get();
       $records    = array();
       foreach ($categories as $cat) {
-        $cat->name = Crypt::decrypt($cat->name);
+        $cat->name    = Crypt::decrypt($cat->name);
         // find out the expenses for each category:
-        $trans     = floatval($cat->transactions()->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-        $transf    = floatval($cat->transfers()->where('account_from', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+        $trans_spent  = floatval($cat->transactions()->where('amount', '<', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+        $trans_earned = floatval($cat->transactions()->where('amount', '>', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+        $transf       = floatval($cat->transfers()->where('account_from', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
         $transf += floatval($cat->transfers()->where('account_to', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-        $records[] = array(
+        $records[]    = array(
             'category' => $cat->name,
-            'spent'    => $trans,
+            'spent'    => $trans_spent,
+            'earned'   => $trans_earned,
             'moved'    => $transf
         );
       }
       // everything *outside* of the categories:
-      $trans  = floatval($account->transactions()->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-      $transf = floatval($account->transfersfrom()->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $trans_spent  = floatval($account->transactions()->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $trans_earned = floatval($account->transactions()->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+      $transf       = floatval($account->transfersfrom()->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
       $transf += floatval($account->transfersto()->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
 
 
       array_unshift($records, array(
           'category' => 'Outside of categories',
-          'spent'    => $trans,
+          'spent'    => $trans_spent,
+          'earned'   => $trans_earned,
           'moved'    => $transf
       ));
 
@@ -258,7 +262,12 @@ class ChartController extends BaseController {
                   'type'  => 'string',
               ),
               array(
-                  'id'    => 'amount',
+                  'id'    => 'spent',
+                  'label' => 'Spent',
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'earned',
                   'label' => 'Earned',
                   'type'  => 'number',
               ),
@@ -276,7 +285,8 @@ class ChartController extends BaseController {
         if (!($r['spent'] == 0 && $r['moved'] == 0)) {
           $data['rows'][$index]['c'][0]['v'] = $r['category'];
           $data['rows'][$index]['c'][1]['v'] = $r['spent'];
-          $data['rows'][$index]['c'][2]['v'] = $r['moved'];
+          $data['rows'][$index]['c'][2]['v'] = $r['earned'];
+          $data['rows'][$index]['c'][3]['v'] = $r['moved'];
           $index++;
         }
       }
@@ -342,6 +352,11 @@ class ChartController extends BaseController {
                   'label' => 'Moved to ' . Crypt::decrypt($account->name),
                   'type'  => 'number',
               ),
+              array(
+                  'id'    => 'balance',
+                  'label' => 'Balance',
+                  'type'  => 'number',
+              ),
           ),
           'rows' => array()
       );
@@ -350,6 +365,8 @@ class ChartController extends BaseController {
         $data['rows'][$index]['c'][0]['v'] = $x['name'];
         $data['rows'][$index]['c'][1]['v'] = $x['to'];
         $data['rows'][$index]['c'][2]['v'] = $x['from'];
+        $data['rows'][$index]['c'][3]['v'] = $x['from'] - $x['to'];
+
         $index++;
       }
       Cache::put($key, $data, 1440);
@@ -383,27 +400,34 @@ class ChartController extends BaseController {
         $budget->name = Crypt::decrypt($budget->name);
         $date         = new DateTime($budget->date);
         // find out the expenses for each budget:
-        $trans        = floatval($budget->transactions()->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-        $transf       = floatval($budget->transfers()->where('account_from', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+        $trans_earned = floatval($budget->transactions()->where('amount', '>', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+        $trans_spent  = floatval($budget->transactions()->where('amount', '<', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+
+
+        // find the earnings for this budget.
+        // find how much we have moved for this budget:
+        $transf = floatval($budget->transfers()->where('account_from', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
         $transf += floatval($budget->transfers()->where('account_to', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-        $records[]    = array(
+
+        $records[] = array(
             'budget' => $budget->name . ' (' . $date->format('F Y') . ')',
-            'spent'  => $trans,
+            'spent'  => $trans_spent,
+            'earned' => $trans_earned,
             'moved'  => $transf
         );
       }
       // everything *outside* of the budgets:
-      $trans  = floatval($account->transactions()->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-      $transf = floatval($account->transfersfrom()->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
-      $transf += floatval($account->transfersto()->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-
-
+      $outside_trans_earned = floatval($account->transactions()->where('amount', '>', 0)->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+      $outside_trans_spent  = floatval($account->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $outside_transf       = floatval($account->transfersfrom()->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $outside_transf += floatval($account->transfersto()->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
 
 
       array_unshift($records, array(
           'budget' => 'Outside of budgets',
-          'spent'  => $trans,
-          'moved'  => $transf
+          'spent'  => $outside_trans_spent,
+          'earned' => $outside_trans_earned,
+          'moved'  => $outside_transf
       ));
 
 
@@ -417,7 +441,12 @@ class ChartController extends BaseController {
                   'type'  => 'string',
               ),
               array(
-                  'id'    => 'amount',
+                  'id'    => 'spent',
+                  'label' => 'Spent',
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'earned',
                   'label' => 'Earned',
                   'type'  => 'number',
               ),
@@ -435,7 +464,8 @@ class ChartController extends BaseController {
         if (!($r['spent'] == 0 && $r['moved'] == 0)) {
           $data['rows'][$index]['c'][0]['v'] = $r['budget'];
           $data['rows'][$index]['c'][1]['v'] = $r['spent'];
-          $data['rows'][$index]['c'][2]['v'] = $r['moved'];
+          $data['rows'][$index]['c'][2]['v'] = $r['earned'];
+          $data['rows'][$index]['c'][3]['v'] = $r['moved'];
           $index++;
         }
       }
@@ -464,13 +494,12 @@ class ChartController extends BaseController {
       $at   = array(); // account temp
       $bt   = array(); // budget temp
       $bet  = array(); // beneficiary temp
-      $ct   = array(); // category temp
       $data = array(
           'cols' => array(
               array(
                   'id'    => 'date',
                   'label' => 'Date',
-                  'type'  => 'string',
+                  'type'  => 'date',
               ),
               array(
                   'id'    => 'descr',
@@ -523,7 +552,10 @@ class ChartController extends BaseController {
           $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
         }
         $date                              = new DateTime($t->date);
-        $strDate                           = $date->format('d F Y');
+        $month                             = intval($date->format('n')) - 1;
+        $year                              = intval($date->format('Y'));
+        $day                               = intval($date->format('d'));
+        $strDate                           = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
         $data['rows'][$index]['c'][0]['v'] = $strDate;
         $data['rows'][$index]['c'][1]['v'] = Crypt::decrypt($t->description);
         $data['rows'][$index]['c'][2]['v'] = floatval($t->amount);
@@ -531,6 +563,78 @@ class ChartController extends BaseController {
         $data['rows'][$index]['c'][4]['v'] = (is_null($t->beneficiary_id) ? null : $bet[intval($t->beneficiary_id)]);
         $data['rows'][$index]['c'][5]['v'] = (is_null($t->category_id) ? null : $ct[intval($t->category_id)]);
         $index++;
+      }
+      Cache::put($key, $data, 1440);
+      return Response::json($data);
+    }
+  }
+
+  public function showBeneficiariesByAccount($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
+      return App::abort(404);
+    } else {
+      $start = new DateTime(Input::get('start'));
+      $end   = new DateTime(Input::get('end'));
+      $key   = cacheKey('benba', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
+      $beneficiaries = Auth::user()->beneficiaries()->get();
+      $records       = array();
+      foreach ($beneficiaries as $ben) {
+        $ben->name    = Crypt::decrypt($ben->name);
+        // find out the expenses for each category:
+        $trans_spent  = floatval($ben->transactions()->where('amount', '<', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+        $trans_earned = floatval($ben->transactions()->where('amount', '>', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+        $records[]    = array(
+            'category' => $ben->name,
+            'spent'    => $trans_spent,
+            'earned'   => $trans_earned,
+        );
+      }
+      // everything *outside* of the categories:
+      $trans_spent  = floatval($account->transactions()->whereNull('beneficiary_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $trans_earned = floatval($account->transactions()->whereNull('beneficiary_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+
+
+      array_unshift($records, array(
+          'category' => 'Outside of beneficiaries',
+          'spent'    => $trans_spent,
+          'earned'   => $trans_earned,
+      ));
+
+
+      // klopt wie ein busje!
+      $data = array(
+          'cols' => array(
+              array(
+                  'id'    => 'ben',
+                  'label' => 'Beneficiaries',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'spent',
+                  'label' => 'Spent',
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'earned',
+                  'label' => 'Earned',
+                  'type'  => 'number',
+              ),
+          ),
+          'rows' => array()
+      );
+
+      $index = 0;
+      foreach ($records as $r) {
+        if (!($r['spent'] == 0)) {
+          $data['rows'][$index]['c'][0]['v'] = $r['category'];
+          $data['rows'][$index]['c'][1]['v'] = $r['spent'];
+          $data['rows'][$index]['c'][2]['v'] = $r['earned'];
+          $index++;
+        }
       }
       Cache::put($key, $data, 1440);
       return Response::json($data);

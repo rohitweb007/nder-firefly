@@ -44,6 +44,31 @@ class Account extends Eloquent {
     return $this->hasMany('Transfer','account_to');
   }
 
+  /**
+   * Tries to predict how much you'll spend
+   * on this day of the month.
+   * @param DateTime $date
+   */
+  public function predict(DateTime $date = null) {
+    $date    = is_null($date) ? Session::get('period') : $date;
+
+    /**
+     * select alle transacties, na vandaag (dag > 24)
+     * en maand is niet deze (month != 6)
+     * en flikker ze op een hoop (sum amount).
+     * Gedeeld door aantal maanden bezig nu (5) == antwoord.
+     */
+    $total     = Auth::user()->transactions()->
+            where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '=', $date->format('d'))->
+            where(DB::Raw('DATE_FORMAT(`date`,"%m")'),'!=',$date->format('m'))->
+            where('amount', '<', 0)->
+            sum('amount');
+    $oldest    = BaseController::getFirst();
+    $diff      = $oldest->diff($date);
+
+    return (($total * -1) / $diff->m);
+  }
+
 
 
   public function transactions() {

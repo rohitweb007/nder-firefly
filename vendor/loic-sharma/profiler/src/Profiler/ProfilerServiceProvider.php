@@ -33,7 +33,7 @@ class ProfilerServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function registerProfiler()
-	{	
+	{
 		$this->app['profiler'] = $this->app->share(function($app)
 		{
 			$startTime = null;
@@ -144,7 +144,7 @@ class ProfilerServiceProvider extends ServiceProvider {
 
 				return $app['redirect']->to('/');
 			});
-			
+
 			$app['router']->get('/_profiler/reset', function() use ($app, $provider)
 			{
 				$app['session']->forget($provider::SESSION_HASH);
@@ -177,7 +177,9 @@ class ProfilerServiceProvider extends ServiceProvider {
 			// Do not display profiler on ajax requests or non-HTML responses.
 			$isHTML = \Str::startsWith($response->headers->get('Content-Type'), 'text/html');
 
-			if( ! $profiler->isEnabled() or $request->ajax() or ! $isHTML)
+      // show it when the responses are not html because we need it for debug:
+			//if( ! $profiler->isEnabled() or $request->ajax() or ! $isHTML)
+      if( ! $profiler->isEnabled() or $request->ajax())
 			{
 				return;
 			}

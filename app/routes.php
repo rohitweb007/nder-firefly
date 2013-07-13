@@ -49,7 +49,9 @@ Route::get('/home/chart/predict', 'ChartController@predictionChart');
 Route::get('/home/chart/bba/{id}', 'ChartController@showBudgetsByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/cba/{id}', 'ChartController@showCategoriesByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/mba/{id}', 'ChartController@showMovesByAccount')->where('id', '[0-9]+');
+Route::get('/home/chart/benba/{id}', 'ChartController@showBeneficiariesByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccount')->where('id', '[0-9]+');
+
 Route::get('/home/charts/prediction', 'PageController@predictionChart');
 Route::get('/home/charts/compare', 'PageController@compare');
 
@@ -65,6 +67,7 @@ Route::get('/home/account/chart/{id}', 'AccountController@overviewGraph')->where
 Route::post('/home/account/delete/{id}', 'AccountController@deleteAccount')->where('id', '[0-9]+');
 Route::get('/home/account/edit/{id}', 'AccountController@editAccount')->where('id', '[0-9]+');
 Route::post('/home/account/edit/{id}', 'AccountController@doEditAccount')->where('id', '[0-9]+');
+Route::get('/home/account/summary/{id}', 'AccountController@getAccountSummary')->where('id', '[0-9]+');
 
 // beneficiary management
 Route::get('/home/beneficiaries', 'BeneficiaryController@showAll');

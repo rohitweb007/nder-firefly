@@ -195,10 +195,11 @@ class AccountController extends BaseController {
   public function overviewGraph($id = 0) {
     $key = cacheKey('Account', 'overviewGraph', $id, Session::get('period'));
     if (Cache::has($key)) {
-      return Response::json(Cache::get($key));
+      //return Response::json(Cache::get($key));
     }
-    // 30 days into the past.
     $today   = clone Session::get('period');
+    $end     = clone($today);
+    $end->modify('last day of this month');
     $past    = self::getFirst();
     $account = Auth::user()->accounts()->find($id);
 
@@ -216,18 +217,36 @@ class AccountController extends BaseController {
                 'type'  => 'number',
                 'p'     => array('role' => 'data')
             ),
+            array(
+                'type' => 'boolean',
+                'p'    => array(
+                    'role' => 'certainty'
+                )
+            ),
         ),
         'rows' => array()
     );
 
-    $index = 0;
-    while ($past <= $today) {
+    $index   = 0;
+    $balance = $account->balance($past);
+    while ($past <= $end) {
       $month                             = intval($past->format('n')) - 1;
       $year                              = intval($past->format('Y'));
       $day                               = intval($past->format('j'));
       $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
-      $balance                           = $account->balance($past);
+
+
+
+      if ($past > $today) {
+        $prediction = $account->predict($past);
+        $balance    = $balance - $prediction;
+        $certain    = false;
+      } else {
+        $balance = $account->balance($past);
+        $certain = true;
+      }
       $data['rows'][$index]['c'][1]['v'] = $balance;
+      $data['rows'][$index]['c'][2]['v'] = $certain;
       $past->add(new DateInterval('P1D'));
       $index++;
     }
@@ -277,6 +296,49 @@ class AccountController extends BaseController {
       }
     } else {
       return App::abort(404);
+    }
+  }
+
+  public function getAccountSummary($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
+      return App::abort(404);
+    } else {
+      $start = new DateTime(Input::get('start'));
+      $end   = new DateTime(Input::get('end'));
+      $key   = cacheKey('accountsummary', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
+      $startStr = $start->format('jS M Y');
+      $endStr   = $end->format('jS M Y');
+
+      $earned_raw = $account->transactions()->where('amount', '>', 0)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount') * 1;
+      $earned     = mf($earned_raw);
+
+      $spent_raw    = $account->transactions()->where('amount', '<', 0)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount') * -1;
+      $spent        = mf($spent_raw);
+      $net          = mf($earned_raw - $spent_raw);
+      $profitloss   = ($earned_raw - $spent_raw) < 0 ? 'loss' : 'profit';
+      $moved_raw    = floatval($account->transfersfrom()->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+      $moved        = mf($moved_raw);
+      $received_raw = floatval($account->transfersto()->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+
+      $received        = mf($received_raw);
+      $totalmoved      = mf($received_raw - $moved_raw < 0 ? ($received_raw - $moved_raw) * -1 : $received_raw - $moved_raws);
+      $moved_away_here = ($received_raw - $moved_raw) > 0 ? 'to this account' : 'away from this account';
+      $avg_raw         = ($earned_raw - $spent_raw) / $end->format('t');
+      $avg             = mf($avg_raw);
+      $ms              = $avg_raw > 0 ? 'made' : 'spent';
+
+      $string    = 'In the period between %s and %s (including), you have
+          made a net %s of %s (earned %s and spent %s).<br />
+
+          You have moved %s away and received %s from other accounts, effectively transferring %s %s.
+          On average per day, you have %s %s.';
+      $formatted = sprintf($string, $startStr, $endStr, $profitloss, $net, $earned, $spent, $moved, $received, $totalmoved, $moved_away_here, $ms, $avg);
+      Cache::put($key, $formatted, 1440);
+      return Response::json($formatted);
     }
   }
 

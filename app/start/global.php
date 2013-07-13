@@ -75,8 +75,14 @@ App::down(function() {
   |
  */
 
-function mf($m) {
-  return '&euro; ' . number_format(floatval($m), 2, ',', '.');
+function mf($m,$colorize = false) {
+  $number = floatval($m);
+  $string = number_format($number, 2, ',', '.');
+  $return = '&euro; ' . $string;
+  if($colorize && $number < 0) {
+    return '<span class="text-danger">'.$return.'</span>';
+  }
+  return $return;
 }
 
 define('CACHE_TODAY', date('Ymd'));
