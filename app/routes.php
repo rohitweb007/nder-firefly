@@ -6,6 +6,7 @@ require_once 'google/appengine/api/users/UserService.php';
 use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 
+# home view with optional redirect for logged in users.
 Route::get('/', function() {
           $user = UserService::getCurrentUser();
 
@@ -17,19 +18,20 @@ Route::get('/', function() {
           }
         });
 
-Route::get('/oldimport', 'ImportController@doOldImport');
+# flush the cache; still needs optimization for specific user's caches.
 Route::get('/home/flush', function() {
           Cache::flush();
           return Redirect::to('/home');
         });
+
 Route::get('/home/export', 'ImportController@doExport');
 Route::get('/home/import', 'ImportController@showImport');
-Route::post('/home/import', 'ImportController@doImport');
 Route::get('/concept', 'HomeController@showConcept');
 Route::get('/home/logout', 'HomeController@doLogout');
 Route::get('/home/delete', 'HomeController@askDelete');
-Route::post('/home/delete', 'HomeController@doDelete');
 Route::get('/home', 'HomeController@getHome');
+Route::post('/home/import', 'ImportController@doImport');
+Route::post('/home/delete', 'HomeController@doDelete');
 
 Route::get('/home/settings', 'SettingsController@settings');
 Route::post('/home/settings', 'SettingsController@save');
@@ -49,7 +51,7 @@ Route::get('/home/chart/predict', 'ChartController@predictionChart');
 Route::get('/home/chart/bba/{id}', 'AccountController@showBudgetsInTimeframe')->where('id', '[0-9]+');
 Route::get('/home/chart/cba/{id}', 'AccountController@showCategoriesInTimeframe')->where('id', '[0-9]+');
 Route::get('/home/chart/mba/{id}', 'AccountController@showMovesInTimeframe')->where('id', '[0-9]+');
-Route::get('/home/chart/benba/{id}',   'AccountController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/chart/benba/{id}', 'AccountController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
 Route::get('/home/chart/transba/{id}', 'AccountController@showTransactionsInTimeframe')->where('id', '[0-9]+');
 
 Route::get('/home/charts/prediction', 'PageController@predictionChart');
