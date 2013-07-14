@@ -49,7 +49,7 @@ Route::get('/home/chart/predict', 'ChartController@predictionChart');
 Route::get('/home/chart/bba/{id}', 'ChartController@showBudgetsByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/cba/{id}', 'ChartController@showCategoriesByAccount')->where('id', '[0-9]+');
 Route::get('/home/chart/mba/{id}', 'ChartController@showMovesByAccount')->where('id', '[0-9]+');
-Route::get('/home/chart/benba/{id}', 'ChartController@showBeneficiariesByAccount')->where('id', '[0-9]+');
+Route::get('/home/chart/benba/{id}', 'AccountController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
 Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccount')->where('id', '[0-9]+');
 
 Route::get('/home/charts/prediction', 'PageController@predictionChart');

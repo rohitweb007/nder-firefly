@@ -342,4 +342,76 @@ class AccountController extends BaseController {
     }
   }
 
+  public function showBeneficiariesInTimeframe($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
+      return App::abort(404);
+    } else {
+      $start = new DateTime(Input::get('start'));
+      $end   = new DateTime(Input::get('end'));
+      $key   = cacheKey('benba', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
+      $beneficiaries = Auth::user()->beneficiaries()->get();
+      $records       = array();
+      foreach ($beneficiaries as $ben) {
+        $ben->name    = Crypt::decrypt($ben->name);
+        // find out the expenses for each category:
+        $trans_spent  = floatval($ben->transactions()->where('amount', '<', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+        $trans_earned = floatval($ben->transactions()->where('amount', '>', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+        $records[]    = array(
+            'category' => $ben->name,
+            'spent'    => $trans_spent,
+            'earned'   => $trans_earned,
+        );
+      }
+      // everything *outside* of the categories:
+      $trans_spent  = floatval($account->transactions()->whereNull('beneficiary_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $trans_earned = floatval($account->transactions()->whereNull('beneficiary_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+
+
+      array_unshift($records, array(
+          'category' => 'Outside of beneficiaries',
+          'spent'    => $trans_spent,
+          'earned'   => $trans_earned,
+      ));
+
+
+      // klopt wie ein busje!
+      $data = array(
+          'cols' => array(
+              array(
+                  'id'    => 'ben',
+                  'label' => 'Beneficiaries',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'spent',
+                  'label' => 'Spent',
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'earned',
+                  'label' => 'Earned',
+                  'type'  => 'number',
+              ),
+          ),
+          'rows' => array()
+      );
+
+      $index = 0;
+      foreach ($records as $r) {
+        if (!($r['spent'] == 0)) {
+          $data['rows'][$index]['c'][0]['v'] = $r['category'];
+          $data['rows'][$index]['c'][1]['v'] = $r['spent'];
+          $data['rows'][$index]['c'][2]['v'] = $r['earned'];
+          $index++;
+        }
+      }
+      Cache::put($key, $data, 1440);
+      return Response::json($data);
+    }
+  }
+
 }
