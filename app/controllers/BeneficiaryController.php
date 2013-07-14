@@ -89,4 +89,80 @@ class BeneficiaryController extends BaseController {
     }
   }
 
+  /**
+   * Same but a longer date range
+   * TODO combine and smarter call.
+   * @param type $id
+   * @return type
+   */
+  public function overviewGraph($id = 0) {
+    $key = cacheKey('Beneficiary', 'overviewGraph', $id, Session::get('period'));
+    if (Cache::has($key)) {
+      //return Response::json(Cache::get($key));
+    }
+    $today       = clone Session::get('period');
+    $end         = clone($today);
+    $past        = self::getFirst();
+    $beneficiary = Auth::user()->beneficiaries()->find($id);
+
+    $data = array(
+        'cols' => array(
+            array(
+                'id'    => 'date',
+                'label' => 'Date',
+                'type'  => 'date',
+                'p'     => array('role' => 'domain')
+            ),
+            array(
+                'id'    => 'spent',
+                'label' => 'Spent',
+                'type'  => 'number',
+                'p'     => array('role' => 'data')
+            ),
+            array(
+                'type' => 'boolean',
+                'p'    => array(
+                    'role' => 'certainty'
+                )
+            ),
+            array(
+                'id'    => 'earned',
+                'label' => 'Earned',
+                'type'  => 'number',
+                'p'     => array('role' => 'data')
+            ),
+            array(
+                'type' => 'boolean',
+                'p'    => array(
+                    'role' => 'certainty'
+                )
+            ),
+        ),
+        'rows' => array()
+    );
+
+    $index = 0;
+    //$balance = $account->balance($past);
+    while ($past <= $end) {
+      $month                             = intval($past->format('n')) - 1;
+      $year                              = intval($past->format('Y'));
+      $day                               = intval($past->format('j'));
+      $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
+
+      $spent                             = floatval($beneficiary->transactions()->where('amount', '<', 0)->where('date', '=', $past->format('Y-m-d'))->sum('amount')) * -1;
+      $earned                            = floatval($beneficiary->transactions()->where('amount', '>', 0)->where('date', '=', $past->format('Y-m-d'))->sum('amount'));
+      $certain_spent                     = true;
+      $certain_earned                    = true;
+      $data['rows'][$index]['c'][1]['v'] = $spent;
+      $data['rows'][$index]['c'][2]['v'] = $certain_spent;
+      $data['rows'][$index]['c'][3]['v'] = $earned;
+      $data['rows'][$index]['c'][4]['v'] = $certain_earned;
+      $past->add(new DateInterval('P1D'));
+      $index++;
+    }
+
+    Cache::put($key, $data, 1440);
+    return Response::json($data);
+  }
+
 }

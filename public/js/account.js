@@ -4,7 +4,6 @@ google.setOnLoadCallback(drawCharts);
 var accountDashboard;
 var accountControl;
 var accountChart;
-var budgetDashboard;
 var start = new Date();
 var end = new Date();
 end.setMonth(end.getMonth() - 1);
@@ -23,8 +22,8 @@ function deleteAccount(ev) {
     var row = target.parent().parent().parent();
 
   }
-  if($('td:nth-child(1) a', row).text().length > 0) {
-  $('#delAccountName').text($('td:nth-child(1) a', row).text())
+  if ($('td:nth-child(1) a', row).text().length > 0) {
+    $('#delAccountName').text($('td:nth-child(1) a', row).text())
   } else {
     $('#delAccountName').text(Name);
   }
@@ -34,23 +33,6 @@ function deleteAccount(ev) {
   $('#modal').modal();
 }
 
-
-function drawCharts() {
-  if ($('#accountDashboard').length > 0) {
-    drawAccount();
-    getSummary();
-    updateHeader();
-    drawBudget();
-    drawCategory();
-    drawMoves();
-    drawTransactions();
-    drawBeneficiaries();
-
-  }
-  if ($('#allChart').length > 0) {
-    drawAllChart();
-  }
-}
 
 function drawAllChart() {
   $.getJSON('/home/accounts/chart', function(data) {
@@ -124,6 +106,25 @@ function drawAccount() {
 
 
 }
+
+function drawCharts() {
+  if ($('#accountDashboard').length > 0) {
+    drawAccount();
+    getSummary();
+    updateHeader();
+    drawBudget();
+    drawCategory();
+    drawMoves();
+    drawTransactions();
+    drawBeneficiaries();
+
+  }
+  if ($('#allChart').length > 0) {
+    drawAllChart();
+  }
+}
+
+
 
 function updateHeader() {
   var state = accountControl.getState();

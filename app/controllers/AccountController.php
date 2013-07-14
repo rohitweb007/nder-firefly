@@ -195,7 +195,7 @@ class AccountController extends BaseController {
   public function overviewGraph($id = 0) {
     $key = cacheKey('Account', 'overviewGraph', $id, Session::get('period'));
     if (Cache::has($key)) {
-      //return Response::json(Cache::get($key));
+      return Response::json(Cache::get($key));
     }
     $today   = clone Session::get('period');
     $end     = clone($today);

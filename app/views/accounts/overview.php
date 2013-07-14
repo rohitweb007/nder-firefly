@@ -5,7 +5,7 @@
 </script>
 <div class="row-fluid">
   <div class="span12">
-    <h3>Account <?php echo Crypt::decrypt($account->name); ?> <span id="date"></span></h3>
+    <h3>Overview for <?php echo Crypt::decrypt($account->name); ?> <span id="date"></span></h3>
     <a href="/home/account/edit/<?php echo $account->id; ?>" class="btn"><i class="icon-pencil"></i> Edit <?php echo Crypt::decrypt($account->name); ?></a>
     <a href="#" data-value="<?php echo $account->id; ?>" title="Delete <?php echo Crypt::decrypt($account->name);?>" class="btn btn-danger deleteAccount"><i data-value="<?php echo $account->id; ?>" class="icon-white icon-remove"></i> Delete <?php echo Crypt::decrypt($account->name);?></a>
   </div>

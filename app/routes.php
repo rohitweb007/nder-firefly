@@ -31,18 +31,18 @@ Route::get('/home/delete', 'HomeController@askDelete');
 Route::post('/home/delete', 'HomeController@doDelete');
 Route::get('/home', 'HomeController@getHome');
 
-Route::get('/home/settings','SettingsController@settings');
-Route::post('/home/settings','SettingsController@save');
-Route::post('/home/settings/update','SettingsController@update');
-Route::post('/home/settings/add','SettingsController@addSetting');
-Route::post('/home/settings/delete','SettingsController@deleteSetting');
-Route::get('/home/amounts',array('as' => 'amounts','uses' => 'SettingsController@amounts'));
+Route::get('/home/settings', 'SettingsController@settings');
+Route::post('/home/settings', 'SettingsController@save');
+Route::post('/home/settings/update', 'SettingsController@update');
+Route::post('/home/settings/add', 'SettingsController@addSetting');
+Route::post('/home/settings/delete', 'SettingsController@deleteSetting');
+Route::get('/home/amounts', array('as'   => 'amounts', 'uses' => 'SettingsController@amounts'));
 
 # compare things:
-Route::get('/home/compare/basictable','ComparisionController@basicTable');
-Route::get('/home/compare/basicchart','ComparisionController@basicChart');
-Route::get('/home/compare/categories','ComparisionController@compareCategories');
-Route::get('/home/compare/budgets','ComparisionController@compareBudgets');
+Route::get('/home/compare/basictable', 'ComparisionController@basicTable');
+Route::get('/home/compare/basicchart', 'ComparisionController@basicChart');
+Route::get('/home/compare/categories', 'ComparisionController@compareCategories');
+Route::get('/home/compare/budgets', 'ComparisionController@compareBudgets');
 # charts
 Route::get('/home/chart/ovcat', 'ChartController@showOverExpendingCategories');
 Route::get('/home/chart/predict', 'ChartController@predictionChart');
@@ -75,7 +75,7 @@ Route::get('/home/beneficiary/overview/{id}', 'BeneficiaryController@showOvervie
 Route::get('/home/beneficiary/edit/{id}', 'BeneficiaryController@editBeneficiary')->where('id', '[0-9]+');
 Route::post('/home/beneficiary/edit/{id}', 'BeneficiaryController@doEditBeneficiary')->where('id', '[0-9]+');
 Route::post('/home/beneficiary/delete/{id}', 'BeneficiaryController@deleteBeneficiary')->where('id', '[0-9]+');
-
+Route::get('/home/beneficiary/chart/{id}', 'BeneficiaryController@overviewGraph')->where('id', '[0-9]+');
 
 
 // budget management
@@ -97,7 +97,7 @@ Route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransact
 Route::post('/home/transaction/delete/{id}', 'TransactionController@deleteTransaction')->where('id', '[0-9]+');
 
 // target management
-Route::get('/home/targets','TargetController@showAll');
+Route::get('/home/targets', 'TargetController@showAll');
 Route::get('/home/target/add', 'TargetController@addTarget');
 Route::post('/home/target/add', 'TargetController@newTarget');
 Route::get('/home/target/edit/{id}', 'TargetController@editTarget');
