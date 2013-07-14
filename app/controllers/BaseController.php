@@ -129,5 +129,4 @@ class BaseController extends Controller {
     Cache::put($last, $result, 5000);
     return $result;
   }
-
 }
