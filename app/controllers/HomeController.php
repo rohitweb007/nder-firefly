@@ -10,7 +10,26 @@ use Holmes\Holmes;
 class HomeController extends BaseController {
 
   public function __construct() {
-    $this->beforeFilter('gs', array('only' => 'getHome','askDelete','doDelete','doLogout')); // do Google "sync".
+    $this->beforeFilter('gs', array('only' => 'getHome', 'askDelete', 'doDelete', 'doLogout')); // do Google "sync".
+  }
+
+  /**
+   * The very very first page.
+   */
+  public function getRoot() {
+    $user = UserService::getCurrentUser();
+
+    if (isset($user)) {
+      return Redirect::to('/home');
+    } else {
+      $url = UserService::createLoginUrl('/home');
+      return View::make('home.index')->with('url', $url);
+    }
+  }
+
+  public function doFlush() {
+    Cache::flush();
+    return Redirect::to('/home');
   }
 
   public function getHome() {
@@ -34,8 +53,8 @@ class HomeController extends BaseController {
             'currentbalance' => $a->balance()
         );
         $account['header'] = $account['currentbalance'] < 0 ? array('style' => 'color:red;', 'class' => 'tt', 'title' => $account['name'] . ' has a balance below zero. Try to fix this.') : array();
-        $min = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
-        $max = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
+        $min               = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
+        $max               = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
 
 // last transactions and transfers for this account:
         $list = array();
@@ -130,13 +149,13 @@ class HomeController extends BaseController {
         $data['budgets'][] = $budget;
       }
       // some extra budget data:
-      $monthlyAmount = Setting::getSetting('monthlyAmount',Session::get('period')->format('Y-m-').'01');
-      if(is_null($monthlyAmount)) {
+      $monthlyAmount = Setting::getSetting('monthlyAmount', Session::get('period')->format('Y-m-') . '01');
+      if (is_null($monthlyAmount)) {
         $monthlyAmount = intval(Setting::getSetting('defaultAmount'));
       }
-      $data['budget_data']['amount'] = $monthlyAmount;
-      $data['budget_data']['spent_outside'] =  floatval(Auth::user()->transactions()->where('amount','<',0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'),'=',Session::get('period')->format('m-Y'))->sum('amount')) * -1;
-      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense','=',1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'),'=',Session::get('period')->format('m-Y'))->sum('amount'));
+      $data['budget_data']['amount']        = $monthlyAmount;
+      $data['budget_data']['spent_outside'] = floatval(Auth::user()->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount')) * -1;
+      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
 
       // targets
       $db = Auth::user()->targets()->orderBy('duedate', 'DESC')->get();
@@ -157,15 +176,15 @@ class HomeController extends BaseController {
       Cache::put($key, $data, 2440);
     }
     // flash some warnings:
-    if(count($data['budgets']) == 0) {
+    if (count($data['budgets']) == 0) {
       Session::flash('warning', 'You don\'t have any budgets defined.');
     }
-    if(count($data['accounts']) == 0) {
+    if (count($data['accounts']) == 0) {
       Session::flash('warning', 'You do not have any accounts added. You should do this first (Create &rarr; New account)');
     }
 
 
-    if(Holmes::isMobile()) {
+    if (Holmes::isMobile()) {
       return View::make('mobile.home.home')->with('data', $data);
     } else {
       return View::make('home.home')->with('data', $data);
