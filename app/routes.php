@@ -46,11 +46,11 @@ Route::get('/home/compare/budgets', 'ComparisionController@compareBudgets');
 # charts
 Route::get('/home/chart/ovcat', 'ChartController@showOverExpendingCategories');
 Route::get('/home/chart/predict', 'ChartController@predictionChart');
-Route::get('/home/chart/bba/{id}', 'ChartController@showBudgetsByAccount')->where('id', '[0-9]+');
-Route::get('/home/chart/cba/{id}', 'ChartController@showCategoriesByAccount')->where('id', '[0-9]+');
-Route::get('/home/chart/mba/{id}', 'ChartController@showMovesByAccount')->where('id', '[0-9]+');
-Route::get('/home/chart/benba/{id}', 'AccountController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
-Route::get('/home/chart/transba/{id}', 'ChartController@showTransactionsByAccount')->where('id', '[0-9]+');
+Route::get('/home/chart/bba/{id}', 'AccountController@showBudgetsInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/chart/cba/{id}', 'AccountController@showCategoriesInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/chart/mba/{id}', 'AccountController@showMovesInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/chart/benba/{id}',   'AccountController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/chart/transba/{id}', 'AccountController@showTransactionsInTimeframe')->where('id', '[0-9]+');
 
 Route::get('/home/charts/prediction', 'PageController@predictionChart');
 Route::get('/home/charts/compare', 'PageController@compare');
