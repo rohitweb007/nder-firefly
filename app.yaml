@@ -3,6 +3,20 @@ version: 1
 runtime: php
 api_version: 1
 
+pagespeed:
+  domains_to_rewrite:
+    - nder-firefly.appspot.com
+  enabled_rewriters:
+    - CollapseWhitespace
+    - ElideAttributes
+    - RemoveComments
+    - RemoveQuotes
+    - MinifyCss
+    - ProxyCss
+    - ProxyImages
+    - ProxyJs
+    - ConvertMetaTags
+
 handlers:
 - url: /favicon\.ico
   static_files: public/favicon.ico
@@ -26,11 +40,3 @@ handlers:
 
 - url: /.*
   script: public/index.php
-
-pagespeed:
-  enabled_rewriters:
-    - CollapseWhitespace
-    - ElideAttributes
-    - RemoveComments
-    - RemoveQuotes
-    - MinifyCss

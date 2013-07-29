@@ -62,6 +62,9 @@ Route::get('/home/beneficiaries', 'BeneficiaryController@showAll');
 Route::get('/home/beneficiary/overview/{id}', 'BeneficiaryController@showOverview')->where('id', '[0-9]+');
 Route::get('/home/beneficiary/edit/{id}', 'BeneficiaryController@editBeneficiary')->where('id', '[0-9]+');
 Route::get('/home/beneficiary/chart/{id}', 'BeneficiaryController@overviewGraph')->where('id', '[0-9]+');
+Route::get('/home/beneficiary/summary/{id}', 'BeneficiaryController@getBeneficiarySummary')->where('id', '[0-9]+');
+Route::get('/home/beneficiary/transactions/{id}', 'BeneficiaryController@showTransactionsInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/beneficiary/budgets/{id}', 'BeneficiaryController@showBudgetsInTimeframe')->where('id', '[0-9]+');
 Route::post('/home/beneficiary/edit/{id}', 'BeneficiaryController@doEditBeneficiary')->where('id', '[0-9]+');
 Route::post('/home/beneficiary/delete/{id}', 'BeneficiaryController@deleteBeneficiary')->where('id', '[0-9]+');
 
@@ -79,7 +82,9 @@ Route::post('/home/budget/delete/{id}', 'BudgetController@deleteBudget')->where(
 # transaction management
 Route::get('/home/transactions', 'TransactionController@showAll');
 Route::get('/home/transaction/add', 'TransactionController@addTransaction');
+Route::get('/home/transaction/add/mass', 'TransactionController@massAddTransaction');
 Route::get('/home/transaction/edit/{id}', 'TransactionController@editTransaction')->where('id', '[0-9]+');
+Route::post('/home/transaction/add/mass', 'TransactionController@massNewTransaction');
 Route::post('/home/transaction/add', 'TransactionController@newTransaction');
 Route::post('/home/transaction/edit/{id}', 'TransactionController@doEditTransaction')->where('id', '[0-9]+');
 Route::post('/home/transaction/delete/{id}', 'TransactionController@deleteTransaction')->where('id', '[0-9]+');

@@ -10,8 +10,26 @@ end.setMonth(end.getMonth() - 1);
 
 
 $(document).ready(function() {
-  $('.deleteAccount').on('click', deleteAccount);
+  $('.deleteAccount').on('show', deleteAccount);
   $('#tabs').tab();
+
+  $('a[href="#transactions"]').on('show', function() {
+    drawTransactions();
+  });
+  $('a[href="#budgets"]').on('show', function() {
+    drawBudget();
+  });
+  $('a[href="#categories"]').on('show', function() {
+    drawCategory();
+  });
+  $('a[href="beneficiaries"]').on('show', function() {
+    drawBeneficiaries();
+  });
+  $('a[href="#moved"]').on('show', function() {
+    drawMoves();
+  });
+
+
 });
 
 function deleteAccount(ev) {

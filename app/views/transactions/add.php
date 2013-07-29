@@ -11,6 +11,9 @@
       that whatever you fill in will be saved. If you have a bunch of them, the text-box will suggest
       existing ones.
     </p>
+    <p>
+      <?php echo HTML::Link('/home/transaction/add/mass','Add transactions en masse');?>
+    </p>
 
     <?php echo Form::open(array('class' => 'form-horizontal')); ?>
     <div class="control-group">

@@ -7,7 +7,7 @@
   <div class="span12">
     <h3>Overview for <?php echo Crypt::decrypt($beneficiary->name); ?> <span id="date"></span></h3>
     <a href="/home/beneficiary/edit/<?php echo $beneficiary->id; ?>" class="btn"><i class="icon-pencil"></i> Edit <?php echo Crypt::decrypt($beneficiary->name); ?></a>
-    <a href="#" data-value="<?php echo $beneficiary->id; ?>" title="Delete <?php echo Crypt::decrypt($beneficiary->name);?>" class="btn btn-danger deleteAccount"><i data-value="<?php echo $beneficiary->id; ?>" class="icon-white icon-remove"></i> Delete <?php echo Crypt::decrypt($beneficiary->name);?></a>
+    <a href="#" data-value="<?php echo $beneficiary->id; ?>" title="Delete <?php echo Crypt::decrypt($beneficiary->name);?>" class="btn btn-danger deleteBeneficiary"><i data-value="<?php echo $beneficiary->id; ?>" class="icon-white icon-remove"></i> Delete <?php echo Crypt::decrypt($beneficiary->name);?></a>
   </div>
 </div>
 
@@ -29,8 +29,7 @@
 
     <div class="tab-content">
       <div class="tab-pane active" id="summary">
-        <div id="summaryTable">TABEL
-        </div>
+        <div id="summaryText"></div>
       </div>
       <div class="tab-pane" id="transactions">
         <div id="transactionsTable"></div>
@@ -53,12 +52,12 @@
   </div>
   <div class="modal-body">
     <p>
-      Are you sure you want to delete "<span id="delAccountName"></span>"? You cannot undo this!
+      Are you sure you want to delete "<span id="delBeneficiaryName"></span>"? You cannot undo this!
     </p>
   </div>
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    <?php echo Form::open(array('url' => '/home/account/delete','style' => 'display:inline;','id' => 'delAccountForm')); ?>
+    <?php echo Form::open(array('url' => '/home/beneficiary/delete','style' => 'display:inline;','id' => 'delBeneficiaryForm')); ?>
     <button class="btn btn-danger">Delete it!</button>
     <?php echo Form::close(); ?>
   </div>

@@ -102,13 +102,148 @@ class TransactionController extends BaseController {
     }
   }
 
+  public function massAddTransaction() {
+
+    $accounts = array();
+    foreach (Auth::user()->accounts()->get() as $account) {
+      $accounts[$account->id] = Crypt::decrypt($account->name);
+    }
+
+    $budgets    = array();
+    $budgets[0] = '(no budget)';
+    foreach (Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get() as $budget) {
+      $budgets[$budget->id] = Crypt::decrypt($budget->name);
+    }
+
+    $categories = array();
+    foreach (Auth::user()->categories()->get() as $cat) {
+      $categories[] = Crypt::decrypt($cat->name);
+    }
+
+    $beneficiaries = array();
+    foreach (Auth::user()->beneficiaries()->get() as $ben) {
+      $beneficiaries[] = Crypt::decrypt($ben->name);
+    }
+    return View::make('transactions.massAdd')->with('accounts', $accounts)->with('budgets', $budgets)
+                    ->with('categories', $categories)
+                    ->with('beneficiaries', $beneficiaries);
+  }
+
+  public function massNewTransaction() {
+
+    $data = Input::get('transactions');
+    if (is_array($data)) {
+      foreach ($data as $new) {
+        // basic info:
+        $transaction                 = new Transaction;
+        $transaction->amount         = floatval($new['amount']);
+        $transaction->fireflyuser_id = Auth::user()->id;
+        $transaction->date           = $new['date'];
+        $transaction->onetime        = (isset($new['onetime']) && $new['onetime'] == 'on') ? 1 : 0;
+        $transaction->description    = $new['description'];
+
+        // account ID:
+        if (!is_null($new['account'])) {
+          $account = Auth::user()->accounts()->find($new['account']);
+          if (!is_null($account)) {
+            $transaction->account_id = $account->id;
+          }
+        }
+
+        // budget
+        if (intval($new['budget']) > 0) {
+          $budget = Auth::user()->budgets()->find(intval($new['budget']));
+          if (!is_null($budget)) {
+            $transaction->budget_id = $budget->id;
+          }
+        }
+
+        // category
+        if (strlen($new['category']) != 0) {
+          $categories = Auth::user()->categories()->get(); //->where('name','=',Input::get('category'))->first();
+          $category   = null;
+          foreach ($categories as $cat) {
+            if (Crypt::decrypt($cat->name) == $new['category']) {
+              $category = $cat;
+              break;
+            }
+          }
+          unset($cat, $categories);
+          if (is_null($category)) {
+
+            $category                 = new Category;
+            $category->fireflyuser_id = Auth::user()->id;
+            $category->name           = $new['category'];
+            $category->showtrend      = 0;
+            $category->icon_id        = Icon::first()->id; // FIXME moet niet hardcoded
+            $validator                = Validator::make($category->toArray(), Category::$rules);
+            if ($validator->passes()) {
+              $category->name = Crypt::encrypt($category->name);
+              $category->save();
+
+              $transaction->category_id = $category->id;
+            }
+          } else {
+            $transaction->category_id = $category->id;
+          }
+        }
+
+        // beneficiary
+        if (strlen(Input::get('beneficiary')) != 0) {
+          $beneficiaries = Auth::user()->beneficiaries()->get(); //->where('name','=',Input::get('beneficiary'))->first();
+          $beneficiary   = null;
+          foreach ($beneficiaries as $ben) {
+            if (Crypt::decrypt($ben->name) == Input::get('beneficiary')) {
+              $beneficiary = $ben;
+              break;
+            }
+          }
+          unset($ben, $categories);
+          if (is_null($beneficiary)) {
+
+            $beneficiary = new Beneficiary;
+
+
+            $beneficiary->fireflyuser_id = Auth::user()->id;
+            $beneficiary->name           = Input::get('beneficiary');
+            $validator                   = Validator::make($beneficiary->toArray(), Beneficiary::$rules);
+            if ($validator->passes()) {
+              $beneficiary->name           = Crypt::encrypt($beneficiary->name);
+              $beneficiary->save();
+              $transaction->beneficiary_id = $beneficiary->id;
+            }
+          } else {
+            $transaction->beneficiary_id = $beneficiary->id;
+          }
+        }
+
+        if (strlen($transaction->description) > 0) {
+          $validator = Validator::make($transaction->toArray(), Transaction::$rules);
+          if (!$validator->fails()) {
+            $transaction->description = Crypt::encrypt($transaction->description);
+            $transaction->save();
+          } else {
+            echo 'Something failed:<br>';
+            var_dump($new);
+            echo 'messages:<br>';
+            var_dump($validator->fails());
+            var_dump($validator->failed());
+            echo '<hr />';
+            exit();
+          }
+        }
+      }
+    }
+    return Redirect::to('/home');
+  }
+
   public function newTransaction() {
     $transaction                 = new Transaction;
     $transaction->amount         = floatval(Input::get('amount'));
     $transaction->fireflyuser_id = Auth::user()->id;
     $transaction->date           = Input::get('date');
     $transaction->onetime        = Input::get('onetime') == 'on' ? 1 : 0;
-    $transaction->description    = Input::get('description');
+    $transaction->description    = Input:: get('description');
 
     if (Input::get('type') == 'min') {
       $transaction->amount = $transaction->amount * -1;
@@ -161,7 +296,6 @@ class TransactionController extends BaseController {
 
 
     // beneficiary
-
     if (strlen(Input::get('beneficiary')) != 0) {
       $beneficiaries = Auth::user()->beneficiaries()->get(); //->where('name','=',Input::get('beneficiary'))->first();
       $beneficiary   = null;
@@ -174,7 +308,9 @@ class TransactionController extends BaseController {
       unset($ben, $categories);
       if (is_null($beneficiary)) {
 
-        $beneficiary                 = new Beneficiary;
+        $beneficiary = new Beneficiary;
+
+
         $beneficiary->fireflyuser_id = Auth::user()->id;
         $beneficiary->name           = Input::get('beneficiary');
         $validator                   = Validator::make($beneficiary->toArray(), Beneficiary::$rules);
@@ -211,7 +347,8 @@ class TransactionController extends BaseController {
       }
 
       $budgets    = array();
-      $budgets[0] = '(no budget)';
+      $budgets[0]
+              = '(no budget)';
       foreach (Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get() as $budget) {
         $budgets[$budget->id] = Crypt::decrypt($budget->name);
       }
@@ -275,7 +412,6 @@ class TransactionController extends BaseController {
         }
         unset($cat, $categories);
         if (is_null($category)) {
-
           $category                 = new Category;
           $category->fireflyuser_id = Auth::user()->id;
           $category->name           = Input::get('category');
@@ -313,7 +449,8 @@ class TransactionController extends BaseController {
           $beneficiary                 = new Beneficiary;
           $beneficiary->fireflyuser_id = Auth::user()->id;
           $beneficiary->name           = Input::get('beneficiary');
-          $validator                   = Validator::make($beneficiary->toArray(), Beneficiary::$rules);
+          $validator                   = Validator::make(
+                          $beneficiary->toArray(), Beneficiary::$rules);
           if ($validator->passes()) {
             $beneficiary->name           = Crypt::encrypt($beneficiary->name);
             $beneficiary->save();
@@ -335,7 +472,7 @@ class TransactionController extends BaseController {
         $transaction->save();
         Cache::flush();
         Session::flash('success', 'The new transaction has been edited.');
-        return Redirect::to('/home');
+        return Redirect::to('/home/transactions');
       }
     } else {
       return App::abort(404);
