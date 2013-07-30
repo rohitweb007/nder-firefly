@@ -47,50 +47,14 @@ class HomeController extends BaseController {
 
       $accounts = Auth::user()->accounts()->get();
       foreach ($accounts as $a) {
-        $account           = array(
+        $account            = array(
             'id'             => intval($a->id),
             'name'           => Crypt::decrypt($a->name),
             'currentbalance' => $a->balance()
         );
-        $account['header'] = $account['currentbalance'] < 0 ? array('style' => 'color:red;', 'class' => 'tt', 'title' => $account['name'] . ' has a balance below zero. Try to fix this.') : array();
-        $min               = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
-        $max               = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
-
-// last transactions and transfers for this account:
-        $list = array();
-        foreach ($a->transactions()->take(5)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->orderBy('date', 'DESC')->orderBy('created_at', 'DESC')->get() as $t) {
-          $date             = $t->date;
-          $list[$date]      = isset($list[$date]) ? $list[$date] : array();
-          $t->description   = Crypt::decrypt($t->description);
-          $t->date          = new DateTime($t->date);
-          $t->category_name = is_null($t->category_id) ? null : Crypt::decrypt($t->category()->first()->name);
-          $t->type          = 'Transaction';
-          $list[$date][]    = $t->toArray();
-        }
-        foreach ($a->transfersto()->take(5)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->orderBy('date', 'DESC')->orderBy('created_at', 'DESC')->get() as $t) {
-          $date                 = $t->date;
-          $list[$date]          = isset($list[$date]) ? $list[$date] : array();
-          $t->date              = new DateTime($t->date);
-          $t->description       = Crypt::decrypt($t->description);
-          $t->category_name     = is_null($t->category_id) ? null : Crypt::decrypt($t->category()->first()->name);
-          $t->account_to_name   = Crypt::decrypt($t->accountto()->first()->name);
-          $t->account_from_name = Crypt::decrypt($t->accountfrom()->first()->name);
-          $t->type              = 'Transfer';
-          $list[$date][]        = $t->toArray();
-        }
-        foreach ($a->transfersfrom()->take(5)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->orderBy('date', 'DESC')->orderBy('created_at', 'DESC')->get() as $t) {
-          $date                 = $t->date;
-          $list[$date]          = isset($list[$date]) ? $list[$date] : array();
-          $t->description       = Crypt::decrypt($t->description);
-          $t->date              = new DateTime($t->date);
-          $t->category_name     = is_null($t->category_id) ? null : Crypt::decrypt($t->category()->first()->name);
-          $t->account_to_name   = Crypt::decrypt($t->accountto()->first()->name);
-          $t->account_from_name = Crypt::decrypt($t->accountfrom()->first()->name);
-          $t->type              = 'Transfer';
-          $list[$date][]        = $t->toArray();
-        }
-        krsort($list);
-        $account['list']    = $list;
+        $account['header']  = $account['currentbalance'] < 0 ? array('style' => 'color:red;', 'class' => 'tt', 'title' => $account['name'] . ' has a balance below zero. Try to fix this.') : array();
+        $min                = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
+        $max                = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
         $data['accounts'][] = $account;
       }
 
@@ -100,10 +64,6 @@ class HomeController extends BaseController {
       $max = ceil($max / 1000) * 1000;
       $sum = 0;
       foreach ($data['accounts'] as $index => $account) {
-        $maxpct                             = $max != 0 ? ceil(($account['currentbalance'] / $max) * 100) : 0;
-        $data['accounts'][$index]['maxpct'] = $maxpct < 0 ? 0 : $maxpct;
-        $minpct                             = $min != 0 ? floor(($account['currentbalance'] / $min) * 100) : 0;
-        $data['accounts'][$index]['minpct'] = $minpct < 0 ? 0 : $minpct;
         $sum+= $account['currentbalance'];
       }
       $data['acc_data']['sum'] = $sum;
@@ -124,28 +84,6 @@ class HomeController extends BaseController {
         );
         $budget['overflow'] = $budget['expected'] > $b->left();
 
-        $list = array();
-        foreach ($b->transactions()->take(5)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->orderBy('date', 'DESC')->orderBy('created_at', 'DESC')->get() as $t) {
-          $date             = $t->date;
-          $t->description   = Crypt::decrypt($t->description);
-          $list[$date]      = isset($list[$date]) ? $list[$date] : array();
-          $t->date          = new DateTime($t->date);
-          $t->type          = 'Transaction';
-          $t->category_name = is_null($t->category_id) ? null : Crypt::decrypt($t->category()->first()->name);
-          $list[$date][]    = $t->toArray();
-        }
-        foreach ($b->transfers()->take(5)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->orderBy('date', 'DESC')->orderBy('created_at', 'DESC')->get() as $t) {
-          $date                 = $t->date;
-          $t->description       = Crypt::decrypt($t->description);
-          $list[$date]          = isset($list[$date]) ? $list[$date] : array();
-          $t->date              = new DateTime($t->date);
-          $t->type              = 'Transfer';
-          $t->account_to_name   = Crypt::decrypt($t->accountto()->first()->name);
-          $t->account_from_name = Crypt::decrypt($t->accountfrom()->first()->name);
-          $t->category_name     = is_null($t->category_id) ? null : Crypt::decrypt($t->category()->first()->name);
-          $list[$date][]        = $t->toArray();
-        }
-        $budget['list']    = $list;
         $data['budgets'][] = $budget;
       }
       // some extra budget data:
@@ -167,8 +105,6 @@ class HomeController extends BaseController {
             'duedate'     => $t->duedate != '0000-00-00' ? new DateTime($t->duedate) : null,
             'startdate'   => $t->startdate != '0000-00-00' ? new DateTime($t->startdate) : null,
             'saved'       => $t->hassaved(),
-            'guide'       => $t->guide(),
-            'should'      => $t->shouldhavesaved()
         );
         $tr['pct']         = round(($tr['saved'] / $tr['amount']) * 100, 2);
         $data['targets'][] = $tr;

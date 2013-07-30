@@ -1,8 +1,9 @@
 <?php
+
 require_once 'google/appengine/api/users/UserService.php';
+
 use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
-
 
 /*
   |--------------------------------------------------------------------------
@@ -16,7 +17,7 @@ use google\appengine\api\users\UserService;
  */
 
 App::before(function($request) {
-  BaseController::_determinePeriod();
+          BaseController::_determinePeriod();
           //
         });
 
@@ -42,40 +43,44 @@ Route::filter('auth', function() {
         });
 
 Route::filter('gs', function() {
-    $user = UserService::getCurrentUser();
-    if ($user) {
-        $email = $user->getEmail();
-        $dbUser = Fireflyuser::where('email',$email)->first();
-        if(!$dbUser) {
-          $dbUser = new Fireflyuser;
-          $dbUser->email = $email;
-          $dbUser->password = Hash::make(Str::random(32));
-          $dbUser->save();
-        }
-        // save the default settings if not there:
-        $defaultAmount = $dbUser->settings()->where('name','=','defaultAmount')->first();
-        if(is_null($defaultAmount)) {
-          $defaultAmount = new Setting;
-          $defaultAmount->fireflyuser_id = $dbUser->id;
-          $defaultAmount->name = 'defaultAmount';
-          $defaultAmount->value = Crypt::encrypt(1000);
-          $defaultAmount->save();
-        }
-        // budget behaviour:
-        $bb = $dbUser->settings()->where('name','=','budgetBehaviour')->first();
-        if(is_null($bb)) {
-          $bb = new Setting;
-          $bb->fireflyuser_id = $dbUser->id;
-          $bb->name = 'budgetBehaviour';
-          $bb->value = Crypt::encrypt('substract');
-          $bb->save();
-        }
+          $user = UserService::getCurrentUser();
+          if ($user) {
+            $email  = $user->getEmail();
+            $dbUser = Fireflyuser::where('email', $email)->first();
+            if (!$dbUser) {
+              $dbUser           = new Fireflyuser;
+              $dbUser->email    = $email;
+              $dbUser->password = Hash::make(Str::random(32));
+              $dbUser->save();
+            }
+            // save the default settings if not there:
+            $defaultAmount = $dbUser->settings()->where('name', '=', 'defaultAmount')->first();
+            if (is_null($defaultAmount)) {
+              $defaultAmount                 = new Setting;
+              $defaultAmount->fireflyuser_id = $dbUser->id;
+              $defaultAmount->name           = 'defaultAmount';
+              $defaultAmount->value          = Crypt::encrypt(1000);
+              $defaultAmount->save();
+            }
+            // budget behaviour:
+            $bb = $dbUser->settings()->where('name', '=', 'budgetBehaviour')->first();
+            if (is_null($bb)) {
+              $bb                 = new Setting;
+              $bb->fireflyuser_id = $dbUser->id;
+              $bb->name           = 'budgetBehaviour';
+              $bb->value          = Crypt::encrypt('substract');
+              $bb->save();
+            }
 
 
 
-        Auth::loginUsingId($dbUser->id);
-
-    }
+            Auth::loginUsingId($dbUser->id);
+          }
+          // since the user is now present and accounted for, we can define
+          // some cache sections that will be used throughout the application
+          // to make sure not EVERYTHING is dropped right the second something changes.
+          define('TRANSACTIONS', $dbUser->id . '-transactions');
+          define('CHARTS',$dbUser->id.'-charts');
         });
 
 

@@ -92,13 +92,13 @@ class BeneficiaryController extends BaseController {
   /**
    * Same but a longer date range
    * TODO combine and smarter call.
-   * @param type $id
-   * @return type
+   * @param int $id
+   * @return array
    */
   public function overviewGraph($id = 0) {
     $key = cacheKey('Beneficiary', 'overviewGraph', $id, Session::get('period'));
     if (Cache::has($key)) {
-      //return Response::json(Cache::get($key));
+      return Response::json(Cache::get($key));
     }
     $today       = clone Session::get('period');
     $end         = clone($today);
@@ -321,8 +321,8 @@ class BeneficiaryController extends BaseController {
         );
       }
       // everything *outside* of the budgets:
-      $outside_trans_earned = floatval($beneficiary->transactions()->where('amount', '>', 0)->whereNull('beneficiary_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-      $outside_trans_spent  = floatval($beneficiary->transactions()->where('amount', '<', 0)->whereNull('beneficiary_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+      $outside_trans_earned = floatval($beneficiary->transactions()->where('amount', '>', 0)->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+      $outside_trans_spent  = floatval($beneficiary->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
 
       array_unshift($records, array(
           'budget' => 'Outside of budgets',
@@ -338,6 +338,89 @@ class BeneficiaryController extends BaseController {
               array(
                   'id'    => 'budget',
                   'label' => 'Budget',
+                  'type'  => 'string',
+              ),
+              array(
+                  'id'    => 'spent',
+                  'label' => 'Spent',
+                  'type'  => 'number',
+              ),
+              array(
+                  'id'    => 'earned',
+                  'label' => 'Earned',
+                  'type'  => 'number',
+              ),
+          ),
+          'rows' => array()
+      );
+
+      $index = 0;
+      foreach ($records as $r) {
+        if (!($r['spent'] == 0)) {
+          $data['rows'][$index]['c'][0]['v'] = $r['budget'];
+          $data['rows'][$index]['c'][1]['v'] = $r['spent'];
+          $data['rows'][$index]['c'][2]['v'] = $r['earned'];
+          $index++;
+        }
+      }
+    }
+    Cache::put($key, $data, 1440);
+    return Response::json($data);
+  }
+
+  public function showCategoriesInTimeframe($id) {
+    $beneficiary = Auth::user()->beneficiaries()->find($id);
+    if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($beneficiary)) {
+      return App::abort(404);
+    } else {
+      $start = new DateTime(Input::get('start'));
+      $end   = new DateTime(Input::get('end'));
+
+      $key = cacheKey('categoriesbybeneficiary', $id, $start, $end);
+      if (Cache::has($key)) {
+        return Response::json(Cache::get($key));
+      }
+
+      $start_first = clone $start;
+      $end_first   = clone $end;
+      $start_first->modify('first day of this month');
+      $end_first->modify('first day of this month');
+
+
+      // all budgets + stuff outside budgets should match this!
+      $categories = Auth::user()->categories()->get();
+      $records = array();
+      foreach ($categories as $category) {
+        $category->name = Crypt::decrypt($category->name);
+        // find out the expenses for each budget:
+        $trans_earned = floatval($category->transactions()->where('amount', '>', 0)->where('beneficiary_id', '=', $beneficiary->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+        $trans_spent  = floatval($category->transactions()->where('amount', '<', 0)->where('beneficiary_id', '=', $beneficiary->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+
+
+        $records[] = array(
+            'budget' => $category->name,
+            'spent'  => $trans_spent,
+            'earned' => $trans_earned,
+        );
+      }
+      // everything *outside* of the budgets:
+      $outside_trans_earned = floatval($beneficiary->transactions()->where('amount', '>', 0)->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+      $outside_trans_spent  = floatval($beneficiary->transactions()->where('amount', '<', 0)->whereNull('category_id')->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+
+      array_unshift($records, array(
+          'budget' => 'Outside of categories',
+          'spent'  => $outside_trans_spent,
+          'earned' => $outside_trans_earned,
+      ));
+
+
+
+      // klopt wie ein busje!
+      $data = array(
+          'cols' => array(
+              array(
+                  'id'    => 'cat',
+                  'label' => 'Category',
                   'type'  => 'string',
               ),
               array(

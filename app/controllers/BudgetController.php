@@ -13,7 +13,7 @@ class BudgetController extends BaseController {
       $start = new DateTime($budget->date);
       $start->sub(new DateInterval('P1Y'));
       for ($i = 0; $i <= 24; $i++) {
-        $dates[$start->format('Y-m-d')] = $start->format('F Y');
+        $dates[$start->format('Y-m').'-01'] = $start->format('F Y');
         $start->add(new DateInterval('P1M'));
       }
       return View::make('budgets.edit')->with('budget', $budget)->with('dates', $dates);

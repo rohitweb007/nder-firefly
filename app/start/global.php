@@ -75,17 +75,20 @@ App::down(function() {
   |
  */
 
-function mf($m,$colorize = false) {
+function mf($m, $colorize = false) {
   $number = floatval($m);
   $string = number_format($number, 2, ',', '.');
   $return = '&euro; ' . $string;
-  if($colorize && $number < 0) {
-    return '<span class="text-danger">'.$return.'</span>';
+  if ($colorize && $number < 0) {
+    return '<span class="text-danger">' . $return . '</span>';
   }
   return $return;
 }
 
-define('CACHE_TODAY', date('Ymd'));
+/*
+ * Some cache related functions below:
+ */
+
 function cacheKey() {
   $keys = func_get_args();
   $cKey = Auth::user()->id;
@@ -102,7 +105,6 @@ function cacheKey() {
   }
   return $cKey;
 }
-
 
 
 require app_path() . '/filters.php';

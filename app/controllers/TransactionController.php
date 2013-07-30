@@ -78,8 +78,9 @@ class TransactionController extends BaseController {
 
     $budgets    = array();
     $budgets[0] = '(no budget)';
-    foreach (Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get() as $budget) {
-      $budgets[$budget->id] = Crypt::decrypt($budget->name);
+    foreach (Auth::user()->budgets()->orderBy('date', 'DESC')->take(20)->get() as $budget) {
+      $date                 = new DateTime($budget->date);
+      $budgets[$budget->id] = Crypt::decrypt($budget->name) . ' (' . $date->format('F Y') . ')';
     }
 
     $categories = array();
@@ -349,8 +350,9 @@ class TransactionController extends BaseController {
       $budgets    = array();
       $budgets[0]
               = '(no budget)';
-      foreach (Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get() as $budget) {
-        $budgets[$budget->id] = Crypt::decrypt($budget->name);
+      foreach (Auth::user()->budgets()->orderBy('date', 'DESC')->take(20)->get() as $budget) {
+        $date                 = new DateTime($budget->date);
+        $budgets[$budget->id] = Crypt::decrypt($budget->name) . ' (' . $date->format('F Y') . ')';
       }
 
       $categories = array();

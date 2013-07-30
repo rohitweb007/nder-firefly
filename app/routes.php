@@ -32,8 +32,10 @@ Route::get('/home/compare/budgets', 'ComparisionController@compareBudgets');
 # pages for charts
 Route::get('/home/charts/prediction', 'PageController@predictionChart');
 Route::get('/home/charts/compare', 'PageController@compare');
+Route::get('/home/charts/progress', 'PageController@progressPage');
 
 # charts themselves
+Route::get('/home/chart/progress/budget', 'ChartController@budgetProgress');
 Route::get('/home/chart/ovcat', 'ChartController@showOverExpendingCategories');
 Route::get('/home/chart/predict', 'ChartController@predictionChart');
 Route::get('/home/chart/bba/{id}', 'AccountController@showBudgetsInTimeframe')->where('id', '[0-9]+');
@@ -65,6 +67,7 @@ Route::get('/home/beneficiary/chart/{id}', 'BeneficiaryController@overviewGraph'
 Route::get('/home/beneficiary/summary/{id}', 'BeneficiaryController@getBeneficiarySummary')->where('id', '[0-9]+');
 Route::get('/home/beneficiary/transactions/{id}', 'BeneficiaryController@showTransactionsInTimeframe')->where('id', '[0-9]+');
 Route::get('/home/beneficiary/budgets/{id}', 'BeneficiaryController@showBudgetsInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/beneficiary/categories/{id}', 'BeneficiaryController@showCategoriesInTimeframe')->where('id', '[0-9]+');
 Route::post('/home/beneficiary/edit/{id}', 'BeneficiaryController@doEditBeneficiary')->where('id', '[0-9]+');
 Route::post('/home/beneficiary/delete/{id}', 'BeneficiaryController@deleteBeneficiary')->where('id', '[0-9]+');
 
@@ -109,8 +112,14 @@ Route::post('/home/transfer/delete/{id}', 'TransferController@deleteTransfer')->
 
 # category list:
 Route::get('/home/categories', 'CategoryController@showAll');
+Route::get('/home/category/overview/{id}', 'CategoryController@showOverview')->where('id', '[0-9]+');
 Route::get('/home/categories/{id}', 'CategoryController@showSingle');
 Route::get('/home/category/edit/{id}', 'CategoryController@editCategory')->where('id', '[0-9]+');
+Route::get('/home/category/chart/{id}', 'CategoryController@overviewGraph')->where('id', '[0-9]+');
+Route::get('/home/category/summary/{id}', 'CategoryController@getCategorySummary')->where('id', '[0-9]+');
+Route::get('/home/category/transactions/{id}', 'CategoryController@showTransactionsInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/category/budgets/{id}', 'CategoryController@showBudgetsInTimeframe')->where('id', '[0-9]+');
+Route::get('/home/category/beneficiaries/{id}', 'CategoryController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
 Route::post('/home/category/edit/{id}', 'CategoryController@doEditCategory')->where('id', '[0-9]+');
 Route::post('/home/category/delete/{id}', 'CategoryController@deleteCategory')->where('id', '[0-9]+');
 

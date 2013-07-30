@@ -9,6 +9,25 @@ class PageController extends BaseController {
     return View::make('pages.prediction');
   }
 
+  public function progressPage() {
+    // let's find budgets with "sisters", budgets with the same name. Then, get some graphs going on.
+    $budgets = Auth::user()->budgets()->get();
+    $list = array();
+    foreach($budgets as $budget) {
+      $name = Crypt::decrypt($budget->name);
+      $list[$name] = isset($list[$name]) ? $list[$name] + 1 : 1;
+    }
+    foreach($list as $index => $count) {
+      if($count < 2) {
+        unset($list[$index]);
+      }
+    }
+
+
+
+    return View::make('pages.progress')->with('budgets',$list);
+  }
+
   public function compare() {
     // get a list of all months:
     $months = array();

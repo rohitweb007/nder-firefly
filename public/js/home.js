@@ -39,7 +39,7 @@ function drawChart() {
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata, {lineWidth: 1, legend: {position: 'none'}, height: 90, chartArea: {left: 40, width: '100%'}});
+      chart.draw(gdata, {vAxis: {textPosition:'none'},lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
     });
   });
 
@@ -53,7 +53,7 @@ function drawChart() {
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata, {lineWidth: 1, legend: {position: 'none'}, height: 90, chartArea: {left: 40, width: '100%'}});
+      chart.draw(gdata, {vAxis: {textPosition:'none'},lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
     });
 
   });
@@ -68,7 +68,18 @@ function drawChart() {
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata, {lineWidth: 1, height: 180, legend: {position: 'none'}, chartArea: {left: 40, width: '100%'}, colors: ['blue', 'green']});
+      var opt = {
+        vAxis: {textPosition:'none'},
+        lineWidth: 1,
+        height: 180,
+        hAxis: {
+          textPosition: 'none',
+          gridlines: {
+            count: 2
+          }
+        }, legend: {position: 'none'}, chartArea: {left: 40, width: '100%'}, colors: ['blue', 'green']}
+
+      chart.draw(gdata, opt);
     });
 
   });

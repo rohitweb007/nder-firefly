@@ -4,7 +4,7 @@ google.setOnLoadCallback(drawPredictionChart);
 function drawPredictionChart() {
   if ($('#predictionChart').length === 1) {
     // do async data grab for all graphs:
-    $.getJSON('/home/chart/predict/', function(data) {
+    $.getJSON('/home/chart/predict', function(data) {
       var chart = new google.visualization.LineChart(document.getElementById('predictionChart'));
       var gdata = new google.visualization.DataTable(data);
       var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});

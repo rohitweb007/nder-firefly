@@ -1,19 +1,104 @@
 <?php
 
+use Carbon\Carbon as Carbon;
+
 class ChartController extends BaseController {
 
   public function __construct() {
     $this->beforeFilter('gs'); // do Google "sync".
   }
 
+  public function budgetProgress() {
+    $this->_debug = Input::get('debug') == 'true' ? true : false;
+    $budget       = Input::get('budget');
+    if (is_null($budget)) {
+      return App::abort(404);
+    }
+    $key = cacheKey('budgetProgress', $budget, Session::get('period'));
+
+    if (Cache::has($key)) {
+      return Response::json(Cache::get($key));
+    } else {
+      // so the current month, right?
+      $month = Session::get('period');
+      $end   = intval($month->format('t'));
+      $clone = new Carbon($month->format('Y-m-d'));
+      $clone->modify('first day of this month');
+
+      $data    = array(
+          'cols' => array(
+              array(
+                  'id'    => 'day',
+                  'label' => 'Day of the month',
+                  'type'  => 'string',
+                  'p'     => array('role' => 'domain')
+              ),
+              array(
+                  'id'    => 'left',
+                  'label' => $clone->format('F Y'),
+                  'type'  => 'number',
+                  'p'     => array('role' => 'data')),
+              array(
+                  'id'    => 'Spentavg',
+                  'label' => 'Avg',
+                  'type'  => 'number',
+                  'p'     => array('role' => 'data')
+              ),
+          ),
+      );
+      // get the latest budgets with this name:
+      $budgets = Auth::user()->budgets()->orderBy('date', 'DESC')->get();
+      $current = null;
+      $others  = array();
+      foreach ($budgets as $b) {
+        $bName = Crypt::decrypt($b->name);
+        $bDate = new Carbon($b->date);
+        if ($bDate == $clone && $bName == $budget && is_null($current)) {
+          $current = $b;
+        } else if ($bName == $budget && !is_null($current)) {
+          $others[] = $b->id;
+        }
+      }
+
+      if (!is_null($current)) {
+        $index           = 0;
+        $spent           = 0;
+        $previouslySpent = 0;
+        for ($i = 1; $i <= $end; $i++) {
+          // get expenses for budget on this day.
+          $expenses                          = floatval($current->transactions()->where('date', '=', $clone->format('Y-m-d'))->sum('amount')) * -1;
+          $spent += $expenses;
+          $data['rows'][$index]['c'][0]['v'] = $clone->format('j F');
+          $data['rows'][$index]['c'][1]['v'] = $spent;
+
+          // now for all previous budgets.
+          $oldExpenses                       = (floatval(Auth::user()->transactions()->whereIn('budget_id', $others)->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)->sum('amount')) * -1) / count($others);
+          $previouslySpent += $oldExpenses;
+          $data['rows'][$index]['c'][2]['v'] = $previouslySpent;
+          $clone->addDay();
+          $index++;
+        }
+      }
+
+
+      if ($this->_debug) {
+        return '<pre>' . print_r($data, true) . '</pre>';
+      }
+      Cache::put($key, $data, 5000);
+      return Response::json($data);
+    }
+  }
+
   public function predictionChart() {
     // in order to predict the future, we look at the past.
     //$baseAccount = ?;
     //$startBalance = ?;
-    $setting = Auth::user()->settings()->where('name', '=', 'defaultAmount')->first();
-    $balance = intval(Crypt::decrypt($setting->value));
-    $account = Auth::user()->accounts()->orderBy('id', 'ASC')->first();
-    $key     = cacheKey('prediction');
+    $setting      = Auth::user()->settings()->where('name', '=', 'defaultAmount')->first();
+    $balance      = intval(Crypt::decrypt($setting->value));
+    $account      = Auth::user()->accounts()->orderBy('id', 'ASC')->first();
+    $debug        = Input::get('debug') == 'true' ? true : false;
+    $this->_debug = $debug;
+    $key          = $debug ? cacheKey('prediction', Session::get('period')) : cacheKey('prediction', Session::get('period'));
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
@@ -47,12 +132,14 @@ class ChartController extends BaseController {
           'rows' => array()
       );
 
-
       // set the data array:
       // some working vars:
       $first     = BaseController::getFirst();
+      $this->_e('FIRST is ' . $first->format('d M Y'));
       $today     = new DateTime('now');
+      $this->_e('Today is ' . $today->format('d M Y'));
       $today->modify('first day of this month');
+      $this->_e('Today is ' . $today->format('d M Y'));
       $chartdate = new DateTime('now');
       $chartdate->modify('first day of this month');
       $index     = 0;
@@ -63,44 +150,43 @@ class ChartController extends BaseController {
       }
 
       // loop over each day of the month:
+      $this->_e('start month loop');
       for ($i = 1; $i <= intval($today->format('t')); $i++) {
+        $this->_e('Now at day #' . $i);
         $current = clone $first;
         $day     = $i - 1;
         if ($day > 0) {
           $current->add(new DateInterval('P' . $day . 'D'));
         }
-        // the sum for this day of the month:
-        $sums = array();
+        $this->_e('Date is now: ' . $current->format('d M Y'));
         // loop over each month:
-        $min  = 1000000;
-        $max  = 0;
-        while ($current < $today) {
-          //echo $current->format('Y-m-d') . ': ';
-          $transaction_sum = Auth::user()->transactions()->where('amount', '<', 0)->where('onetime', '=', 0)->where('date', '=', $current->format('Y-m-d'))->sum('amount');
-          $transfer_sum    = Auth::user()->transfers()->where('countasexpense', '=', 1)->where('ignoreprediction', '=', 0)->where('date', '=', $current->format('Y-m-d'))->sum('amount');
-
-          $daysum = (floatval($transaction_sum) * -1) + floatval($transfer_sum);
-          $sums[] = $daysum;
-//          echo 'transactions: ' . mf($transaction_sum) . ', ';
-//          echo 'transfers: ' . mf($transfer_sum);
-          $min    = $daysum < $min ? $daysum : $min;
-          $max    = $daysum > $max ? $daysum : $max;
-
-
-
-
-          $current->add(new DateInterval('P1M'));
-//          echo '<br>';
-        }
-
-        if (count($sums) == 0) {
-          $avg = 0;
-        } else if (count($sums) == 1) {
-          $avg = array_sum($sums);
+        // get all transaction results for this day of the month:
+        $transactions = Auth::user()->transactions()->where('amount', '<', 0)->where('onetime', '=', 0)
+                        ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', intval($current->format('d')))
+                        ->orderBy('amount', 'ASC')->get();
+        // lets see what we have
+        if (count($transactions) > 0) {
+          $min = $transactions[count($transactions) - 1]->amount * -1;
+          $max = $transactions[0]->amount * -1;
         } else {
-          $avg = array_sum($sums) / count($sums);
+          $min = 0;
+          $max = 0;
         }
 
+        // now do the same for transfers and compare it.
+        $transfers = Auth::user()->transfers()->where('countasexpense', '=', 1)->
+                        where('ignoreprediction', '=', 0)->orderBy('amount', 'ASC')
+                        ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', intval($current->format('d')))->get();
+        if (count($transfers) > 0) {
+          $min += $transfers[count($transfers) - 1]->amount;
+          $max += $transfers[0]->amount;
+        }
+        $this->_e('New min: ' . $min);
+        $this->_e('New max: ' . $max);
+
+        // calc avg:
+        $avg                               = (($max - $min) / 2) + $min;
+        $this->_e('New avg: ' . $avg);
         $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
         $data['rows'][$index]['c'][1]['v'] = $account->balance($chartdate); // actual balance
         $data['rows'][$index]['c'][2]['v'] = $balance - $avg; // predicted balance
@@ -112,15 +198,14 @@ class ChartController extends BaseController {
 
         $chartdate->add(new DateInterval('P1D'));
         $index++;
-//        echo 'Avg voor deze dag: ' . mf($avg) . '<br>';
-//        echo 'Min is ' . mf($min) . '<br>';
-//        echo 'Max is ' . mf($max) . '<br>';
-//        echo '<br>';
+        $this->_e(' ');
       }
       Cache::put($key, $data, 1440);
+      if ($debug) {
+        //Cache::flush();
+        return '<pre>' . print_r($data, true) . '</pre>';
+      }
     }
-//    echo '<pre>';
-//    print_r($data);
     return Response::json($data);
   }
 
@@ -209,6 +294,12 @@ class ChartController extends BaseController {
 
     Cache::put($key, $data, 1440);
     return Response::json($data);
+  }
+
+  private function _e($str) {
+    if ($this->_debug) {
+      echo $str . '<br>';
+    }
   }
 
 }

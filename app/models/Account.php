@@ -15,6 +15,10 @@ class Account extends Eloquent {
   }
 
   public function balance(DateTime $date = null) {
+    $key = cacheKey('accountBalance',$this->id,$date);
+    if(Cache::has($key)) {
+      return Cache::get($key);
+    }
     // default to the period date:
     $date = is_null($date) ? clone Session::get('period') : $date;
 
@@ -32,8 +36,9 @@ class Account extends Eloquent {
 
     // add all transfers TO this account
     $here_sum = floatval($this->transfersto()->where('date','<=',$date->format('Y-m-d'))->sum('amount'));
-
-    return $start + $tr_sum + $away_sum + $here_sum;
+    $result =  $start + $tr_sum + $away_sum + $here_sum;
+    Cache::put($key,$result,5000);
+    return $result;
   }
 
   public function transfersfrom() {

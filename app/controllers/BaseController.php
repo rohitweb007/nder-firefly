@@ -87,7 +87,7 @@ class BaseController extends Controller {
 
     $transf_date = is_null($transfer) ? new DateTime('now') : new DateTime($transfer->date);
     $transa_date = is_null($transaction) ? new DateTime('now') : new DateTime($transaction->date);
-    $result      = min($transf_date, $transa_date);
+    $result      = $transf_date <= $transa_date ? $transf_date : $transa_date;
     Cache::put($first, $result, 5000);
     return $result;
   }

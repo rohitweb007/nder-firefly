@@ -19,6 +19,12 @@ $(document).ready(function() {
   $('a[href="#budgets"]').on('show', function(e) {
     drawBudget();
   });
+  $('a[href="#transactions"]').on('show', function(e) {
+    drawTransactions();
+  });
+  $('a[href="#categories"]').on('show', function(e) {
+    drawCategory();
+  });
 
 });
 
@@ -29,7 +35,6 @@ function deleteBeneficiary(ev) {
     var row = target.parent().parent();
   } else {
     var row = target.parent().parent().parent();
-
   }
   if ($('td:nth-child(1) a', row).text().length > 0) {
     $('#delBeneficiaryName').text($('td:nth-child(1) a', row).text())
@@ -49,10 +54,8 @@ function drawCharts() {
     getSummary();
     updateHeader();
     drawBudget();
-//    drawCategory();
-//    drawMoves();
+    drawCategory();
     drawTransactions();
-//    drawBeneficiaries();
   }
 }
 
@@ -106,13 +109,12 @@ function drawBeneficiary() {
 
   var jsondata = $.ajax({url: "/home/beneficiary/chart/" + ID, dataType: "json", async: false}).responseText;
   var data = new google.visualization.DataTable(jsondata);
-  google.visualization.events.addListener(beneficiaryControl, 'statechange', drawBudget);
-//  google.visualization.events.addListener(accountControl, 'statechange', drawCategory);
-//  google.visualization.events.addListener(accountControl, 'statechange', drawMoves);
   google.visualization.events.addListener(beneficiaryControl, 'statechange', updateHeader);
-  google.visualization.events.addListener(beneficiaryControl, 'statechange', drawTransactions);
-//  google.visualization.events.addListener(accountControl, 'statechange', drawBeneficiaries);
   google.visualization.events.addListener(beneficiaryControl, 'statechange', getSummary);
+  google.visualization.events.addListener(beneficiaryControl, 'statechange', drawTransactions);
+  google.visualization.events.addListener(beneficiaryControl, 'statechange', drawBudget);
+  google.visualization.events.addListener(beneficiaryControl, 'statechange', drawCategory);
+
   var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
   for (i = 1; i < data.getNumberOfColumns(); i++) {
     money.format(data, i);
@@ -181,6 +183,40 @@ function drawBudget(opt) {
       }
       chart.draw(gdata, {sortAscending: false, allowHtml: true, sortColumn: 1, width: 400});
       workingBudget = false;
+    });
+  }
+}
+
+var workingCategories = false;
+function drawCategory(opt) {
+
+  if (workingCategories === false || (workingCategories === false && opt && opt.inProgress === false)) {
+    workingCategories = true;
+
+    var state = beneficiaryControl.getState();
+
+    $.getJSON('/home/beneficiary/categories/' + ID, {start: state.range.start.toDateString(), end: state.range.end.toDateString()}, function(data) {
+      var chart = new google.visualization.Table(document.getElementById('categoryTable'));
+      var gdata = new google.visualization.DataTable(data);
+      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+
+      var colours_spent = new google.visualization.ColorFormat();
+      colours_spent.addRange(0.01, null, "#b94a48");
+      colours_spent.addRange(0, 0.009, "#ddd");
+      colours_spent.format(gdata, 1);
+
+      var colours_earned = new google.visualization.ColorFormat();
+      colours_earned.addRange(0.01, null, "#468847");
+      colours_earned.addRange(0, 0.009, "#ddd");
+      colours_earned.format(gdata, 2);
+
+
+      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+        money.format(gdata, i);
+
+      }
+      chart.draw(gdata, {sortAscending: false, allowHtml: true, sortColumn: 1, width: 400});
+      workingCategories = false;
     });
   }
 }
