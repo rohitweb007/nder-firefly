@@ -52,7 +52,11 @@ return array(
 	|
 	*/
 
-	'storage' => __DIR__.'/../app/storage',
+    // Google path:
+'storage' => 'gs://nder-firefly',
+
+    // old path:
+	//'storage' => __DIR__.'/../app/storage',
 
 
 );
