@@ -43,9 +43,6 @@ $env = $app->detectEnvironment(array(
     'local'  => array('localhost','SanderIsTof'),
     'google' => array('nder-firefly.appspot.com')
         ));
-$options = [ "gs" => [ "Content-Type" => "text/plain" ]];
-stream_context_set_default($options);
-unset($options);
 /*
   |--------------------------------------------------------------------------
   | Bind Paths

@@ -33,7 +33,7 @@ class ProfilerServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function registerProfiler()
-	{
+	{	
 		$this->app['profiler'] = $this->app->share(function($app)
 		{
 			$startTime = null;
@@ -144,7 +144,7 @@ class ProfilerServiceProvider extends ServiceProvider {
 
 				return $app['redirect']->to('/');
 			});
-
+			
 			$app['router']->get('/_profiler/reset', function() use ($app, $provider)
 			{
 				$app['session']->forget($provider::SESSION_HASH);
@@ -177,31 +177,34 @@ class ProfilerServiceProvider extends ServiceProvider {
 			// Do not display profiler on ajax requests or non-HTML responses.
 			$isHTML = \Str::startsWith($response->headers->get('Content-Type'), 'text/html');
 
-      // show it when the responses are not html because we need it for debug:
-			//if( ! $profiler->isEnabled() or $request->ajax() or ! $isHTML)
-      if( ! $profiler->isEnabled() or $request->ajax())
+			if( ! $profiler->isEnabled() or $request->ajax() or ! $isHTML)
 			{
 				return;
 			}
 
 			$responseContent = $response->getContent();
-			$profiler = $profiler->render();
 
-			// If we can find a closing HTML tag in the response, let's add the
-			// profiler content inside it.
-			if(($pos = strrpos($responseContent, '</html>')) !== false)
+			// Don't do anything if the response content is not a string.
+			if(is_string($responseContent))
 			{
-				$responseContent = substr($responseContent, 0, $pos).$profiler.substr($responseContent, $pos);
-			}
+				$profiler = $profiler->render();
 
-			// If we cannot find a closing HTML tag, we'll just append the profiler
-			// at the very end of the response's content.
-			else
-			{
-				$responseContent .= $profiler;
-			}
+				// If we can find a closing HTML tag in the response, let's add the
+				// profiler content inside it.
+				if(($pos = strrpos($responseContent, '</html>')) !== false)
+				{
+					$responseContent = substr($responseContent, 0, $pos).$profiler.substr($responseContent, $pos);
+				}
 
-			$response->setContent($responseContent);
+				// If we cannot find a closing HTML tag, we'll just append the profiler
+				// at the very end of the response's content.
+				else
+				{
+					$responseContent .= $profiler;
+				}
+
+				$response->setContent($responseContent);
+			}
 		});
 	}
 

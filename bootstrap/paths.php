@@ -12,7 +12,7 @@ return array(
       |
      */
 
-    'app' => __DIR__ . '/../app',
+    'app'    => __DIR__ . '/../app',
     /*
       |--------------------------------------------------------------------------
       | Public Path
@@ -34,7 +34,7 @@ return array(
       | is necessary you will do so here, just proceed with some caution.
       |
      */
-    'base' => __DIR__ . '/..',
+    'base'   => __DIR__ . '/..',
     /*
       |--------------------------------------------------------------------------
       | Storage Path
@@ -48,6 +48,6 @@ return array(
 
     // Google path:
     'storage' => 'gs://nder-firefly',
-        // old path:
-        //'storage' => __DIR__.'/../app/storage',
+    // old path:
+    'storage' => __DIR__ . '/../app/storage',
 );
