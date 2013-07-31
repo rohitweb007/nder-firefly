@@ -96,7 +96,7 @@ class HomeController extends BaseController {
       $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
 
       // targets
-      $db = Auth::user()->targets()->orderBy('duedate', 'DESC')->get();
+      $db = Auth::user()->targets()->where('closed','=',0)->orderBy('duedate', 'DESC')->get();
       foreach ($db as $t) {
         $tr                = array(
             'id'          => $t->id,

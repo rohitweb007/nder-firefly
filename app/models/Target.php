@@ -10,6 +10,7 @@ class Target extends Eloquent {
       'description'    => 'required|between:1,500',
       'duedate'        => 'before:2038-01-01|after:1980-01-01',
       'startdate'      => 'required|before:2038-01-01|after:1980-01-01',
+      'closed'         => 'required|between:0,1|numeric'
   );
 
   public function transfers() {
@@ -24,7 +25,7 @@ class Target extends Eloquent {
     foreach ($transfers as $t) {
       if ($t->account_from == $this->account_id) {
         $sum -= floatval($t->amount);
-      } else if(($t->account_to == $this->account_id)) {
+      } else if (($t->account_to == $this->account_id)) {
         $sum += floatval($t->amount);
       }
     }
@@ -39,7 +40,9 @@ class Target extends Eloquent {
   public function guide(DateTime $date = null, $ignoresaved = false) {
     $date = is_null($date) ? clone Session::get('period') : $date;
     $end  = $this->duedate != '0000-00-00' ? new DateTime($this->duedate) : new DateTime('now');
-
+    if ($end < $date) {
+      return 0;
+    }
     $diff = $date->diff($end);
     if ($diff->days > 0) {
       if ($ignoresaved === false) {
@@ -58,17 +61,20 @@ class Target extends Eloquent {
 
   public function shouldhavesaved(DateTime $date = null) {
     $date = is_null($date) ? clone Session::get('period') : $date;
+
     if ($this->duedate == '0000-00-00') {
       return null;
-    } else {
-      $start = new DateTime($this->startdate);
-      // guide voor de hele periode:
-      $due   = new DateTime($this->duedate);
-      $guide = $this->guide($start);
-      // days since start:
-      $diff  = $start->diff($date); // hoeveel dagen al onderweg?
-      return $diff->days * $guide;
     }
+    $start = new DateTime($this->startdate);
+    // guide voor de hele periode:
+    $due   = new DateTime($this->duedate);
+    if($date > $due) {
+      return 0;
+    }
+    $guide = $this->guide($start);
+    // days since start:
+    $diff  = $start->diff($date); // hoeveel dagen al onderweg?
+    return $diff->days * $guide;
   }
 
 }
