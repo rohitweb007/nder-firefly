@@ -35,6 +35,9 @@ handlers:
 - url: /js
   static_dir: public/js
 
+- url: /test.php
+  script: public/test.php
+
 - url: /home.*
   script: public/index.php
   login: required
