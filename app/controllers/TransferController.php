@@ -12,7 +12,7 @@ class TransferController extends BaseController {
       $data = Cache::get($key);
     } else {
       $data   = array();
-      $transf = Auth::user()->transfers()->orderBy('date', 'DESC')->get();
+      $transf = Auth::user()->transfers()->orderBy('date', 'DESC')->orderBy('created_at','DESC')->get();
 
       $ct = array(); // category temp
       $at = array(); // account temp
