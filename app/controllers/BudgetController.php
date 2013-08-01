@@ -35,8 +35,6 @@ class BudgetController extends BaseController {
       } else {
         $budget->name = Crypt::encrypt($budget->name);
         $budget->save();
-        Cache::flush();
-        Session::flash('success', 'The budget has been edited.');
         return Redirect::to('/home/budget/overview/' . $budget->id);
       }
     } else {
@@ -48,8 +46,6 @@ class BudgetController extends BaseController {
     $budget = Auth::user()->budgets()->find($id);
     if ($budget) {
       $budget->delete();
-      Cache::flush();
-      Session::flash('success', 'Budget deleted!');
       return Redirect::to('/home');
     } else {
       return Response::error(404);
@@ -192,8 +188,6 @@ class BudgetController extends BaseController {
     } else {
       $budget->name = Crypt::encrypt($budget->name);
       $budget->save();
-      Cache::flush();
-      Session::flash('success', 'The new budget has been created.');
       return Redirect::to('/home');
     }
   }

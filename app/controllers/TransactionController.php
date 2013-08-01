@@ -233,7 +233,6 @@ class TransactionController extends BaseController {
         }
       }
     }
-    Cache::flush();
     return Redirect::to('/home');
   }
 
@@ -331,8 +330,6 @@ class TransactionController extends BaseController {
       return Redirect::to('/home/transaction/add')->withErrors($validator)->withInput();
     } else {
       $transaction->save();
-      Cache::flush();
-      Session::flash('success', 'The new transaction has been created.');
       return Redirect::to('/home');
     }
   }
@@ -471,8 +468,6 @@ class TransactionController extends BaseController {
         return Redirect::to('/home/transaction/edit/' . $transaction->id)->withErrors($validator)->withInput();
       } else {
         $transaction->save();
-        Cache::flush();
-        Session::flash('success', 'The new transaction has been edited.');
         return Redirect::to('/home/transactions');
       }
     } else {
@@ -484,7 +479,6 @@ class TransactionController extends BaseController {
     $tr = Auth::user()->transactions()->find($id);
     if ($tr) {
       $tr->delete();
-      Cache::flush();
       return Redirect::to('/home');
     } else {
       return App::abort(404);

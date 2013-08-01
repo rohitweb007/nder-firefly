@@ -27,11 +27,12 @@ class HomeController extends BaseController {
   }
 
   public function doFlush() {
-    Cache::flush();
     return Redirect::to('/home');
   }
 
   public function getHome() {
+    $event = Event::fire('firefly.home',null);
+
     $key = cacheKey('home', Session::get('period'));
 
     if (Cache::has($key)) {

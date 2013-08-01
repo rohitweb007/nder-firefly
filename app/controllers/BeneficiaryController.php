@@ -58,8 +58,6 @@ class BeneficiaryController extends BaseController {
       } else {
         $beneficiary->name = Crypt::encrypt($beneficiary->name);
         $beneficiary->save();
-        Cache::flush();
-        Session::flash('success', 'The beneficiary has been edited.');
         return Redirect::to('/home/beneficiaries');
       }
     } else {
@@ -72,8 +70,6 @@ class BeneficiaryController extends BaseController {
     $beneficiary = Auth::user()->beneficiaries()->find($id);
     if ($beneficiary) {
       $beneficiary->delete();
-      Cache::flush();
-      Session::flash('success', 'The beneficiary has been deleted.');
       return Redirect::to('/home/beneficiaries');
     } else {
       return App::abort(404);

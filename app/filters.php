@@ -70,9 +70,6 @@ Route::filter('gs', function() {
               $bb->value          = Crypt::encrypt('substract');
               $bb->save();
             }
-
-
-
             Auth::loginUsingId($dbUser->id);
           }
           // since the user is now present and accounted for, we can define

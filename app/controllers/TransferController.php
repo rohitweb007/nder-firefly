@@ -193,8 +193,6 @@ class TransferController extends BaseController {
       return Redirect::to('/home/transfer/add')->withErrors($validator)->withInput();
     } else {
       $transfer->save();
-      Cache::flush();
-      Session::flash('success', 'The new transfer has been created.');
       return Redirect::to('/home');
     }
   }
@@ -203,7 +201,6 @@ class TransferController extends BaseController {
     $tr = Auth::user()->transfers()->find($id);
     if ($tr) {
       $tr->delete();
-      Cache::flush();
       return Redirect::to('/home');
     } else {
       return Response::error(404);
@@ -326,8 +323,6 @@ class TransferController extends BaseController {
         return Redirect::to('/home/transfer/edit/' . $transfer->id)->withErrors($validator)->withInput();
       } else {
         $transfer->save();
-        Cache::flush();
-        Session::flash('success', 'The transfer has been edited.');
         return Redirect::to('/home');
       }
     } else {

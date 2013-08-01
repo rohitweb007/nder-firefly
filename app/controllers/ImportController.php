@@ -133,7 +133,6 @@ class ImportController extends BaseController {
       }
     }
     Session::flash('success', 'All data imported!');
-    Cache::flush();
     return Redirect::to('/home');
   }
 

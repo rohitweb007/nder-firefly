@@ -90,7 +90,6 @@ class SettingsController extends BaseController {
       }
     }
     Session::flash('success', 'Settings updated!');
-    Cache::flush();
     if (!is_null(Input::get('special_redirect'))) {
       return Redirect::route(Input::get('special_redirect'));
     } else {
@@ -135,7 +134,6 @@ class SettingsController extends BaseController {
     } else {
       $setting->value = Crypt::encrypt($setting->value);
       $setting->save();
-      Cache::flush();
       Session::flash('success', 'Your settings have been saved.');
       if (!is_null(Input::get('special_redirect'))) {
         return Redirect::route(Input::get('special_redirect'));
@@ -149,7 +147,6 @@ class SettingsController extends BaseController {
     $setting = Auth::user()->settings()->find(Input::get('id'));
     if($setting) {
       $setting->delete();
-      Cache::flush();
       return Response::json(true);
     } else {
       return Response::json(false);

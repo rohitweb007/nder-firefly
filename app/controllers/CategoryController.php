@@ -134,8 +134,6 @@ class CategoryController extends BaseController {
       } else {
         $category->name = Crypt::encrypt($category->name);
         $category->save();
-        Cache::flush();
-        Session::flash('success', 'The category has been edited.');
         return Redirect::to('/home/categories');
       }
     } else {
@@ -157,8 +155,6 @@ class CategoryController extends BaseController {
     $category = Auth::user()->categories()->find($id);
     if ($category) {
       $category->delete();
-      Cache::flush();
-      Session::flash('success', 'The category has been deleted.');
       return Redirect::to('/home/categories');
     } else {
       return App::abort(404);

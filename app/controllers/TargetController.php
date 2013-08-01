@@ -28,9 +28,7 @@ class TargetController extends BaseController {
       if ($validator->fails()) {
         return Redirect::to('/home/target/add')->withErrors($validator)->withInput();
       } else {
-        Cache::flush();
         $target->save();
-        Session::flash('success', 'Changes to target saved!');
         return Redirect::to('/home');
       }
     } else {
@@ -42,8 +40,6 @@ class TargetController extends BaseController {
     $t = Auth::user()->targets()->find($id);
     if ($t) {
       $t->delete();
-      Cache::flush();
-      Session::flash('success', 'Target deleted');
       return Redirect::to('/home');
     } else {
       return App::abort(404);
@@ -204,9 +200,7 @@ class TargetController extends BaseController {
     if ($validator->fails()) {
       return Redirect::to('/home/target/add')->withErrors($validator)->withInput();
     } else {
-      Cache::flush();
       $target->save();
-      Session::flash('success', 'The new target has been created.');
       return Redirect::to('/home');
     }
   }

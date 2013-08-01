@@ -207,7 +207,6 @@ class ChartController extends BaseController {
       }
       Cache::put($key, $data, 1440);
       if ($debug) {
-        //Cache::flush();
         return '<pre>' . print_r($data, true) . '</pre>';
       }
     }

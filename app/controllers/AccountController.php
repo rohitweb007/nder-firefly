@@ -6,15 +6,6 @@ class AccountController extends BaseController {
     $this->beforeFilter('gs'); // do Google "sync".
   }
 
-  public function balanceDataPoint($id) {
-    $account = Auth::user()->accounts()->find($id);
-    if($account) {
-      $date = new Carbon('2013-05-09');
-      $balance = $account->balanceNew($date);
-      echo 'Balance is ' . mf($balance);
-    }
-  }
-
   public function addAccount() {
     return View::make('accounts.add');
   }
@@ -139,8 +130,6 @@ class AccountController extends BaseController {
     } else {
       $account->name = Crypt::encrypt($account->name);
       $account->save();
-      Cache::flush();
-      Session::flash('success', 'The new account has been created.');
       return Redirect::to('/home');
       exit;
     }
@@ -273,8 +262,6 @@ class AccountController extends BaseController {
     $a = Auth::user()->accounts()->find($id);
     if ($a) {
       $a->delete();
-      Cache::flush();
-      Session::flash('success', 'Account deleted');
       return Redirect::to('/home');
     } else {
       return App::abort(404);
@@ -304,9 +291,7 @@ class AccountController extends BaseController {
       } else {
         $account->name = Crypt::encrypt($account->name);
         $account->save();
-        Balancedatapoint::clear(new Carbon('1950-01-01'));
-        Cache::flush();
-        Session::flash('success', 'The account has been edited.');
+
         return Redirect::to('/home');
       }
     } else {
