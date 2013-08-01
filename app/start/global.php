@@ -88,14 +88,13 @@ function mf($m, $colorize = false) {
 /*
  * Some cache related functions below:
  */
-
 function cacheKey() {
   $keys = func_get_args();
   $cKey = Auth::user()->id;
   foreach ($keys as $key) {
     if (is_string($key)) {
       $cKey .= $key;
-    } else if ($key instanceof DateTime) {
+    } else if ($key instanceof DateTime || $key instanceof Carbon\Carbon) {
       $cKey .= $key->format('Ymd');
     } else if (is_int($key) || is_float($key)) {
       $cKey .= (string) $key;

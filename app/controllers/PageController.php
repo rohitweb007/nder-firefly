@@ -64,7 +64,7 @@ class PageController extends BaseController {
     $first  = BaseController::getFirst();
     $first->modify('first day of this month midnight');
 
-    $today = new DateTime('now');
+    $today = new Carbon('now');
     $today->modify('first day of this month midnight');
 
     $prev = clone $today;

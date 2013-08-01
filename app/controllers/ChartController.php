@@ -141,11 +141,11 @@ class ChartController extends BaseController {
       // some working vars:
       $first     = BaseController::getFirst();
       $this->_e('FIRST is ' . $first->format('d M Y'));
-      $today     = new DateTime('now');
+      $today     = new Carbon('now');
       $this->_e('Today is ' . $today->format('d M Y'));
       $today->modify('first day of this month');
       $this->_e('Today is ' . $today->format('d M Y'));
-      $chartdate = new DateTime('now');
+      $chartdate = new Carbon('now');
       $chartdate->modify('first day of this month');
       $index     = 0;
 

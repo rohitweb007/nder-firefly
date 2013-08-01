@@ -77,7 +77,7 @@ class TransactionController extends BaseController {
     $budgets    = array();
     $budgets[0] = '(no budget)';
     foreach (Auth::user()->budgets()->orderBy('date', 'DESC')->take(20)->get() as $budget) {
-      $date                 = new DateTime($budget->date);
+      $date                 = new Carbon($budget->date);
       $budgets[$budget->id] = Crypt::decrypt($budget->name) . ' (' . $date->format('F Y') . ')';
     }
 
@@ -347,7 +347,7 @@ class TransactionController extends BaseController {
       $budgets[0]
               = '(no budget)';
       foreach (Auth::user()->budgets()->orderBy('date', 'DESC')->take(20)->get() as $budget) {
-        $date                 = new DateTime($budget->date);
+        $date                 = new Carbon($budget->date);
         $budgets[$budget->id] = Crypt::decrypt($budget->name) . ' (' . $date->format('F Y') . ')';
       }
 

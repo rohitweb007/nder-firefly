@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -21,7 +21,7 @@ class ComparisionController extends BaseController {
   }
 
   private function _getValues() {
-    $this->_today = new DateTime('now');
+    $this->_today = new Carbon('now');
     $this->_today->modify('midnight');
     if (
             is_null(Input::get('base')) ||
@@ -36,7 +36,7 @@ class ComparisionController extends BaseController {
       return App::abort(500);
     } else {
       // save base
-      $this->_base = new DateTime(Input::get('base'));
+      $this->_base = new Carbon(Input::get('base'));
       // if the base is in the current month, we need to edit it
       // to reflect that.
       if ($this->_base->format('m-Y') == $this->_today->format('m-Y')) {
@@ -50,7 +50,7 @@ class ComparisionController extends BaseController {
         if ($validator->fails()) {
           return App::abort(500);
         } else {
-          $this->_compares[] = new DateTime($x);
+          $this->_compares[] = new Carbon($x);
         }
       }
     }
@@ -109,7 +109,7 @@ class ComparisionController extends BaseController {
 
     $compares = array();
     foreach (Input::get('compare') as $c) {
-      $d          = new DateTime($c);
+      $d          = new Carbon($c);
       $compares[] = $d->format('m-Y');
     }
 
@@ -147,7 +147,7 @@ class ComparisionController extends BaseController {
       return Response::json(Cache::get($key));
     }
     // set some vars:
-    $today    = new DateTime('now');
+    $today    = new Carbon('now');
     $account  = intval(Input::get('account')) > 0 ? Auth::user()->accounts()->find(intval(Input::get('account'))) : null;
     $accounts = is_null($account) ? Auth::user()->accounts()->get() : null;
     // prep the data:
@@ -202,7 +202,7 @@ class ComparisionController extends BaseController {
     $index    = 0;
     $compares = Input::get('compare');
     for ($day = 1; $day <= 31; $day++) {
-      $currentBaseDate                   = new DateTime($this->_base->format('Y-m-') . $day);
+      $currentBaseDate                   = new Carbon($this->_base->format('Y-m-') . $day);
       // first the base information:
       $month                             = intval($currentBaseDate->format('n')) - 1;
       $year                              = intval($currentBaseDate->format('Y'));
@@ -227,8 +227,8 @@ class ComparisionController extends BaseController {
       foreach ($compares as $currentCompare) {
         // hier komen sowieso sommetjes uit voor elke dag.
         // zo optellen en avg.
-        $compareBase        = new DateTime($currentCompare);
-        $currentCompareDate = new DateTime($compareBase->format('Y-m-') . $day);
+        $compareBase        = new Carbon($currentCompare);
+        $currentCompareDate = new Carbon($compareBase->format('Y-m-') . $day);
         if (!is_null($account)) {
           // get for just the one account, add to comparesums and done.
           $comparesums[] = $account->balance($currentCompareDate);
@@ -286,14 +286,14 @@ class ComparisionController extends BaseController {
 
     $compares = array();
     foreach (Input::get('compare') as $c) {
-      $d          = new DateTime($c);
+      $d          = new Carbon($c);
       $compares[] = $d->format('m-Y');
     }
 
     // new format for compares
     $longCompares = array();
     foreach (Input::get('compare') as $c) {
-      $d              = new DateTime($c);
+      $d              = new Carbon($c);
       $longCompares[] = $d->format('Y-m-d');
     }
     // expenses for this month without any budget:
@@ -385,7 +385,7 @@ class ComparisionController extends BaseController {
     }
     $compares = array();
     foreach (Input::get('compare') as $c) {
-      $d          = new DateTime($c);
+      $d          = new Carbon($c);
       $compares[] = $d->format('m-Y');
     }
 

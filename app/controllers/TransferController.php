@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 class TransferController extends BaseController {
 
   public function __construct() {
@@ -22,7 +22,7 @@ class TransferController extends BaseController {
       $ta = array();
 
       foreach ($transf as $t) {
-        $month           = new DateTime($t->date);
+        $month           = new Carbon($t->date);
         $strMonth        = $month->format('F Y');
         $data[$strMonth] = isset($data[$strMonth]) ? $data[$strMonth] : array();
 
@@ -53,7 +53,7 @@ class TransferController extends BaseController {
         if (!is_null($t->category_id) && !isset($ct[intval($t->category_id)])) {
           $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
         }
-        $date              = new DateTime($t->date);
+        $date              = new Carbon($t->date);
         $strDate           = $date->format('d F Y');
         $current           = array(
             'id'                 => intval($t->id),

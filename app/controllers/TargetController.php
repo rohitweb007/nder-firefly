@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 class TargetController extends BaseController {
 
   public function __construct() {
@@ -69,8 +69,8 @@ class TargetController extends BaseController {
       foreach ($targets as $t) {
         $daily  = $t->guide(null, false);
         $left   = floatval($t->amount) - $t->hassaved();
-        $start  = new DateTime($t->startdate);
-        $due    = $t->duedate == null ? null : new DateTime($t->duedate);
+        $start  = new Carbon($t->startdate);
+        $due    = $t->duedate == null ? null : new Carbon($t->duedate);
         $duestr = is_null($due) ? '-' : $due->format('j F Y');
         $target = array(
             'id'          => $t->id,
@@ -122,11 +122,11 @@ class TargetController extends BaseController {
             ),
             'rows' => array()
         );
-        $start = new DateTime($target->startdate);
+        $start = new Carbon($target->startdate);
         if ($target->duedate == '0000-00-00') {
-          $end = new DateTime('today');
+          $end = new Carbon('today');
         } else {
-          $end = new DateTime($target->duedate);
+          $end = new Carbon($target->duedate);
         }
 
         $current = clone($start);

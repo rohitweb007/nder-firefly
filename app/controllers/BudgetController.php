@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 class BudgetController extends BaseController {
 
   public function __construct() {
@@ -10,7 +10,7 @@ class BudgetController extends BaseController {
     $budget = Auth::user()->budgets()->find($id);
     if ($budget) {
       $dates = array();
-      $start = new DateTime($budget->date);
+      $start = new Carbon($budget->date);
       $start->sub(new DateInterval('P1Y'));
       for ($i = 0; $i <= 24; $i++) {
         $dates[$start->format('Y-m').'-01'] = $start->format('F Y');
@@ -60,7 +60,7 @@ class BudgetController extends BaseController {
       $data    = array();
       $budgets = Auth::user()->budgets()->orderBy('date', 'DESC')->get();
       foreach ($budgets as $b) {
-        $month           = new DateTime($b->date);
+        $month           = new Carbon($b->date);
         $strMonth        = $month->format('F Y');
         $data[$strMonth] = isset($data[$strMonth]) ? $data[$strMonth] : array();
 
@@ -105,7 +105,7 @@ class BudgetController extends BaseController {
     // avg spent per day must correct for past budgets:
     $periodCorrected = clone Session::get('period');
     $periodCorrected->modify('first day of this month midnight');
-    $budgetDate      = new DateTime($budget->date);
+    $budgetDate      = new Carbon($budget->date);
     if ($periodCorrected < $budgetDate) {
       // budget is in the future:
       $budget->avgspent = $budget->spent();
@@ -203,7 +203,7 @@ class BudgetController extends BaseController {
     // 30 days into the past.
     $end    = clone Session::get('period');
     $end->modify('last day of this month ');
-    $today  = new DateTime('now');
+    $today  = new Carbon('now');
     $today->modify('midnight');
     $past   = clone $end;
     $past->modify('first day of this month midnight');

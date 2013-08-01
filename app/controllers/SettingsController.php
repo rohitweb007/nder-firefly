@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 /**
  * Description of SettingsController
  *
@@ -70,7 +70,7 @@ class SettingsController extends BaseController {
         // check if there is a date for this setting:
         $query = Auth::user()->settings()->where('name', '=', $name);
         if (!is_null(Input::get('date_' . $name))) {
-          $date = new DateTime(Input::get('date_' . $name));
+          $date = new Carbon(Input::get('date_' . $name));
           $query->where('date', '=', $date->format('Y-m-d'));
         } else {
           $date = null;

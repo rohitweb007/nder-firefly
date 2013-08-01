@@ -43,10 +43,7 @@ class AccountController extends BaseController {
           $sum += $account->balance($past);
         }
         $month = intval($past->format('n')) - 1;
-        $year  = intval($past->format('Y'));
-        $day   = intval($past->format('j'));
-
-        $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
+        $data['rows'][$index]['c'][0]['v'] = 'Date(' . intval($past->format('Y')) . ', ' . $month . ', ' . intval($past->format('j')) . ')';
         $data['rows'][$index]['c'][1]['v'] = $sum;
         $index++;
         $past->addDay();
@@ -122,6 +119,7 @@ class AccountController extends BaseController {
     $account->date           = Input::get('date');
     $account->fireflyuser_id = Auth::user()->id;
 
+    // dit hele blok kan naar een listener
     $validator = Validator::make($account->toArray(), Account::$rules);
     $validator->fails();
     if ($validator->fails()) {
@@ -304,8 +302,8 @@ class AccountController extends BaseController {
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
       return App::abort(404);
     } else {
-      $start = new DateTime(Input::get('start'));
-      $end   = new DateTime(Input::get('end'));
+      $start = new Carbon(Input::get('start'));
+      $end   = new Carbon(Input::get('end'));
       $key   = cacheKey('accountsummary', $id, $start, $end);
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
@@ -346,8 +344,8 @@ class AccountController extends BaseController {
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
       return App::abort(404);
     } else {
-      $start = new DateTime(Input::get('start'));
-      $end   = new DateTime(Input::get('end'));
+      $start = new Carbon(Input::get('start'));
+      $end   = new Carbon(Input::get('end'));
 
       $key = cacheKey('transba', $id, $start, $end);
       if (Cache::has($key)) {
@@ -418,7 +416,7 @@ class AccountController extends BaseController {
         if (!is_null($t->category_id) && !isset($ct[intval($t->category_id)])) {
           $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
         }
-        $date                              = new DateTime($t->date);
+        $date                              = new Carbon($t->date);
         $month                             = intval($date->format('n')) - 1;
         $year                              = intval($date->format('Y'));
         $day                               = intval($date->format('d'));
@@ -441,8 +439,8 @@ class AccountController extends BaseController {
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
       return App::abort(404);
     } else {
-      $start = new DateTime(Input::get('start'));
-      $end   = new DateTime(Input::get('end'));
+      $start = new Carbon(Input::get('start'));
+      $end   = new Carbon(Input::get('end'));
       $key   = cacheKey('benba', $id, $start, $end);
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
@@ -516,8 +514,8 @@ class AccountController extends BaseController {
     } else {
 
       $results = array();
-      $start   = new DateTime(Input::get('start'));
-      $end     = new DateTime(Input::get('end'));
+      $start   = new Carbon(Input::get('start'));
+      $end     = new Carbon(Input::get('end'));
       $key     = cacheKey('mba', $id, $start, $end);
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
@@ -593,8 +591,8 @@ class AccountController extends BaseController {
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
       return App::abort(404);
     } else {
-      $start = new DateTime(Input::get('start'));
-      $end   = new DateTime(Input::get('end'));
+      $start = new Carbon(Input::get('start'));
+      $end   = new Carbon(Input::get('end'));
       $key   = cacheKey('cba', $id, $start, $end);
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
@@ -677,8 +675,8 @@ class AccountController extends BaseController {
     if (is_null(Input::get('start')) || is_null(Input::get('end')) || is_null($account)) {
       return App::abort(404);
     } else {
-      $start = new DateTime(Input::get('start'));
-      $end   = new DateTime(Input::get('end'));
+      $start = new Carbon(Input::get('start'));
+      $end   = new Carbon(Input::get('end'));
 
       $key = cacheKey('bba', $id, $start, $end);
       if (Cache::has($key)) {
@@ -696,7 +694,7 @@ class AccountController extends BaseController {
       $records = array();
       foreach ($budgets as $budget) {
         $budget->name = Crypt::decrypt($budget->name);
-        $date         = new DateTime($budget->date);
+        $date         = new Carbon($budget->date);
         // find out the expenses for each budget:
         $trans_earned = floatval($budget->transactions()->where('amount', '>', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
         $trans_spent  = floatval($budget->transactions()->where('amount', '<', 0)->where('account_id', '=', $account->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;

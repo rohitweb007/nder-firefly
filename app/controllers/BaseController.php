@@ -18,11 +18,11 @@ class BaseController extends Controller {
   public static function _determinePeriod() {
     // get the period from the session:
     $sessionPeriod = Session::get('period');
-    $today         = new DateTime('now');
+    $today         = new Carbon('now');
     $today->modify('midnight');
     if (is_null($sessionPeriod)) {
       // new period: today at midnight:
-      $sessionPeriod = new DateTime('now');
+      $sessionPeriod = new Carbon('now');
       $sessionPeriod->modify('midnight');
       Session::put('period', $sessionPeriod);
     }
@@ -31,9 +31,9 @@ class BaseController extends Controller {
     if (!is_null(Request::segment(2)) && !is_null(Request::segment(3))) {
       if (intval(Request::segment(2)) > 1000) { // crude check for year.
         $string = '1 ' . Request::segment(3) . ' ' . Request::segment(2);
-        $date   = new DateTime('now');
+        $date   = new Carbon('now');
         try {
-          $date = new DateTime($string);
+          $date = new Carbon($string);
         } catch (Exception $e) {
 
         }
