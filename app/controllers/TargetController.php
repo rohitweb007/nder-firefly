@@ -97,6 +97,7 @@ class TargetController extends BaseController {
 
   public function homeOverviewGraph($id = 0) {
     $target = Auth::user()->targets()->find($id);
+
     if ($target) {
       $key = cacheKey('Target', 'homeOverviewGraph', $id, Session::get('period'));
       if (Cache::has($key)) {
@@ -131,21 +132,37 @@ class TargetController extends BaseController {
         } else {
           $end = new DateTime($target->duedate);
         }
+
         $current = clone($start);
         $index   = 0;
         $guide   = 0;
         $step    = $target->guide($start, true);
+
+        // transfers
+        $transfers_q = $target->transfers()->where('date','<=',$end->format('Y-m-d'))->get();
+        $transferred = array();
+        foreach($transfers_q as $t) {
+          $transferred[$t->date] = isset($transferred[$t->date]) ? $transferred[$t->date] : 0;
+          if($t->account_from == $target->account_id) {
+            $transferred[$t->date] -= floatval($t->amount);
+          } else if($t->account_to == $target->account_id) {
+            $transferred[$t->date] += floatval($t->amount);
+          }
+        }
+        $saved = 0;
         while ($current <= $end) {
+          $saved += isset($transferred[$current->format('Y-m-d')]) ? $transferred[$current->format('Y-m-d')] : 0;
           $month                             = intval($current->format('n')) - 1;
           $year                              = intval($current->format('Y'));
           $day                               = intval($current->format('j'));
           $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
           $data['rows'][$index]['c'][1]['v'] = $guide;
-          $data['rows'][$index]['c'][2]['v'] = $target->hassaved($current);
+          $data['rows'][$index]['c'][2]['v'] = $saved;// $target->hassaved($current);
           $current->add(new DateInterval('P1D'));
           $guide += $step;
           $index++;
         }
+
         Cache::put($key, $data, 1440);
         return Response::json($data);
       }

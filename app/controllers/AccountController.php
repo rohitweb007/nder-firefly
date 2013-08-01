@@ -43,7 +43,7 @@ class AccountController extends BaseController {
       );
       $today    = self::getLast();
       $past     = clone $today;
-      $past->sub(new DateInterval('P4M'));
+      $past->subMonths(4);
       $accounts = Auth::user()->accounts()->get();
       $index    = 0;
       while ($past <= $today) {
@@ -58,7 +58,7 @@ class AccountController extends BaseController {
         $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
         $data['rows'][$index]['c'][1]['v'] = $sum;
         $index++;
-        $past->add(new DateInterval('P1D'));
+        $past->addDay();
       }
       Cache::put($key, $data, 1440);
     }
@@ -78,9 +78,9 @@ class AccountController extends BaseController {
             'name'  => Crypt::decrypt($a->name),
             'start' => floatval($a->balance),
         );
-        $date                   = new DateTime($a->date);
+        $date                   = new Carbon($a->date);
         $account['startdate']   = $date->format('j F Y');
-        $now                    = new DateTime('now');
+        $now                    = new Carbon('now');
         $account['current']     = $a->balance($now);
         $account['currentdate'] = $now->format('j F Y');
 
@@ -98,7 +98,7 @@ class AccountController extends BaseController {
           $currentBalance = $a->balance($firstDate);
           $diff           = $currentBalance - $balance;
           $diffs[]        = $diff;
-          $firstDate->add(new DateInterval('P1M'));
+          $firstDate->addMonth();
           $balance        = $currentBalance;
         }
         if (count($diffs) == 0) {
@@ -148,6 +148,7 @@ class AccountController extends BaseController {
 
   public function homeOverviewGraph($id = 0) {
     $key = cacheKey('Account', 'homeOverviewGraph', $id, Session::get('period'));
+
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }
@@ -179,14 +180,18 @@ class AccountController extends BaseController {
         ),
         'rows' => array()
     );
-
+    $bdp_q = $account->balancedatapoints()->where('date','>=',$past->format('Y-m-d'))->where('date','<=',$today->format('Y-m-d'))->get();
+    $bdp = array();
+    foreach($bdp_q as $b) {
+      $bdp[$b->date] = floatval($b->balance);
+    }
     $index = 0;
     while ($past <= $today) {
       $month                             = intval($past->format('n')) - 1;
       $year                              = intval($past->format('Y'));
       $day                               = intval($past->format('j'));
       $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
-      $balance                           = $account->balance($past);
+      $balance                           = isset($bdp[$past->format('Y-m-d')]) ? $bdp[$past->format('Y-m-d')] : null;
       $data['rows'][$index]['c'][1]['v'] = $balance;
       $past->add(new DateInterval('P1D'));
       $index++;
@@ -299,6 +304,7 @@ class AccountController extends BaseController {
       } else {
         $account->name = Crypt::encrypt($account->name);
         $account->save();
+        Balancedatapoint::clear(new Carbon('1950-01-01'));
         Cache::flush();
         Session::flash('success', 'The account has been edited.');
         return Redirect::to('/home');

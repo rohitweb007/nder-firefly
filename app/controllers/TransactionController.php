@@ -233,6 +233,7 @@ class TransactionController extends BaseController {
         }
       }
     }
+    Cache::flush();
     return Redirect::to('/home');
   }
 

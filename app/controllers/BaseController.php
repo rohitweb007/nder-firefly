@@ -1,7 +1,7 @@
 <?php
 
 use Holmes\Holmes;
-
+use Carbon\Carbon as Carbon;
 class BaseController extends Controller {
 
   /**
@@ -85,8 +85,8 @@ class BaseController extends Controller {
     $transfer    = $transf_query->first();
     $transaction = $transa_query->first();
 
-    $transf_date = is_null($transfer) ? new DateTime('now') : new DateTime($transfer->date);
-    $transa_date = is_null($transaction) ? new DateTime('now') : new DateTime($transaction->date);
+    $transf_date = is_null($transfer) ? new Carbon('now') : new Carbon($transfer->date);
+    $transa_date = is_null($transaction) ? new Carbon('now') : new Carbon($transaction->date);
     $result      = $transf_date <= $transa_date ? $transf_date : $transa_date;
     Cache::put($first, $result, 5000);
     return $result;
@@ -123,8 +123,8 @@ class BaseController extends Controller {
     $transfer    = $transf_query->first();
     $transaction = $transa_query->first();
 
-    $transf_date = is_null($transfer) ? new DateTime('now') : new DateTime($transfer->date);
-    $transa_date = is_null($transaction) ? new DateTime('now') : new DateTime($transaction->date);
+    $transf_date = is_null($transfer) ? new Carbon('now') : new Carbon($transfer->date);
+    $transa_date = is_null($transaction) ? new Carbon('now') : new Carbon($transaction->date);
     $result      = max($transf_date, $transa_date);
     Cache::put($last, $result, 5000);
     return $result;

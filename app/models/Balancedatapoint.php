@@ -7,4 +7,8 @@ class Balancedatapoint extends Eloquent {
       'amount'         => 'required|numeric|between:-65536,65536',
   );
 
+  public static function clear(Carbon $date) {
+    
+  }
+
 }

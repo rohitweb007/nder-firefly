@@ -3,7 +3,6 @@
 require_once 'google/appengine/api/users/User.php';
 require_once 'google/appengine/api/users/UserService.php';
 
-use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 use Holmes\Holmes;
 
@@ -45,20 +44,24 @@ class HomeController extends BaseController {
           'budgets'  => array(),
           'targets'  => array()
       );
+      // we need this list:
+      $accounts = Auth::user()->accounts()->get();
 
-      $accounts = Auth::user()->accounts()->remember(1440)->get();
       foreach ($accounts as $a) {
         $account            = array(
             'id'             => intval($a->id),
             'name'           => Crypt::decrypt($a->name),
+            // we need this query to be sure to be up-to-date:
             'currentbalance' => $a->balance()
         );
+
 
         $account['header']  = $account['currentbalance'] < 0 ? array('style' => 'color:red;', 'class' => 'tt', 'title' => $account['name'] . ' has a balance below zero. Try to fix this.') : array();
         $min                = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
         $max                = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
         $data['accounts'][] = $account;
       }
+
       $min = $min > 0 ? 0 : $min;
       $max = $max < 0 ? 0 : $max;
       $min = floor($min / 1000) * 1000;
@@ -70,46 +73,24 @@ class HomeController extends BaseController {
       $data['acc_data']['sum'] = $sum;
 
 
-      // now everything for budgets:
-      $budgets = Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->remember(1440)->get();
-      foreach ($budgets as $b) {
-        $budget             = array(
-            'id'       => intval($b->id),
-            'name'     => Crypt::decrypt($b->name),
-            'widthpct' => $b->amount > 0 ? ceil(($b->spent() / $b->amount) * 100) : 100,
-            'expected' => $b->expected(),
-            'spent'    => $b->spent(),
-            'left'     => $b->left(),
-            'advice'   => $b->advice(),
-            'amount'   => floatval($b->amount),
-        );
-        $budget['overflow'] = $budget['expected'] > $b->left();
 
-        $data['budgets'][] = $budget;
-      }
+      // now everything for budgets:
+      $data['budgets'] = Budget::getHomeOverview();
+
       // some extra budget data:
       $monthlyAmount = Setting::getSetting('monthlyAmount', Session::get('period')->format('Y-m-') . '01');
+
       if (is_null($monthlyAmount)) {
         $monthlyAmount = intval(Setting::getSetting('defaultAmount'));
       }
-      $data['budget_data']['amount']        = $monthlyAmount;
-      $data['budget_data']['spent_outside'] = floatval(Auth::user()->transactions()->where('amount', '<', 0)->remember(1440)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount')) * -1;
-      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->remember(1440)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
 
-      // targets
-      $db = Auth::user()->targets()->where('closed','=',0)->remember(1440)->orderBy('duedate', 'DESC')->get();
-      foreach ($db as $t) {
-        $tr                = array(
-            'id'          => $t->id,
-            'description' => Crypt::decrypt($t->description),
-            'amount'      => floatval($t->amount),
-            'duedate'     => $t->duedate != '0000-00-00' ? new DateTime($t->duedate) : null,
-            'startdate'   => $t->startdate != '0000-00-00' ? new DateTime($t->startdate) : null,
-            'saved'       => $t->hassaved(),
-        );
-        $tr['pct']         = round(($tr['saved'] / $tr['amount']) * 100, 2);
-        $data['targets'][] = $tr;
-      }
+      $data['budget_data']['amount']        = $monthlyAmount;
+      $data['budget_data']['spent_outside'] = floatval(Auth::user()->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount')) * -1;
+      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
+
+
+      // targets, cant make it better im afraid.
+      $data['targets'] = Target::getHomeOverview();
       Cache::put($key, $data, 2440);
     }
     // flash some warnings:

@@ -30,10 +30,10 @@ class Budget extends Eloquent {
    */
   public function spent(DateTime $date = null) {
     $date         = is_null($date) ? Session::get('period') : $date;
-    $transactions = floatval($this->transactions()->remember(1440)->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
+    $transactions = floatval($this->transactions()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
 
     // transfers that are expenses in this budget:
-    $transfers = floatval($this->transfers()->remember(1440)->where('date', '<=', $date->format('Y-m-d'))->where('countasexpense', '=', '1')->sum('amount'));
+    $transfers = floatval($this->transfers()->where('date', '<=', $date->format('Y-m-d'))->where('countasexpense', '=', '1')->sum('amount'));
 
     $sum = ($transactions * -1) + $transfers;
     return $sum;
@@ -53,7 +53,6 @@ class Budget extends Eloquent {
                     where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '!=', $date->format('m-Y'))->
                     whereNotNull('budget_id')->
                     where('onetime', '=', 0)->
-                    remember(1440)->
                     where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '>', $date->format('d'))->get();
     $sum          = 0;
 
@@ -70,7 +69,6 @@ class Budget extends Eloquent {
     $transfers = Auth::user()->transfers()->
                     where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '!=', $date->format('m-Y'))->
                     whereNotNull('budget_id')->
-                    remember(1440)->
                     where('countasexpense', '=', 1)->
                     where('ignoreprediction', '=', 0)->
                     where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '>', $date->format('d'))->get();
@@ -135,6 +133,28 @@ class Budget extends Eloquent {
     $daysleft = intval($date->format('t')) - intval($date->format('j'));
 
     return $daysleft == 0 ? $left : ($left / $daysleft);
+  }
+
+  public static function getHomeOverview() {
+    $budgets = Auth::user()->budgets()->
+            leftJoin('transactions','transactions.budget_id','=','budgets.id')->
+            groupBy('budgets.id')->
+            where(DB::Raw('DATE_FORMAT(`budgets`.`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get(
+                    array('budgets.id','budgets.predicted','budgets.name','budgets.amount',DB::Raw('SUM(`transactions`.`amount`) AS `spent`')));
+    $data = array();
+      foreach ($budgets as $b) {
+        $budget             = array(
+            'id'       => intval($b->id),
+            'name'     => Crypt::decrypt($b->name),
+            'predicted' => floatval($b->predicted),
+            'spent'    => floatval($b->spent),
+            'left'     => floatval($b->amount) + floatval($b->spent),
+            'amount'   => floatval($b->amount),
+        );
+        $budget['overflow'] = $budget['predicted'] > $budget['left'];
+        $data[] = $budget;
+      }
+      return $data;
   }
 
 }

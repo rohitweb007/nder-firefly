@@ -17,11 +17,44 @@ class Target extends Eloquent {
     return $this->hasMany('Transfer');
   }
 
+  public static function getHomeOverview() {
+    $db   = Auth::user()->targets()->where('closed', '=', 0)->orderBy('duedate', 'DESC')->get();
+    $ids  = array();
+    $sums = array();
+    $data = array();
+    foreach ($db as $t) {
+      $ids[] = intval($t->id);
+      $tr           = array(
+          'id'          => $t->id,
+          'description' => Crypt::decrypt($t->description),
+          'amount'      => floatval($t->amount),
+          'duedate'     => $t->duedate != '0000-00-00' ? new DateTime($t->duedate) : null,
+          'startdate'   => $t->startdate != '0000-00-00' ? new DateTime($t->startdate) : null,
+          'account'     => intval($t->account_id),
+          'saved'       => 0
+      );
+      $tr['pct']    = round(($tr['saved'] / $tr['amount']) * 100, 2);
+      $data[intval($t->id)] = $tr;
+    }
+
+    $transfers = Auth::user()->transfers()->whereIn('target_id', $ids)->where('date', '<=', Session::get('period')->format('Y-m-d'))->get();
+    foreach ($transfers as $t) {
+
+      if ($t->account_from == $data[$t->target_id]['account']) {
+        $data[intval($t->target_id)]['saved'] -= floatval($t->amount);
+      } else if ($t->account_to == $data[$t->target_id]['account']) {
+        $data[intval($t->target_id)]['saved'] += floatval($t->amount);
+      }
+    }
+    return $data;
+  }
+
   public function hassaved(DateTime $date = null) {
-    $date      = is_null($date) ? clone Session::get('period') : $date;
+    $date = is_null($date) ? clone Session::get('period') : $date;
     // check it!
-    $transfers = $this->transfers()->remember(1440)->where('date', '<=', $date->format('Y-m-d'))->get();
-    $sum       = 0;
+      $transfers = $this->transfers()->where('date', '<=', $date->format('Y-m-d'))->get();
+
+    $sum = 0;
     foreach ($transfers as $t) {
       if ($t->account_from == $this->account_id) {
         $sum -= floatval($t->amount);
@@ -66,13 +99,13 @@ class Target extends Eloquent {
       return null;
     }
     $start = new DateTime($this->startdate);
-    // guide voor de hele periode:
+// guide voor de hele periode:
     $due   = new DateTime($this->duedate);
-    if($date > $due) {
+    if ($date > $due) {
       return 0;
     }
     $guide = $this->guide($start);
-    // days since start:
+// days since start:
     $diff  = $start->diff($date); // hoeveel dagen al onderweg?
     return $diff->days * $guide;
   }
