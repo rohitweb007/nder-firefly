@@ -20,7 +20,7 @@ class Target extends Eloquent {
   public function hassaved(DateTime $date = null) {
     $date      = is_null($date) ? clone Session::get('period') : $date;
     // check it!
-    $transfers = $this->transfers()->where('date', '<=', $date->format('Y-m-d'))->get();
+    $transfers = $this->transfers()->remember(1440)->where('date', '<=', $date->format('Y-m-d'))->get();
     $sum       = 0;
     foreach ($transfers as $t) {
       if ($t->account_from == $this->account_id) {

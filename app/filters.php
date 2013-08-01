@@ -1,7 +1,6 @@
 <?php
 
 require_once 'google/appengine/api/users/UserService.php';
-
 use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 
@@ -46,7 +45,7 @@ Route::filter('gs', function() {
           $user = UserService::getCurrentUser();
           if ($user) {
             $email  = $user->getEmail();
-            $dbUser = Fireflyuser::where('email', $email)->first();
+            $dbUser = Fireflyuser::where('email', $email)->remember(1440)->first();
             if (!$dbUser) {
               $dbUser           = new Fireflyuser;
               $dbUser->email    = $email;
@@ -54,7 +53,7 @@ Route::filter('gs', function() {
               $dbUser->save();
             }
             // save the default settings if not there:
-            $defaultAmount = $dbUser->settings()->where('name', '=', 'defaultAmount')->first();
+            $defaultAmount = $dbUser->settings()->where('name', '=', 'defaultAmount')->remember(1440)->first();
             if (is_null($defaultAmount)) {
               $defaultAmount                 = new Setting;
               $defaultAmount->fireflyuser_id = $dbUser->id;
@@ -63,7 +62,7 @@ Route::filter('gs', function() {
               $defaultAmount->save();
             }
             // budget behaviour:
-            $bb = $dbUser->settings()->where('name', '=', 'budgetBehaviour')->first();
+            $bb = $dbUser->settings()->where('name', '=', 'budgetBehaviour')->remember(1440)->first();
             if (is_null($bb)) {
               $bb                 = new Setting;
               $bb->fireflyuser_id = $dbUser->id;

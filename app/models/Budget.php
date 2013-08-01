@@ -30,10 +30,10 @@ class Budget extends Eloquent {
    */
   public function spent(DateTime $date = null) {
     $date         = is_null($date) ? Session::get('period') : $date;
-    $transactions = floatval($this->transactions()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
+    $transactions = floatval($this->transactions()->remember(1440)->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
 
     // transfers that are expenses in this budget:
-    $transfers = floatval($this->transfers()->where('date', '<=', $date->format('Y-m-d'))->where('countasexpense', '=', '1')->sum('amount'));
+    $transfers = floatval($this->transfers()->remember(1440)->where('date', '<=', $date->format('Y-m-d'))->where('countasexpense', '=', '1')->sum('amount'));
 
     $sum = ($transactions * -1) + $transfers;
     return $sum;
@@ -53,6 +53,7 @@ class Budget extends Eloquent {
                     where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '!=', $date->format('m-Y'))->
                     whereNotNull('budget_id')->
                     where('onetime', '=', 0)->
+                    remember(1440)->
                     where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '>', $date->format('d'))->get();
     $sum          = 0;
 
@@ -69,6 +70,7 @@ class Budget extends Eloquent {
     $transfers = Auth::user()->transfers()->
                     where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '!=', $date->format('m-Y'))->
                     whereNotNull('budget_id')->
+                    remember(1440)->
                     where('countasexpense', '=', 1)->
                     where('ignoreprediction', '=', 0)->
                     where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '>', $date->format('d'))->get();

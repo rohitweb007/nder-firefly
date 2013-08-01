@@ -34,6 +34,7 @@ class HomeController extends BaseController {
 
   public function getHome() {
     $key = cacheKey('home', Session::get('period'));
+
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
@@ -45,19 +46,19 @@ class HomeController extends BaseController {
           'targets'  => array()
       );
 
-      $accounts = Auth::user()->accounts()->get();
+      $accounts = Auth::user()->accounts()->remember(1440)->get();
       foreach ($accounts as $a) {
         $account            = array(
             'id'             => intval($a->id),
             'name'           => Crypt::decrypt($a->name),
             'currentbalance' => $a->balance()
         );
+
         $account['header']  = $account['currentbalance'] < 0 ? array('style' => 'color:red;', 'class' => 'tt', 'title' => $account['name'] . ' has a balance below zero. Try to fix this.') : array();
         $min                = $account['currentbalance'] < $min ? $account['currentbalance'] : $min;
         $max                = $account['currentbalance'] > $max ? $account['currentbalance'] : $max;
         $data['accounts'][] = $account;
       }
-
       $min = $min > 0 ? 0 : $min;
       $max = $max < 0 ? 0 : $max;
       $min = floor($min / 1000) * 1000;
@@ -70,7 +71,7 @@ class HomeController extends BaseController {
 
 
       // now everything for budgets:
-      $budgets = Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get();
+      $budgets = Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->remember(1440)->get();
       foreach ($budgets as $b) {
         $budget             = array(
             'id'       => intval($b->id),
@@ -92,11 +93,11 @@ class HomeController extends BaseController {
         $monthlyAmount = intval(Setting::getSetting('defaultAmount'));
       }
       $data['budget_data']['amount']        = $monthlyAmount;
-      $data['budget_data']['spent_outside'] = floatval(Auth::user()->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount')) * -1;
-      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
+      $data['budget_data']['spent_outside'] = floatval(Auth::user()->transactions()->where('amount', '<', 0)->remember(1440)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount')) * -1;
+      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->remember(1440)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
 
       // targets
-      $db = Auth::user()->targets()->where('closed','=',0)->orderBy('duedate', 'DESC')->get();
+      $db = Auth::user()->targets()->where('closed','=',0)->remember(1440)->orderBy('duedate', 'DESC')->get();
       foreach ($db as $t) {
         $tr                = array(
             'id'          => $t->id,

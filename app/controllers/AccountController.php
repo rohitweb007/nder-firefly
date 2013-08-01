@@ -1,9 +1,18 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 class AccountController extends BaseController {
 
   public function __construct() {
     $this->beforeFilter('gs'); // do Google "sync".
+  }
+
+  public function balanceDataPoint($id) {
+    $account = Auth::user()->accounts()->find($id);
+    if($account) {
+      $date = new Carbon('2013-05-09');
+      $balance = $account->balanceNew($date);
+      echo 'Balance is ' . mf($balance);
+    }
   }
 
   public function addAccount() {
@@ -143,14 +152,14 @@ class AccountController extends BaseController {
       return Response::json(Cache::get($key));
     }
     // 30 days into the past.
-    $today         = clone Session::get('period');
+    $today         = new Carbon(Session::get('period')->format('Y-m-d'));
     // we do some fixing in case we're in the future:
-    $actuallyToday = new DateTime('now');
+    $actuallyToday = new Carbon('now');
     if ($today > $actuallyToday) {
       $today->modify('last day of this month');
     }
     $past    = clone $today;
-    $past->sub(new DateInterval('P30D'));
+    $past->subDays(30);
     $account = Auth::user()->accounts()->find($id);
 
     $data = array(

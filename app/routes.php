@@ -2,12 +2,12 @@
 
 require_once 'google/appengine/api/users/User.php';
 require_once 'google/appengine/api/users/UserService.php';
-
 use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 
 Route::get('/', 'HomeController@getRoot');
 Route::get('/concept', 'HomeController@showConcept');
+Route::get('/home/balance/{id}', 'AccountController@balanceDataPoint');
 Route::get('/home', 'HomeController@getHome');
 Route::get('/home/delete', 'HomeController@askDelete');
 Route::get('/home/export', 'ImportController@doExport');

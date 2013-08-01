@@ -11,10 +11,17 @@
 
 <div class="row-fluid">
 <?php $index = 1; ?>
-<?php foreach ($budgets as $budget => $count): ?>
+<?php foreach ($budgets as $budget => $data): ?>
   <div class="span4">
     <h4><?php echo $budget;?></h4>
     <div id="budget_<?php echo Str::slug($budget);?>" data-value="<?php echo $budget;?>" class="budgetProgressChart"></div>
+    <table class="table table-condensed">
+      <tr>
+        <td><?php echo mf($data['spent']);?></td>
+        <td style="text-align:center;"><?php echo mf($data['avg']);?></td>
+        <td style="text-align:right;"><?php echo mf(0);?></td>
+      </tr>
+    </table>
   </div>
 
 

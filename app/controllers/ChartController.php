@@ -14,7 +14,7 @@ class ChartController extends BaseController {
     if (is_null($budget)) {
       return App::abort(404);
     }
-    $key = cacheKey('budgetProgress', $budget, Session::get('period'));
+    $key = cacheKey('budgetProgress', $budget, Session::get('period'), rand(1, 10000));
 
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
@@ -55,29 +55,34 @@ class ChartController extends BaseController {
         $bDate = new Carbon($b->date);
         if ($bDate == $clone && $bName == $budget && is_null($current)) {
           $current = $b;
-        } else if ($bName == $budget && !is_null($current)) {
+        } else if ($bName == $budget && ((isset($current) && $current->id != $b->id) || is_null($current))) {
           $others[] = $b->id;
         }
       }
-
-      if (!is_null($current)) {
-        $index           = 0;
-        $spent           = 0;
-        $previouslySpent = 0;
-        for ($i = 1; $i <= $end; $i++) {
-          // get expenses for budget on this day.
-          $expenses                          = floatval($current->transactions()->where('date', '=', $clone->format('Y-m-d'))->sum('amount')) * -1;
+      $index           = 0;
+      $spent           = 0;
+      $previouslySpent = 0;
+      for ($i = 1; $i <= $end; $i++) {
+        // get expenses for budget on this day.
+        $data['rows'][$index]['c'][0]['v'] = $clone->format('j F');
+        if (!is_null($current)) {
+          $expenses                          = floatval($current->transactions()->where('onetime', '=', 0)->where('date', '=', $clone->format('Y-m-d'))->sum('amount')) * -1;
+          // also get 'expenses' from transactions:
+          $expenses += floatval($current->transfers()->where('countasexpense', '=', 1)->where('ignoreprediction', '=', 0)->where('date', '=', $clone->format('Y-m-d'))->sum('amount'));
           $spent += $expenses;
-          $data['rows'][$index]['c'][0]['v'] = $clone->format('j F');
           $data['rows'][$index]['c'][1]['v'] = $spent;
+        }
 
+
+        if (count($others) > 0) {
           // now for all previous budgets.
-          $oldExpenses                       = (floatval(Auth::user()->transactions()->whereIn('budget_id', $others)->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)->sum('amount')) * -1) / count($others);
+          $oldExpenses                       = (floatval(Auth::user()->transactions()->where('onetime', '=', 0)->whereIn('budget_id', $others)->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)->sum('amount')) * -1) / count($others);
+          $oldExpenses += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->where('ignoreprediction', '=', 0)->whereIn('budget_id', $others)->where('date', '=', $clone->format('Y-m-d'))->sum('amount'));
           $previouslySpent += $oldExpenses;
           $data['rows'][$index]['c'][2]['v'] = $previouslySpent;
-          $clone->addDay();
-          $index++;
         }
+        $clone->addDay();
+        $index++;
       }
 
 

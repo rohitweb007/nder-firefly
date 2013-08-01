@@ -15,7 +15,7 @@ class Setting extends Eloquent {
   }
 
   public static function getSetting($name, $date = null) {
-    $setting = Auth::user()->settings()->where('date', '=', $date)->where('name', '=', $name)->first();
+    $setting = Auth::user()->settings()->remember(1440)->where('date', '=', $date)->where('name', '=', $name)->first();
     if (!is_null($setting)) {
       return Crypt::decrypt($setting->value);
     }

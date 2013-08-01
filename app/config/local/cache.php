@@ -1,7 +1,7 @@
 <?php
 
 return array(
-	'driver' => 'database',
+	'driver' => 'file',
 	'path' => storage_path().'/cache',
 	'connection' => 'mysql',
 	'table' => 'cache',

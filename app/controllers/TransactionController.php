@@ -1,6 +1,7 @@
 <?php
 
 use Holmes\Holmes;
+use Carbon\Carbon as Carbon;
 
 class TransactionController extends BaseController {
 
@@ -13,58 +14,55 @@ class TransactionController extends BaseController {
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
-      $data  = array();
-      $trans = Auth::user()->transactions()->orderBy('date', 'DESC')->get();
+      $data = array();
 
-      $ct  = array(); // category temp
-      $at  = array(); // account temp
-      $bt  = array(); // budget temp
-      $bet = array(); // beneficiary temp
-      $ct  = array(); // category temp
+
+      $trans = Auth::user()->transactions()->
+                      leftJoin('accounts', 'accounts.id', '=', 'account_id')->
+                      leftJoin('budgets', 'budgets.id', '=', 'budget_id')->
+                      leftJoin('categories', 'categories.id', '=', 'category_id')->
+                      leftJoin('beneficiaries', 'beneficiaries.id', '=', 'beneficiary_id')->
+                      orderBy('transactions.date', 'DESC')->get(array(
+          'transactions.id',
+          'account_id', 'accounts.name AS account_name',
+          'budget_id', 'budgets.name AS budget_name',
+          'category_id', 'categories.name AS category_name',
+          'beneficiary_id', 'beneficiaries.name AS beneficiary_name',
+          'transactions.date', 'description', 'transactions.amount', 'onetime'
+      ));
+
 
       foreach ($trans as $t) {
-        $month           = new DateTime($t->date);
+
+        $month = new Carbon($t->date);
+
         $strMonth        = $month->format('F Y');
         $data[$strMonth] = isset($data[$strMonth]) ? $data[$strMonth] : array();
 
-        // save acc. name:
-        if (!isset($at[intval($t->account_id)])) {
-          $at[intval($t->account_id)] = Crypt::decrypt($t->account()->first()->name);
-        }
-        // get budget and save
-        if (!is_null($t->budget_id) && !isset($bt[intval($t->budget_id)])) {
-          $bt[intval($t->budget_id)] = Crypt::decrypt($t->budget()->first()->name);
-        }
+        $date    = new Carbon($t->date);
+        $strDate = $date->format('d F Y');
 
-        // get ben and save
-        if (!is_null($t->beneficiary_id) && !isset($bet[intval($t->beneficiary_id)])) {
-          $bet[intval($t->beneficiary_id)] = Crypt::decrypt($t->beneficiary()->first()->name);
-        }
-
-        // get cat and save
-        if (!is_null($t->category_id) && !isset($ct[intval($t->category_id)])) {
-          $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
-        }
-        $date              = new DateTime($t->date);
-        $strDate           = $date->format('d F Y');
-        $current           = array(
+        $current = array(
             'id'               => intval($t->id),
             'date'             => $strDate,
             'description'      => Crypt::decrypt($t->description),
             'amount'           => mf(floatval($t->amount)),
             'onetime'          => $t->onetime == 1 ? true : false,
             'account_id'       => $t->account_id,
-            'account_name'     => $at[$t->account_id],
+            'account_name'     => Crypt::decrypt($t->account_name),
             'budget_id'        => $t->budget_id,
-            'budget_name'      => (is_null($t->budget_id) ? null : $bt[intval($t->budget_id)]),
+            'budget_name'      => !is_null($t->budget_name) ? Crypt::decrypt($t->budget_name) : null,
             'beneficiary_id'   => $t->beneficiary_id,
-            'beneficiary_name' => (is_null($t->beneficiary_id) ? null : $bet[intval($t->beneficiary_id)]),
+            'beneficiary_name' => !is_null($t->beneficiary_name) ? Crypt::decrypt($t->beneficiary_name) : null,
             'category_id'      => $t->category_id,
-            'category_name'    => (is_null($t->category_id) ? null : $ct[intval($t->category_id)]),
+            'category_name'    => !is_null($t->category_name) ? Crypt::decrypt($t->category_name) : null
         );
+
         $data[$strMonth][] = $current;
       }
-      Cache::put($key, $data, 4000);
+
+
+      Cache::put($key, $data, 1440);
     }
     return View::make('transactions.all')->with('transactions', $data);
   }
