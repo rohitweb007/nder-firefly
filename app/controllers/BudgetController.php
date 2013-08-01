@@ -200,10 +200,12 @@ class BudgetController extends BaseController {
 
   public function homeOverviewGraph($id = 0) {
 
-    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'));
+    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'),rand(1,10000));
+
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }
+
     // 30 days into the past.
     $end    = clone Session::get('period');
     $end->modify('last day of this month ');
@@ -211,7 +213,9 @@ class BudgetController extends BaseController {
     $today->modify('midnight');
     $past   = clone $end;
     $past->modify('first day of this month midnight');
+
     $budget = Auth::user()->budgets()->find($id);
+
 
     $data = array(
         'cols' => array(
@@ -239,6 +243,16 @@ class BudgetController extends BaseController {
 
     $index   = 0;
     $balance = $budget->amount;
+    // since we move over to "predicted"
+    // we have to do another calculation.
+    // predicted tells us how much we will have spent on this budget.
+    // we use it as a "guide" of sorts.
+    if($budget->predicted > 0) {
+      $step = intval($budget->predicted / $past->format('t'));
+    } else {
+      $step = 0;
+    }
+
     while ($past <= $end) {
       $month                             = intval($past->format('n')) - 1;
       $year                              = intval($past->format('Y'));
@@ -249,8 +263,7 @@ class BudgetController extends BaseController {
         $data['rows'][$index]['c'][1]['v'] = $balance;
         $data['rows'][$index]['c'][2]['v'] = true;
       } else {
-        $prediction                        = $budget->predict($past);
-        $balance                           = ($balance - $prediction);
+        $balance                           = ($balance - $step);
         $data['rows'][$index]['c'][1]['v'] = $balance;
         $data['rows'][$index]['c'][2]['v'] = false;
       }
@@ -258,6 +271,7 @@ class BudgetController extends BaseController {
       $past->add(new DateInterval('P1D'));
       $index++;
     }
+
     Cache::put($key, $data, 1440);
     return Response::json($data);
   }
