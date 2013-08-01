@@ -27,7 +27,7 @@ class Account extends Eloquent {
       return floatval($this->balance);
     }
 
-    $balance = $this->balancedatapoints()->where('date', '=', $date->format('Y-m-d'))->remember(1440)->first();
+    $balance = $this->balancedatapoints()->where('date', '=', $date->format('Y-m-d'))->first();
 
     if (!is_null($balance)) {
       return $balance->balance;
@@ -39,7 +39,7 @@ class Account extends Eloquent {
       while ($workdate >= $start) {
         // calculate the account's balance for this day and save it in the database.
         // if it's already there, skip it:
-        $workbalance = $this->balancedatapoints()->remember(1440)->where('date', '=', $workdate->format('Y-m-d'))->first();
+        $workbalance = $this->balancedatapoints()->where('date', '=', $workdate->format('Y-m-d'))->first();
         if (is_null($workbalance)) {
           // calculate it:
           $tr_sum = floatval($this->transactions()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
@@ -55,7 +55,7 @@ class Account extends Eloquent {
         $workdate->subDay();
       }
       // then, we should / MUST have today's balance.
-      $today = $this->balancedatapoints()->remember(1440)->where('date', '=', $date->format('Y-m-d'))->first();
+      $today = $this->balancedatapoints()->where('date', '=', $date->format('Y-m-d'))->first();
       if(is_null($today)) {
         return App::abort(500);
       } else {
