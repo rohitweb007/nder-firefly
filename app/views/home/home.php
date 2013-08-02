@@ -42,43 +42,53 @@
         </p>
       <?php else: ?>
         <table class="table table-condensed table-striped">
-          <?php $sum = 0;$spent=0; foreach ($data['budgets'] as $budget): $sum += $budget['amount']; $spent += $budget['spent'];?>
+          <?php $sum   = 0;
+          $spent = 0;
+          foreach ($data['budgets'] as $budget): $sum += $budget['amount'];
+            $spent += $budget['spent']; ?>
 
             <tr>
               <th style="width:30%;">
                 <?php if ($budget['overflow'] === false): ?>
                   <a href="/home/budget/overview/<?php echo $budget['id']; ?>"><?php echo $budget['name']; ?></a>
-                <?php else: ?>
+      <?php else: ?>
                   <a href="/home/budget/overview/<?php echo $budget['id']; ?>" class="tt" title="Firefly predicts you will overspend on this budget!"><?php echo $budget['name']; ?></a>
-                <?php endif; ?>
+      <?php endif; ?>
               </th>
-              <td><small><?php echo mf($budget['amount']);?> - <?php echo mf($budget['spent']);?> = <?php echo mf($budget['left']);?></small></td>
+              <td><small><?php echo mf($budget['amount']); ?> - <?php echo mf($budget['spent']); ?> = <?php echo mf($budget['left']); ?></small></td>
             </tr>
             <tr>
               <td colspan="3">
                 <div class="budgetOverviewGraph loading" data-value="<?php echo $budget['id']; ?>" id="budgetOverviewGraph<?php echo $budget['id']; ?>"></div>
               </td>
             </tr>
-          <?php endforeach; ?>
+    <?php endforeach; ?>
         </table>
-        <p>
-          Amount for month: <?php echo mf($data['budget_data']['amount']); ?><br />
-          Budgeted: <?php echo mf($sum); ?><br />
-          Diff: <?php echo mf($data['budget_data']['amount'] - $sum); ?><br />
-          <br />
-          Spent in budgets: <?php echo mf($spent); ?><br />
-          Spent outside budgets: <?php echo mf($data['budget_data']['spent_outside']); ?><br />
-          Left: <?php echo mf($data['budget_data']['amount'] - $data['budget_data']['spent_outside'] - $spent); ?><br />
-      <?php endif; ?>
-    </div>
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <td>Amount for month</td><td><?php echo mf($data['budget_data']['amount']); ?></td>
+          </tr><tr>
+            <td>Budgeted</td><td><?php echo mf($sum); ?></td>
+          </tr><tr>
+            <td>Diff</td><td><?php echo mf($data['budget_data']['amount'] - $sum); ?></td>
+          </tr><tr>
+            <td>Spent in budgets</td><td><?php echo mf($spent); ?></td>
+          </tr><tr>
+            <td>Spent outside budgets</td><td><?php echo mf($data['budget_data']['spent_outside']); ?></td>
+          </tr><tr>
+            <td>Left</td><td><?php echo mf($data['budget_data']['amount'] - $data['budget_data']['spent_outside'] - $spent); ?></td>
+          </tr>
+        </table>
   <?php endif; ?>
+    </div>
+<?php endif; ?>
 </div>
 <?php if (count($data['targets']) > 0) { ?>
   <div class="row-fluid">
     <div class="span6">
       <h4>Saving targets</h4>
       <table class="table table-striped table-condensed">
-        <?php foreach ($data['targets'] as $target) { ?>
+  <?php foreach ($data['targets'] as $target) { ?>
           <tr>
             <th style="width:30%;"><?php echo HTML::Link('home/target/overview/' . $target['id'], $target['description']); ?></th>
             <td><small><?php echo mf($target['saved']); ?> ... <?php echo mf($target['amount']); ?> </td>
@@ -86,7 +96,7 @@
             <td colspan="3">
               <div class="targetOverviewGraph loading" data-value="<?php echo $target['id']; ?>" id="targetOverviewGraph<?php echo $target['id']; ?>"></div>
             </td>
-          <?php } ?>
+  <?php } ?>
       </table>
     </div>
   </div>

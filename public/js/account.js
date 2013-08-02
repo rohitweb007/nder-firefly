@@ -53,6 +53,14 @@ function deleteAccount(ev) {
 
 
 function drawAllChart() {
+  var opt = {
+    areaOpacity: 0.1,
+    legend: {position:'bottom'},
+    lineWidth:1
+
+  };
+
+
   $.getJSON('/home/accounts/chart', function(data) {
     var chart = new google.visualization.AreaChart(document.getElementById('allChart'));
     var gdata = new google.visualization.DataTable(data);
@@ -60,8 +68,10 @@ function drawAllChart() {
     for (i = 1; i < gdata.getNumberOfColumns(); i++) {
       money.format(gdata, i);
     }
-    chart.draw(gdata);
-  });
+    chart.draw(gdata,opt);
+  }).fail(function() {
+      $('#allChart').removeClass('loading').addClass('load_error');
+    });
 }
 
 

@@ -31,7 +31,6 @@ class HomeController extends BaseController {
   }
 
   public function getHome() {
-    $event = Event::fire('firefly.home',null);
 
     $key = cacheKey('home', Session::get('period'));
 
@@ -95,6 +94,10 @@ class HomeController extends BaseController {
       Cache::put($key, $data, 2440);
     }
     // flash some warnings:
+    if(Auth::user()->transactions()->count() == 0) {
+      Session::flash('warning', 'There are no transactions saved yet. Create some to make this overview less boring (Create &rarr; New transaction).');
+    }
+
     if (count($data['budgets']) == 0) {
       Session::flash('warning', 'You don\'t have any budgets defined.');
     }

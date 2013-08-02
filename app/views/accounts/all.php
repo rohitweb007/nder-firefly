@@ -6,54 +6,43 @@
 </div>
 
 <div class="row-fluid">
-  <div class="span12">
-    <div id="allChart" class="loading" style="height:240px;"></div>
+  <div class="span1"></div>
+  <div class="span10">
+    <div id="allChart" class="loading" style="height:300px;margin-bottom:40px;"></div>
   </div>
+  <div class="span1"></div>
 </div>
 
 <div class="row-fluid">
-  <div class="span12">
+  <div class="span1"></div>
+  <div class="span10">
     <table class="table table-striped">
       <tr>
         <th>Account name</th>
-        <th>Opening balance</th>
         <th>Current balance</th>
-        <th>Average net per month</th>
-        <th>&nbsp;</th>
+        <th colspan="2">&nbsp;</th>
       </tr>
       <?php foreach($data as $account): ?>
       <tr>
         <td><?php echo HTML::Link('/home/account/overview/' . $account['id'],$account['name']); ?></td>
         <td>
-          <?php if($account['start'] > 0): ?>
-            <span class="text-success" title="<?php echo $account['startdate']; ?>"><?php echo mf($account['start']); ?></span>
+          <?php if($account['balance'] > 0): ?>
+            <span class="text-success"><?php echo mf($account['balance']); ?></span>
           <?php else: ?>
-            <span class="text-error" title="<?php echo $account['startdate']; ?>"><?php echo mf($account['start']); ?></span>
+            <span class="text-error"><?php echo mf($account['balance']); ?></span>
           <?php endif; ?>
         </td>
         <td>
-          <?php if($account['current'] > 0): ?>
-            <span class="text-success" title="<?php echo $account['currentdate']; ?>"><?php echo mf($account['current']); ?></span>
-          <?php else: ?>
-            <span class="text-error" title="<?php echo $account['currentdate']; ?>"><?php echo mf($account['current']); ?></span>
-          <?php endif; ?>
-        </td>
-        <td>
-          <?php if($account['avg'] > 0): ?>
-            <span class="text-success"><?php echo mf($account['avg']); ?></span>
-          <?php else: ?>
-            <span class="text-error"><?php echo mf($account['avg']); ?></span>
-          <?php endif; ?>
-        </td>
-        <td>
-          <a href="/home/account/edit/<?php echo $account['id'];?>" class="btn"><i class="icon-pencil"></i></a>
-          <a href="#" data-value="<?php echo $account['id']; ?>" title="Delete <?php echo $account['name'];?>" class="btn btn-danger deleteAccount"><i data-value="<?php echo $account['id']; ?>" class="icon-white icon-remove"></i></a>
+          <a href="/home/account/edit/<?php echo $account['id'];?>" class="btn"><i class="icon-pencil"></i> Edit <?php echo $account['name'];?></a>
+        </td><td>
+          <a href="#" data-value="<?php echo $account['id']; ?>" title="Delete <?php echo $account['name'];?>" class="btn btn-danger deleteAccount"><i data-value="<?php echo $account['id']; ?>" class="icon-white icon-remove"></i> Delete <?php echo $account['name'];?></a>
         </td>
       </tr>
 
       <?php endforeach; ?>
     </table>
   </div>
+  <div class="span1"></div>
 
 </div>
 

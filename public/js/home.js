@@ -2,34 +2,20 @@ google.load("visualization", "1", {packages: ["corechart"]});
 google.setOnLoadCallback(drawChart);
 
 $(document).ready(function() {
-  $.each($('.showTransactions'), function(i, v) {
-    $(v).on('click', toggleFolder);
-  });
 });
-
-function toggleFolder(e) {
-  var t = $(e.target);
-  var closed = t.hasClass('icon-folder-close');
-  var identifier = t.attr('data-value') + 'Table';
-  if (closed) {
-    // do open routine:
-    t.removeClass('icon-folder-close');
-    t.addClass('icon-folder-open');
-    $('#' + identifier).show();
-  } else {
-    // do close routine:
-    t.removeClass('icon-folder-open');
-    t.addClass('icon-folder-close');
-    $('#' + identifier).hide();
-  }
-
-}
-
 
 function drawChart() {
   $.each($('.accountOverviewGraph'), function(i, v) {
     var graphHolder = $(v);
     var ID = graphHolder.attr('data-value');
+
+    var opt = {
+      vAxis: {textPosition: 'none'},
+      lineWidth: 1,
+      legend: {position: 'none'},
+      hAxis: {textPosition: 'none', gridlines: {count: 2}},
+      height: 90,
+      chartArea: {left: 40, width: '100%'}};
 
     // do async data grab for all graphs:
     $.getJSON('/home/account/overviewGraph/' + ID, function(data) {
@@ -39,7 +25,9 @@ function drawChart() {
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata, {vAxis: {textPosition:'none'},lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
+      chart.draw(gdata, opt);
+    }).fail(function() {
+      $('#accountOverviewGraph' + ID).removeClass('loading').addClass('load_error');
     });
   });
 
@@ -53,7 +41,9 @@ function drawChart() {
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
         money.format(gdata, i);
       }
-      chart.draw(gdata, {vAxis: {textPosition:'none'},lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
+      chart.draw(gdata, {vAxis: {textPosition: 'none'}, lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
+    }).fail(function() {
+      $('#budgetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
     });
 
   });
@@ -69,7 +59,7 @@ function drawChart() {
         money.format(gdata, i);
       }
       var opt = {
-        vAxis: {textPosition:'none'},
+        vAxis: {textPosition: 'none'},
         lineWidth: 1,
         height: 180,
         hAxis: {
@@ -80,6 +70,8 @@ function drawChart() {
         }, legend: {position: 'none'}, chartArea: {left: 40, width: '100%'}, colors: ['blue', 'green']}
 
       chart.draw(gdata, opt);
+    }).fail(function() {
+      $('#targetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
     });
 
   });

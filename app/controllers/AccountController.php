@@ -54,7 +54,7 @@ class AccountController extends BaseController {
   }
 
   public function showAll() {
-    $key = cacheKey('Accounts', 'showAll');
+    $key = cacheKey('Accounts', 'showAllX');
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
@@ -64,37 +64,8 @@ class AccountController extends BaseController {
         $account                = array(
             'id'    => intval($a->id),
             'name'  => Crypt::decrypt($a->name),
-            'start' => floatval($a->balance),
+            'balance' => $a->balance()
         );
-        $date                   = new Carbon($a->date);
-        $account['startdate']   = $date->format('j F Y');
-        $now                    = new Carbon('now');
-        $account['current']     = $a->balance($now);
-        $account['currentdate'] = $now->format('j F Y');
-
-        // now it gets tougher.
-        // what's the average's account's balance, and how does it increase / decrease every month?
-        $firstDate = self::getFirst($a->id);
-        $firstDate->modify('first day of this month');
-        $lastDate  = self::getLast($a->id);
-        $lastDate->modify('first day of this month');
-
-        // now for every month we get the differences:
-        $diffs   = array();
-        $balance = $a->balance;
-        while ($firstDate < $lastDate) {
-          $currentBalance = $a->balance($firstDate);
-          $diff           = $currentBalance - $balance;
-          $diffs[]        = $diff;
-          $firstDate->addMonth();
-          $balance        = $currentBalance;
-        }
-        if (count($diffs) == 0) {
-          $avg = 0;
-        } else {
-          $avg = count($diffs) > 0 ? array_sum($diffs) / count($diffs) : $diffs[0];
-        }
-        $account['avg'] = $avg;
         $data[]         = $account;
       }
       Cache::put($key, $data, 1440);
