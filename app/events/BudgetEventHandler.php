@@ -55,7 +55,6 @@ class BudgetEventHandler {
   public function subscribe($events) {
     $events->listen('eloquent.created: Budget', 'BudgetEventHandler@updateBudgetPrediction');
     $events->listen('eloquent.updated: Budget', 'BudgetEventHandler@updateBudgetPrediction');
-    $events->listen('eloquent.saved: Budget', 'BudgetEventHandler@updateBudgetPrediction');
   }
 
 }
