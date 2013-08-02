@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 class Budget extends Eloquent {
 
   protected $guarded = array('id', 'created_at', 'updated_at');
@@ -12,6 +12,9 @@ class Budget extends Eloquent {
 
   public function transactions() {
     return $this->hasMany('Transaction');
+  }
+  public function budgetpredictionpoints() {
+    return $this->hasMany('Budgetpredictionpoint');
   }
 
   public function transfers() {
@@ -90,7 +93,7 @@ class Budget extends Eloquent {
    * on this day of the month.
    * @param DateTime $date
    */
-  public function predict(DateTime $date = null) {
+  public function predict(Carbon $date = null) {
     $date    = is_null($date) ? Session::get('period') : $date;
     $name    = Crypt::decrypt($this->name);
     $similar = array();

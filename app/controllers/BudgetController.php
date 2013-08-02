@@ -1,5 +1,7 @@
 <?php
+
 use Carbon\Carbon as Carbon;
+
 class BudgetController extends BaseController {
 
   public function __construct() {
@@ -13,7 +15,7 @@ class BudgetController extends BaseController {
       $start = new Carbon($budget->date);
       $start->sub(new DateInterval('P1Y'));
       for ($i = 0; $i <= 24; $i++) {
-        $dates[$start->format('Y-m').'-01'] = $start->format('F Y');
+        $dates[$start->format('Y-m') . '-01'] = $start->format('F Y');
         $start->add(new DateInterval('P1M'));
       }
       return View::make('budgets.edit')->with('budget', $budget)->with('dates', $dates);
@@ -46,7 +48,7 @@ class BudgetController extends BaseController {
     $budget = Auth::user()->budgets()->find($id);
     if ($budget) {
       $budget->delete();
-      return Redirect::to('/home');
+      return Redirect::to('/home/budgets');
     } else {
       return Response::error(404);
     }
@@ -179,7 +181,7 @@ class BudgetController extends BaseController {
     $budget->name           = Input::get('name');
     $budget->amount         = floatval(Input::get('amount'));
     $budget->fireflyuser_id = Auth::user()->id;
-    $budget->date           = Session::get('period')->format('Y-m-d');
+    $budget->date           = Session::get('period')->format('Y-m') . '-01';
     $validator              = Validator::make($budget->toArray(), Budget::$rules);
     if ($validator->fails()) {
       Log::error('Could not create Budget for user ' . Auth::user()->email . ': ' . print_r($validator->messages()->all(), true) . ' Budget: ' . print_r($budget, true));
@@ -194,18 +196,18 @@ class BudgetController extends BaseController {
 
   public function homeOverviewGraph($id = 0) {
 
-    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'),rand(1,10000));
+    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'), rand(1, 10000));
 
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }
 
     // 30 days into the past.
-    $end    = clone Session::get('period');
+    $end   = clone Session::get('period');
     $end->modify('last day of this month ');
-    $today  = new Carbon('now');
+    $today = new Carbon('now');
     $today->modify('midnight');
-    $past   = clone $end;
+    $past  = clone $end;
     $past->modify('first day of this month midnight');
 
     $budget = Auth::user()->budgets()->find($id);
@@ -237,14 +239,12 @@ class BudgetController extends BaseController {
 
     $index   = 0;
     $balance = $budget->amount;
-    // since we move over to "predicted"
-    // we have to do another calculation.
-    // predicted tells us how much we will have spent on this budget.
-    // we use it as a "guide" of sorts.
-    if($budget->predicted > 0) {
-      $step = intval($budget->predicted / $past->format('t'));
-    } else {
-      $step = 0;
+
+    // get the prediction points (if any):
+    $points     = $budget->budgetpredictionpoints()->get();
+    $prediction = array();
+    foreach ($points as $p) {
+      $prediction[intval($p->day)] = floatval($p->amount);
     }
 
     while ($past <= $end) {
@@ -257,7 +257,7 @@ class BudgetController extends BaseController {
         $data['rows'][$index]['c'][1]['v'] = $balance;
         $data['rows'][$index]['c'][2]['v'] = true;
       } else {
-        $balance                           = ($balance - $step);
+        $balance                           = ($balance - (isset($prediction[$day]) ? $prediction[$day] : 0 ) );
         $data['rows'][$index]['c'][1]['v'] = $balance;
         $data['rows'][$index]['c'][2]['v'] = false;
       }

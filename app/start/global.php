@@ -105,7 +105,8 @@ function cacheKey() {
   return $cKey;
 }
 
-require app_path() . '/events/CacheRelatedEventHandler.php';
-require app_path() . '/events/FlashMessagesAtEventHandler.php';
+require app_path() . '/events/CacheEventHandler.php';
+require app_path() . '/events/BudgetEventHandler.php';
+require app_path() . '/events/FlashMsgHandler.php';
 
 require app_path() . '/filters.php';
