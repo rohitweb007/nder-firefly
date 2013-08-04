@@ -16,7 +16,7 @@
 <div class="row-fluid">
   <div class="span1"></div>
   <div class="span10">
-    <table class="table table-striped">
+    <table class="table table-striped table-bordered">
       <tr>
         <th>Account name</th>
         <th>Current balance</th>

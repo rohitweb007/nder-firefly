@@ -15,6 +15,7 @@ function drawChart() {
       legend: {position: 'none'},
       hAxis: {textPosition: 'none', gridlines: {count: 2}},
       height: 90,
+      trendlines: { 0: {} },
       chartArea: {left: 40, width: '100%'}};
 
     // do async data grab for all graphs:

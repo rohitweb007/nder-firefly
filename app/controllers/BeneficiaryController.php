@@ -1,5 +1,7 @@
 <?php
+
 use Carbon\Carbon as Carbon;
+
 class BeneficiaryController extends BaseController {
 
   public function __construct() {
@@ -7,25 +9,19 @@ class BeneficiaryController extends BaseController {
   }
 
   public function showAll() {
-    $key = cacheKey('Beneficiaries', 'showAll');
+    $key = cacheKey('Beneficiaries', 'showAll',rand(1,10000));
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
       $data          = array();
       $beneficiaries = Auth::user()->beneficiaries()->orderBy('id', 'ASC')->get();
       // to get the avg per month we first need the number of months
-      $first         = BaseController::getFirst();
-      $last          = BaseController::getLast();
-      $diff          = $first->diff($last);
-      $months        = $diff->m + ($diff->y * 12);
-
       foreach ($beneficiaries as $ben) {
-        $bene        = array(
+        $name = Crypt::decrypt($ben->name);
+        $bene = array(
             'id'   => intval($ben->id),
-            'name' => Crypt::decrypt($ben->name),
+            'name' => $name,
         );
-        $trans       = $ben->transactions()->sum('amount');
-        $bene['avg'] = $trans / $months;
 
         $now           = new Carbon('now');
         $thisMonth     = $ben->transactions()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $now->format('m-Y'))->sum('amount');
@@ -33,6 +29,15 @@ class BeneficiaryController extends BaseController {
 
         $data[] = $bene;
       }
+      unset($name);$name=array();
+      // order by alfabet
+      // Obtain a list of columns
+      foreach ($data as $key => $row) {
+        $id[$key]  = $row['id'];
+        $name[$key] = $row['name'];
+      }
+      array_multisort($name, SORT_ASC, $id, SORT_DESC, $data);
+
       Cache::put($key, $data, 1440);
     }
     return View::make('beneficiaries.all')->with('beneficiaries', $data);
@@ -385,12 +390,12 @@ class BeneficiaryController extends BaseController {
 
       // all budgets + stuff outside budgets should match this!
       $categories = Auth::user()->categories()->get();
-      $records = array();
+      $records    = array();
       foreach ($categories as $category) {
         $category->name = Crypt::decrypt($category->name);
         // find out the expenses for each budget:
-        $trans_earned = floatval($category->transactions()->where('amount', '>', 0)->where('beneficiary_id', '=', $beneficiary->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-        $trans_spent  = floatval($category->transactions()->where('amount', '<', 0)->where('beneficiary_id', '=', $beneficiary->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
+        $trans_earned   = floatval($category->transactions()->where('amount', '>', 0)->where('beneficiary_id', '=', $beneficiary->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+        $trans_spent    = floatval($category->transactions()->where('amount', '<', 0)->where('beneficiary_id', '=', $beneficiary->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
 
 
         $records[] = array(

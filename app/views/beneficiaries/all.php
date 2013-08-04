@@ -1,19 +1,18 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 
 <div class="row-fluid">
-  <div class="span12">
+  <div class="span2"></div>
+  <div class="span8">
     <h3>All your beneficiaries</h3>
       <table class="table table-bordered table-condensed table-striped">
         <tr>
           <th>Name</th>
-          <th>Avg. per month</th>
           <th>Current month</th>
           <th>&nbsp;</th>
         </tr>
         <?php foreach($beneficiaries as $b) : ?>
         <tr>
           <td><?php echo HTML::link('/home/beneficiary/overview/'.$b['id'],$b['name']);?></td>
-          <td><?php echo mf($b['avg']);?></td>
           <td><?php
             if($b['month'] == 0) {
               $class = 'muted';
@@ -34,6 +33,7 @@
         <?php endforeach; ?>
       </table>
   </div>
+  <div class="span2"></div>
 </div>
 
 <div id="modal" class="modal hide fade">

@@ -1,19 +1,21 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 <script>
-  var ID = parseInt("<?php echo $account->id; ?>");
-  var Name = "<?php echo Crypt::decrypt($account->name); ?>";
+  var ID = parseInt("<?php echo $object->id; ?>");
+  var Name = "<?php echo Crypt::decrypt($object->name); ?>";
+  var object = "<?php echo $name;?>";
+  var objects = "<?php echo $names;?>";
 </script>
 <div class="row-fluid">
   <div class="span12">
-    <h3>Overview for <?php echo Crypt::decrypt($account->name); ?> <span id="date"></span></h3>
-    <a href="/home/account/edit/<?php echo $account->id; ?>" class="btn"><i class="icon-pencil"></i> Edit <?php echo Crypt::decrypt($account->name); ?></a>
-    <a href="#" data-value="<?php echo $account->id; ?>" title="Delete <?php echo Crypt::decrypt($account->name); ?>" class="btn btn-danger deleteAccount"><i data-value="<?php echo $account->id; ?>" class="icon-white icon-remove"></i> Delete <?php echo Crypt::decrypt($account->name); ?></a>
+    <h3>Overview for <?php echo Crypt::decrypt($object->name); ?> <span id="date"></span></h3>
+    <a href="/home/<?php echo $name;?>/edit/<?php echo $object->id; ?>" class="btn"><i class="icon-pencil"></i> Edit <?php echo Crypt::decrypt($object->name); ?></a>
+    <a href="#" data-value="<?php echo $object->id; ?>" title="Delete <?php echo Crypt::decrypt($object->name); ?>" class="btn btn-danger deleteObject"><i data-value="<?php echo $object->id; ?>" class="icon-white icon-remove"></i> Delete <?php echo Crypt::decrypt($object->name); ?></a>
   </div>
 </div>
 
 <div class="row-fluid">
   <div class="span12">
-    <div id="accountDashboard"></div>
+    <div id="dashboard"></div>
     <div id="chart"></div>
     <div id="control"></div>
   </div>
@@ -36,16 +38,16 @@
   </div>
   <div class="modal-body">
     <p>
-      Are you sure you want to delete "<span id="delAccountName"></span>"? You cannot undo this!
+      Are you sure you want to delete "<span id="delObjectName"></span>"? You cannot undo this!
     </p>
   </div>
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    <?php echo Form::open(array('url'   => '/home/account/delete', 'style' => 'display:inline;', 'id'    => 'delAccountForm')); ?>
+    <?php echo Form::open(array('url'   => '/home/'.$name.'/delete', 'style' => 'display:inline;', 'id'    => 'delObjectForm')); ?>
     <button class="btn btn-danger">Delete it!</button>
     <?php echo Form::close(); ?>
   </div>
 </div>
 
-<script src="/js/account.js"></script>
+<script src="/js/overview.js"></script>
 <?php require_once(__DIR__ . '/../layouts/bottom.php') ?>

@@ -83,25 +83,19 @@ class CategoryController extends BaseController {
   }
 
   public function showAll() {
-    $key = cacheKey('Categories', 'showAll');
+    $key = cacheKey('Categories', 'showAll',rand(1,1000));
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
       $data       = array();
       $categories = Auth::user()->categories()->orderBy('id', 'ASC')->get();
       // to get the avg per month we first need the number of months
-      $first      = BaseController::getFirst();
-      $last       = BaseController::getLast();
-      $diff       = $first->diff($last);
-      $months     = $diff->m + ($diff->y * 12);
 
       foreach ($categories as $cat) {
         $cate        = array(
             'id'   => intval($cat->id),
             'name' => Crypt::decrypt($cat->name),
         );
-        $trans       = $cat->transactions()->sum('amount');
-        $cate['avg'] = $trans / $months;
 
         $now           = new Carbon('now');
         $thisMonth     = $cat->transactions()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $now->format('m-Y'))->sum('amount');

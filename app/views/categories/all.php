@@ -6,14 +6,12 @@
       <table class="table table-bordered table-condensed table-striped">
         <tr>
           <th>Name</th>
-          <th>Avg. per month</th>
           <th>Current month</th>
           <th>&nbsp;</th>
         </tr>
         <?php foreach($categories as $c) : ?>
         <tr>
           <td><?php echo HTML::link('/home/category/overview/'.$c['id'],$c['name']);?></td>
-          <td><?php echo mf($c['avg']);?></td>
           <td><?php
             if($c['month'] == 0) {
               $class = 'muted';
