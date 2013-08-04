@@ -25,7 +25,7 @@ class OverviewController extends BaseController {
    * @return type
    */
   public function showOverviewChart($object, $id = 0) {
-    $key = cacheKey($object, 'overviewGraph', $id, Session::get('period'), rand(1, 100000));
+    $key = cacheKey($object, 'overviewGraph', $id, Session::get('period'));
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }
@@ -151,7 +151,7 @@ class OverviewController extends BaseController {
     $db = Auth::user()->$objects()->find($id);
 
     // create (and find)  a cache key:
-    $key = cacheKey('PieChart', $id, $start, $end, $type, $objects, $charts,rand(1,1000));
+    $key = cacheKey('PieChart', $id, $start, $end, $type, $objects, $charts);
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }

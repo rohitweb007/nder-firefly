@@ -196,7 +196,7 @@ class BudgetController extends BaseController {
 
   public function homeOverviewGraph($id = 0) {
 
-    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'), rand(1, 10000));
+    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'));
 
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));

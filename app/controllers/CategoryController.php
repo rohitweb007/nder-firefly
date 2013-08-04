@@ -83,7 +83,7 @@ class CategoryController extends BaseController {
   }
 
   public function showAll() {
-    $key = cacheKey('Categories', 'showAll',rand(1,1000));
+    $key = cacheKey('Categories', 'showAll');
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {

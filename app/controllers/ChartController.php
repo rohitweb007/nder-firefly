@@ -14,7 +14,7 @@ class ChartController extends BaseController {
     if (is_null($budget)) {
       return App::abort(404);
     }
-    $key = cacheKey('budgetProgress', $budget, Session::get('period'), rand(1, 10000));
+    $key = cacheKey('budgetProgress', $budget, Session::get('period'));
 
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));

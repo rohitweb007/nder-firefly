@@ -9,7 +9,7 @@ class BeneficiaryController extends BaseController {
   }
 
   public function showAll() {
-    $key = cacheKey('Beneficiaries', 'showAll',rand(1,10000));
+    $key = cacheKey('Beneficiaries', 'showAll');
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
