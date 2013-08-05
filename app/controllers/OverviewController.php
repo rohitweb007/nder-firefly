@@ -225,10 +225,7 @@ class OverviewController extends BaseController {
       $transactions = floatval($dbObject->transactions()->where('amount', $operator, 0)->where($object . '_id', '=', $db->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
       // exception for beneficiary
 
-
-
-      if ($chart != 'beneficiary') {
-
+      if ($object != 'beneficiary' && $chart != 'account' && $chart != 'beneficiary') {
         $transfers = floatval($dbObject->transfers()->where($acc, '=', $db->id)->where('countasexpense', '=', 1)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
       } else {
         $transfers = 0;
@@ -243,7 +240,9 @@ class OverviewController extends BaseController {
     // add expenses outside objects (for good measure).
 
     $transactions = floatval(Auth::user()->transactions()->whereNull($chart . '_id')->where('amount', $operator, 0)->where($object.'_id', '=', $db->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-    if ($chart != 'beneficiary') {
+    if ($chart != 'beneficiary' && $chart != 'account' && $object != 'beneficiary') {
+      // transfers hebben geen accountid, die hebben account_from en account_to
+
       $transfers = floatval(Auth::user()->transfers()->whereNull($chart . '_id')->where($acc, '=', $db->id)->where('countasexpense', '=', 1)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
     } else {
       $transfers = 0;

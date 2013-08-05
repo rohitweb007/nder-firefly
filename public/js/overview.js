@@ -119,29 +119,35 @@ function updateHeader() {
 function drawPie(chart, type) {
   url = '/home/' + object + '/pie/';
   var state = control.getState();
+  if ($('#' + chart + type).length > 0) {
+    // draw it!
+    $.getJSON(url, {
+      id: ID,
+      type: type,
+      chart: chart,
+      start: state.range.start.toDateString(),
+      end: state.range.end.toDateString()
+    }, function(data) {
+      var key = type + chart;
+      if (!charts[key]) {
+        charts[key] = new google.visualization.PieChart(document.getElementById(chart + type));
+      }
+      var gdata = new google.visualization.DataTable(data);
+      if (gdata.getNumberOfRows() > 0) {
+        var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+        for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+          money.format(gdata, i);
+        }
+        charts[key].draw(gdata, pieChartOpt);
+      } else {
+        $('#' + chart + type).prev().remove();
+        $('#' + chart + type).remove();
+      }
 
-  // draw it!
-  $.getJSON(url, {
-    id: ID,
-    type: type,
-    chart: chart,
-    start: state.range.start.toDateString(),
-    end: state.range.end.toDateString()
-  }, function(data) {
-    var key = type + chart;
-    if (!charts[key]) {
-      charts[key] = new google.visualization.PieChart(document.getElementById(chart + type));
-    }
-    var gdata = new google.visualization.DataTable(data);
-    var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-    for (i = 1; i < gdata.getNumberOfColumns(); i++) {
-      money.format(gdata, i);
-    }
-    charts[key].draw(gdata, pieChartOpt);
-
-  }).fail(function() {
-    $('#' + chart + type).removeClass('loading').addClass('load_error');
-  });
+    }).fail(function() {
+      $('#' + chart + type).removeClass('loading').addClass('load_error');
+    });
+  }
 
 
 }
@@ -149,6 +155,9 @@ function drawPie(chart, type) {
 function drawPieCharts(opt) {
 
   if (opt === undefined || (opt != undefined && opt.inProgress === false)) {
+
+    drawPie('accounts', 'income');
+    drawPie('accounts', 'expenses');
 
     drawPie('budgets', 'income');
     drawPie('budgets', 'expenses');
