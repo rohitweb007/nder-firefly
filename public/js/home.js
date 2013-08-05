@@ -9,43 +9,46 @@ function drawChart() {
     var graphHolder = $(v);
     var ID = graphHolder.attr('data-value');
 
-    var opt = {
-      vAxis: {textPosition: 'none'},
-      lineWidth: 1,
-      legend: {position: 'none'},
-      hAxis: {textPosition: 'none', gridlines: {count: 2}},
-      height: 90,
-      trendlines: { 0: {} },
-      chartArea: {left: 40, width: '100%'}};
-
     // do async data grab for all graphs:
-    $.getJSON('/home/account/overviewGraph/' + ID, function(data) {
-      var chart = new google.visualization.AreaChart(document.getElementById('accountOverviewGraph' + ID));
-      var gdata = new google.visualization.DataTable(data);
-      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
-        money.format(gdata, i);
-      }
-      chart.draw(gdata, opt);
-    }).fail(function() {
-      $('#accountOverviewGraph' + ID).removeClass('loading').addClass('load_error');
-    });
+    //var gdata = new google.visualization.DataTable(accountCache[ID]);
+    if (!accountCache[ID]) {
+      $.getJSON('/home/account/overviewGraph/' + ID, function(data) {
+        drawAccountChart(ID, data);
+      }).fail(function() {
+        $('#accountOverviewGraph' + ID).removeClass('loading').addClass('load_error');
+      });
+    } else {
+      drawAccountChart(ID, accountCache[ID]);
+    }
   });
 
   $.each($('.budgetOverviewGraph'), function(i, v) {
     var graphHolder = $(v);
     var ID = graphHolder.attr('data-value');
-    $.getJSON('/home/budget/overviewGraph/' + ID, function(data) {
-      var chart = new google.visualization.AreaChart(document.getElementById('budgetOverviewGraph' + ID));
-      var gdata = new google.visualization.DataTable(data);
-      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
-        money.format(gdata, i);
-      }
-      chart.draw(gdata, {vAxis: {textPosition: 'none'}, lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
-    }).fail(function() {
-      $('#budgetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
-    });
+
+    if (!budgetCache[ID]) {
+      $.getJSON('/home/budget/overviewGraph/' + ID, function(data) {
+        drawBudgetChart(ID, data);
+      }).fail(function() {
+        $('#budgetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
+      });
+    } else {
+      drawBudgetChart(ID, budgetCache[ID]);
+    }
+
+
+
+//    $.getJSON('/home/budget/overviewGraph/' + ID, function(data) {
+//      var chart = new google.visualization.AreaChart(document.getElementById('budgetOverviewGraph' + ID));
+//      var gdata = new google.visualization.DataTable(data);
+//      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+//      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+//        money.format(gdata, i);
+//      }
+//      chart.draw(gdata, {vAxis: {textPosition: 'none'}, lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
+//    }).fail(function() {
+//      $('#budgetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
+//    });
 
   });
 
@@ -102,4 +105,39 @@ function drawChart() {
 
   }
 
+}
+
+function drawAccountChart(ID, data) {
+
+  var opt = {
+    vAxis: {textPosition: 'none'},
+    lineWidth: 1,
+    legend: {position: 'none'},
+    hAxis: {textPosition: 'none', gridlines: {count: 2}},
+    height: 90,
+    trendlines: {0: {}},
+    chartArea: {left: 40, width: '100%'}
+  };
+
+  var chart = new google.visualization.AreaChart(document.getElementById('accountOverviewGraph' + ID));
+  var gdata = new google.visualization.DataTable(data);
+  var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+  for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+    money.format(gdata, i);
+  }
+  chart.draw(gdata, opt);
+}
+
+
+function drawBudgetChart(ID, data) {
+
+  var opt = {vAxis: {textPosition: 'none'}, lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}};
+
+  var chart = new google.visualization.AreaChart(document.getElementById('budgetOverviewGraph' + ID));
+  var gdata = new google.visualization.DataTable(data);
+  var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+  for (i = 1; i < gdata.getNumberOfColumns(); i++) {
+    money.format(gdata, i);
+  }
+  chart.draw(gdata, opt);
 }

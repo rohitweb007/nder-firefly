@@ -46,6 +46,15 @@
     </div>
 
     <div class="control-group">
+      <label class="control-label" for="inputClosed">Closed?</label>
+      <div class="controls">
+        <?php echo Form::checkbox('closed',null ,intval($target->closed) == 1 ? true : false,array('id' => 'inputClosed')); ?>
+        &nbsp;&nbsp;<img class="tt" title="Check this if you finished this saving target." src="/img/icons/help.png" alt="Help on this field" />
+        <br /><span class="text-error"><?php echo $errors->first('closed'); ?></span>
+      </div>
+    </div>
+
+    <div class="control-group">
       <div class="controls">
         <input type="submit" class="btn btn-primary" value="Save changes to <?php echo Crypt::decrypt($target->description);?>" />
       </div>

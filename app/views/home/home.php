@@ -1,4 +1,8 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
+<script type="text/javascript">
+  var accountCache = new Array();
+  var budgetCache = new Array();
+</script>
 <div class="row-fluid">
   <div class="span6">
 
@@ -9,6 +13,9 @@
         ?>
         <tr>
           <th colspan="2">
+            <script type="text/javascript">
+              accountCache[<?php echo $account['id']; ?>] = <?php echo json_encode(Cache::get(cacheKey('Account', 'homeOverviewGraph', $account['id'], Session::get('period')))); ?>;
+            </script>
             <?php
             echo HTML::Link('/home/account/overview/' . $account['id'], $account['name'], $account['header']);
             ?>
@@ -42,16 +49,22 @@
         </p>
       <?php else: ?>
         <table class="table table-condensed table-striped">
-          <?php $sum   = 0;
+          <?php
+          $sum   = 0;
           $spent = 0;
           foreach ($data['budgets'] as $budget): $sum += $budget['amount'];
-            $spent += $budget['spent']; ?>
+            $spent += $budget['spent'];
+            ?>
 
             <tr>
               <th style="width:30%;">
+                <script type="text/javascript">
+                  budgetCache[<?php echo $budget['id']; ?>] = <?php echo json_encode(Cache::get(cacheKey('Budget', 'homeOverviewGraph', $budget['id'], Session::get('period')))); ?>;
+                </script>
+
                 <?php if ($budget['overflow'] === false): ?>
                   <a href="/home/budget/overview/<?php echo $budget['id']; ?>"><?php echo $budget['name']; ?></a>
-      <?php else: ?>
+                <?php else: ?>
                   <a href="/home/budget/overview/<?php echo $budget['id']; ?>" class="tt" title="Firefly predicts you will overspend on this budget!"><?php echo $budget['name']; ?></a>
       <?php endif; ?>
               </th>
@@ -79,7 +92,7 @@
             <td>Left</td><td><?php echo mf($data['budget_data']['amount'] - $data['budget_data']['spent_outside'] - $spent); ?></td>
           </tr>
         </table>
-  <?php endif; ?>
+    <?php endif; ?>
     </div>
 <?php endif; ?>
 </div>

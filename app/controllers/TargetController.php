@@ -8,14 +8,59 @@ class TargetController extends BaseController {
     $this->beforeFilter('gs'); // do Google "sync".
   }
 
+  public function showOverview($id) {
+    $target = Auth::user()->targets()->find($id);
+    if ($target) {
+      $key = cacheKey('overview', 'targets', $id);
+      if (Cache::has($key)) {
+        $data = Cache::get($key);
+      } else {
+        $data = array();
+        $transfers = $target->transfers()->
+                        leftJoin('accounts AS a1', 'a1.id', '=', 'account_from')->
+                        leftJoin('accounts AS a2', 'a2.id', '=', 'account_to')->
+                        leftJoin('categories AS c', 'c.id', '=', 'category_id')->
+                        leftJoin('budgets AS b', 'b.id', '=', 'budget_id')->
+                        orderBy('date','DESC')->get(array(
+            'transfers.id', 'account_from', 'a1.name as account_from_name', 'account_to', 'a2.name as account_to_name',
+            'category_id', 'c.name as category_name', 'budget_id', 'b.name as budget_name', 'description',
+            'transfers.amount', 'transfers.date', 'ignoreprediction', 'countasexpense'
+        ));
+        foreach ($transfers as $t) {
+          $arr = array(
+              'id' => $t->id,
+              'account_from' => $t->account_from,
+              'account_from_name' => is_null($t->account_from_name) ? null : Crypt::decrypt($t->account_from_name),
+              'account_to' => $t->account_to,
+              'account_to_name' => is_null($t->account_to_name) ? null: Crypt::decrypt($t->account_to_name),
+              'category_id' => $t->category_id,
+              'category_name' => is_null($t->category_name) ? null : Crypt::decrypt($t->category_name),
+              'budget_id' => $t->budget_id,
+              'budget_name' => is_null($t->budget_name) ? null : Crypt::decrypt($t->budget_name),
+              'description' => Crypt::decrypt($t->description),
+              'amount' => $t->amount,
+              'date' => new Carbon($t->date),
+              'ignoreprediction' => intval($t->ignoreprediction) == 1 ? true : false,
+              'countasexpense' => intval($t->countasexpense) == 1 ? true : false,
+          );
+          $data[] = $arr;
+        }
+      }
+
+      return View::make('targets.overview')->with('target', $target)->with('transfers', $data);
+    }
+    App::abort(404);
+  }
+
   public function doEditTarget($id) {
     $target = Auth::user()->targets()->find($id);
     if ($target) {
       $target->amount         = floatval(Input::get('amount'));
       $target->description    = Input::get('description');
       $target->fireflyuser_id = Auth::user()->id;
-      $target->duedate        = Input::get('duedate');
+      $target->duedate        = is_null(Input::get('duedate')) || Input::get('duedate') == '' ? null : Input::get('duedate');
       $target->startdate      = Input::get('startdate');
+      $target->closed         = Input::get('closed') == 'on' ? 1 : 0;
 
       if (!is_null(Input::get('account'))) {
         $account = Auth::user()->accounts()->find(Input::get('account'));
@@ -31,7 +76,7 @@ class TargetController extends BaseController {
         return Redirect::to('/home/target/add')->withErrors($validator)->withInput();
       } else {
         $target->save();
-        return Redirect::to('/home');
+        return Redirect::to('/home/targets');
       }
     } else {
       return App::abort(404);
@@ -42,7 +87,7 @@ class TargetController extends BaseController {
     $t = Auth::user()->targets()->find($id);
     if ($t) {
       $t->delete();
-      return Redirect::to('/home');
+      return Redirect::to('/home/targets');
     } else {
       return App::abort(404);
     }
@@ -67,7 +112,7 @@ class TargetController extends BaseController {
       $data = Cache::get($key);
     } else {
       $data    = array();
-      $targets = Auth::user()->targets()->get();
+      $targets = Auth::user()->targets()->orderBy('closed')->get();
       foreach ($targets as $t) {
         $daily  = $t->guide(null, false);
         $left   = floatval($t->amount) - $t->hassaved();
@@ -189,6 +234,7 @@ class TargetController extends BaseController {
     $target->fireflyuser_id = Auth::user()->id;
     $target->duedate        = Input::get('duedate');
     $target->startdate      = Input::get('startdate');
+    $target->closed         = 0;
 
     if (!is_null(Input::get('account'))) {
       $account = Auth::user()->accounts()->find(Input::get('account'));

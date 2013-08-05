@@ -44,6 +44,7 @@
           <td>
             <a href="/home/transfer/edit/<?php echo $t['id'];?>" class="btn"><i class="icon-pencil"></i></a>
             <a href="#"  data-value="<?php echo $t['id']; ?>" title="Delete <?php echo $t['description'];?>" class="btn btn-danger deleteTransfer"><i data-value="<?php echo $t['id']; ?>" class="icon-white icon-remove"></i></a>
+          </td>
         </tr>
         <?php endforeach;?>
 </table>

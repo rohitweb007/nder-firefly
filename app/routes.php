@@ -8,7 +8,7 @@ Route::get('/home/flush', 'HomeController@doFlush');
 Route::get('/home/import', 'ImportController@showImport');
 Route::get('/home/logout', 'HomeController@doLogout');
 Route::get('/home/settings', 'SettingsController@settings');
-Route::get('/home/amounts','SettingsController@amounts');
+Route::get('/home/amounts',array('as' => 'amounts','uses'  => 'SettingsController@amounts'));
 Route::post('/home/settings', 'SettingsController@save');
 Route::post('/home/settings/update', 'SettingsController@update');
 Route::post('/home/settings/add', 'SettingsController@addSetting');
@@ -28,7 +28,9 @@ Route::get('/home/charts/compare', 'PageController@compare');
 Route::get('/home/charts/progress', 'PageController@progressPage');
 
 # object overview:
+Route::get('/home/target/overview/{id}', 'TargetController@showOverview')->where('id', '[0-9]+');
 Route::get('/home/{object}/overview/{id}', 'OverviewController@showOverview')->where('id', '[0-9]+');
+
 Route::get('/home/{object}/chart/{id}', 'OverviewController@showOverviewChart')->where('id', '[0-9]+');
 Route::get('/home/{object}/pie', 'OverviewController@showPieChart');
 # charts themselves

@@ -27,6 +27,7 @@ class HomeController extends BaseController {
   }
 
   public function doFlush() {
+    Cache::flush();
     return Redirect::to('/home');
   }
 

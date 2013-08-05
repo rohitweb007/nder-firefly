@@ -1,7 +1,8 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 
 <div class="row-fluid">
-  <div class="span12">
+  <div class="span2"></div>
+  <div class="span8">
     <h3>All your categories</h3>
       <table class="table table-bordered table-condensed table-striped">
         <tr>
@@ -32,6 +33,7 @@
         <?php endforeach; ?>
       </table>
   </div>
+  <div class="span2"></div>
 </div>
 
 <div id="modal" class="modal hide fade">

@@ -24,7 +24,7 @@
         class="closed_target"
         <?php endif; ?>
         >
-        <td><?php echo HTML::Link('/home/targets/overview/' . $t['id'],$t['description']);?></td>
+        <td><?php echo HTML::Link('/home/target/overview/' . $t['id'],$t['description']);?></td>
         <td><?php echo $t['amount'];?></td>
 
         <td><?php echo $t['current'];?></td>
