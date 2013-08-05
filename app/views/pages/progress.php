@@ -14,7 +14,7 @@
 <?php foreach ($budgets as $budget => $data): ?>
   <div class="span4">
     <h4><?php echo $budget;?></h4>
-    <div id="budget_<?php echo Str::slug($budget);?>" data-value="<?php echo $budget;?>" class="budgetProgressChart"></div>
+    <div id="budget_<?php echo Str::slug($budget);?>" data-value="<?php echo $budget;?>" class="loading budgetProgressChart"></div>
     <table class="table table-condensed">
       <tr>
         <td><?php echo mf($data['spent']);?></td>

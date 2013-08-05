@@ -25,6 +25,8 @@ function drawProgressCharts() {
       }
       // draw it:
       chart.draw(gdata, budgetOpt);
+    }).fail(function() {
+      box.removeClass('loading').addClass('load_error');
     });
 
 
