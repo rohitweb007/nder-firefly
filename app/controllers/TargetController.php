@@ -1,5 +1,7 @@
 <?php
+
 use Carbon\Carbon as Carbon;
+
 class TargetController extends BaseController {
 
   public function __construct() {
@@ -82,7 +84,8 @@ class TargetController extends BaseController {
             'weekly'      => $daily * 7 < $left ? mf($daily * 7) : mf(0),
             'monthly'     => $daily * 31 < $left ? mf($daily * 31) : mf(0),
             'start'       => $start->format('j F Y'),
-            'due'         => $duestr
+            'due'         => $duestr,
+            'closed'      => intval($t->closed) == 1 ? true : false
         );
         $data[] = $target;
       }
@@ -135,13 +138,13 @@ class TargetController extends BaseController {
         $step    = $target->guide($start, true);
 
         // transfers
-        $transfers_q = $target->transfers()->where('date','<=',$end->format('Y-m-d'))->get();
+        $transfers_q = $target->transfers()->where('date', '<=', $end->format('Y-m-d'))->get();
         $transferred = array();
-        foreach($transfers_q as $t) {
+        foreach ($transfers_q as $t) {
           $transferred[$t->date] = isset($transferred[$t->date]) ? $transferred[$t->date] : 0;
-          if($t->account_from == $target->account_id) {
+          if ($t->account_from == $target->account_id) {
             $transferred[$t->date] -= floatval($t->amount);
-          } else if($t->account_to == $target->account_id) {
+          } else if ($t->account_to == $target->account_id) {
             $transferred[$t->date] += floatval($t->amount);
           }
         }
@@ -153,7 +156,7 @@ class TargetController extends BaseController {
           $day                               = intval($current->format('j'));
           $data['rows'][$index]['c'][0]['v'] = 'Date(' . $year . ', ' . $month . ', ' . $day . ')';
           $data['rows'][$index]['c'][1]['v'] = $guide;
-          $data['rows'][$index]['c'][2]['v'] = $saved;// $target->hassaved($current);
+          $data['rows'][$index]['c'][2]['v'] = $saved; // $target->hassaved($current);
           $current->add(new DateInterval('P1D'));
           $guide += $step;
           $index++;

@@ -11,7 +11,6 @@
       <tr>
         <th>Description</th>
         <th>Target amount</th>
-
         <th>Current amount so far</th>
         <th>Should have saved</th>
         <th>Daily / weekly / monthly guide</th>
@@ -20,7 +19,11 @@
         <th>&nbsp;</th>
       </tr>
       <?php foreach($data as $t): ?>
-      <tr>
+      <tr
+        <?php if($t['closed']): ?>
+        class="closed_target"
+        <?php endif; ?>
+        >
         <td><?php echo HTML::Link('/home/targets/overview/' . $t['id'],$t['description']);?></td>
         <td><?php echo $t['amount'];?></td>
 

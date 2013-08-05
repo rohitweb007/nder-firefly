@@ -11,3 +11,5 @@
 
 .budgetProgressChart {width:100%;border:1px #aaa solid;height:200px;}
 .piechart {height:280px;}
+
+.closed_target td {text-decoration: line-through !important;}
