@@ -2,6 +2,9 @@
 <div class="row-fluid">
   <div class="span12">
     <h3>Predicted expenses</h3>
+    <p>
+      This chart tries to predict what your balance is going to be.
+    </p>
   </div>
 </div>
 

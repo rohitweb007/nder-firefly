@@ -119,7 +119,14 @@ class ChartController extends BaseController {
                   'id'    => 'actualbalance',
                   'label' => 'Current balance',
                   'type'  => 'number',
-                  'p'     => array('role' => 'data')),
+                  'p'     => array('role' => 'data')
+              ),
+              array(
+                  'type' => 'boolean',
+                  'p'    => array(
+                      'role' => 'certainty'
+                  )
+              ),
               array(
                   'id'    => 'predictedbalance',
                   'label' => 'Predicted balance',
@@ -164,15 +171,23 @@ class ChartController extends BaseController {
           $current->add(new DateInterval('P' . $day . 'D'));
         }
         $this->_e('Date is now: ' . $current->format('d M Y'));
+        // this array will be used to collect average amounts:
+        $average      = array();
         // loop over each month:
         // get all transaction results for this day of the month:
         $transactions = Auth::user()->transactions()->where('amount', '<', 0)->where('onetime', '=', 0)
                         ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', intval($current->format('d')))
                         ->orderBy('amount', 'ASC')->get();
         // lets see what we have
+
         if (count($transactions) > 0) {
-          $min = $transactions[count($transactions) - 1]->amount * -1;
-          $max = $transactions[0]->amount * -1;
+          $min = floatval($transactions[count($transactions) - 1]->amount) * -1;
+          $max = floatval($transactions[0]->amount) * -1;
+
+          // fill the array for the averages later on:
+          foreach ($transactions as $t) {
+            $average[] = floatval($t->amount) * -1;
+          }
         } else {
           $min = 0;
           $max = 0;
@@ -183,20 +198,34 @@ class ChartController extends BaseController {
                         where('ignoreprediction', '=', 0)->orderBy('amount', 'ASC')
                         ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', intval($current->format('d')))->get();
         if (count($transfers) > 0) {
-          $min += $transfers[count($transfers) - 1]->amount;
-          $max += $transfers[0]->amount;
+          $transfer_min = floatval($transfers[count($transfers) - 1]->amount);
+          $transfer_max = floatval($transfers[0]->amount);
+          $min          = $transfer_min < $min ? $transfer_min : $min;
+          $max          = $transfer_max > $max ? $transfer_max : $max;
+          unset($transfer_max, $transfer_min);
+
+          // fill the array for the averages later on:
+          foreach ($transfers as $t) {
+            $average[] = floatval($t->amount);
+          }
         }
         $this->_e('New min: ' . $min);
         $this->_e('New max: ' . $max);
 
         // calc avg:
-        $avg                               = (($max - $min) / 2) + $min;
+        //$avg                               = (($max - $min) / 2) + $min;
+        $avg                               = array_sum($average) / count($average);
         $this->_e('New avg: ' . $avg);
         $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
         $data['rows'][$index]['c'][1]['v'] = $account->balance($chartdate); // actual balance
-        $data['rows'][$index]['c'][2]['v'] = $balance - $avg; // predicted balance
-        $data['rows'][$index]['c'][3]['v'] = $balance - $max; // predicted max expenses.
-        $data['rows'][$index]['c'][4]['v'] = $balance - $min; // predicted max expenses.
+        if ($chartdate > new Carbon('now')) {
+          $data['rows'][$index]['c'][2]['v'] = false;
+        } else {
+          $data['rows'][$index]['c'][2]['v'] = true;
+        }
+        $data['rows'][$index]['c'][3]['v'] = $balance - $avg; // predicted balance
+        $data['rows'][$index]['c'][4]['v'] = $balance - $max; // predicted max expenses.
+        $data['rows'][$index]['c'][5]['v'] = $balance - $min; // predicted max expenses.
         $balance                           = $balance - $avg;
 
 
@@ -206,9 +235,9 @@ class ChartController extends BaseController {
         $this->_e(' ');
       }
       Cache::put($key, $data, 1440);
-      if ($debug) {
-        return '<pre>' . print_r($data, true) . '</pre>';
-      }
+    }
+    if ($debug) {
+      return '<pre>' . print_r($data, true) . '</pre>';
     }
     return Response::json($data);
   }
