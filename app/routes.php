@@ -1,5 +1,6 @@
 <?php
 Route::get('/', 'HomeController@getRoot');
+
 Route::get('/concept', 'HomeController@showConcept');
 Route::get('/home', 'HomeController@getHome');
 Route::get('/home/delete', 'HomeController@askDelete');
@@ -15,6 +16,9 @@ Route::post('/home/settings/add', 'SettingsController@addSetting');
 Route::post('/home/settings/delete', 'SettingsController@deleteSetting');
 Route::post('/home/import', 'ImportController@doImport');
 Route::post('/home/delete', 'HomeController@doDelete');
+
+#tags
+Route::get('/home/tags','TagsController@testTags');
 
 # compare things:
 Route::get('/home/compare/basictable', 'ComparisionController@basicTable');

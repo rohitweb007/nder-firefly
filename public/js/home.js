@@ -36,20 +36,6 @@ function drawChart() {
       drawBudgetChart(ID, budgetCache[ID]);
     }
 
-
-
-//    $.getJSON('/home/budget/overviewGraph/' + ID, function(data) {
-//      var chart = new google.visualization.AreaChart(document.getElementById('budgetOverviewGraph' + ID));
-//      var gdata = new google.visualization.DataTable(data);
-//      var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-//      for (i = 1; i < gdata.getNumberOfColumns(); i++) {
-//        money.format(gdata, i);
-//      }
-//      chart.draw(gdata, {vAxis: {textPosition: 'none'}, lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}});
-//    }).fail(function() {
-//      $('#budgetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
-//    });
-
   });
 
   $.each($('.targetOverviewGraph'), function(i, v) {
@@ -80,17 +66,13 @@ function drawChart() {
 
   });
 
-  if ($('#ovcat').length == 1) {
+  if ($('#ovcat').length === 1) {
     $.getJSON('/home/chart/ovcat', function(data) {
       if (data.rows.length > 0) {
-        var chart = new google.visualization.BubbleChart(document.getElementById('ovcat'));
-        var gdata = new google.visualization.DataTable(data);
-        var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-        var pct = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '', suffix: '%'});
-        money.format(gdata, 1);
-        money.format(gdata, 2);
-        money.format(gdata, 4);
-        chart.draw(gdata, {
+
+
+
+        var opt = {
           width: '100%',
           hAxis: {title: 'Overspent in euros'},
           vAxis: {title: 'Spent so far in euros'},
@@ -99,7 +81,53 @@ function drawChart() {
           },
           height: 400,
           colors: ['FFFF99', 'FFCC66', 'FF9933', 'FF6633', 'FF0000', '990000', '660000', '330000', '000']
+        };
+
+        var chart = new google.visualization.BubbleChart(document.getElementById('ovcat'));
+        var gdata = new google.visualization.DataTable(data);
+        var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+        var pct = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '', suffix: '%'});
+        money.format(gdata, 1);
+        money.format(gdata, 2);
+        money.format(gdata, 4);
+
+
+        chart.setAction({
+          id: 'sample', // An id is mandatory for all actions.
+          text: 'See sample book', // The text displayed in the tooltip.
+          action: function() {           // When clicked, the following runs.
+            selection = chart.getSelection();
+            switch (selection[0].row) {
+              case 0:
+                alert("Ender's Game");
+                break;
+              case 1:
+                alert("Feynman Lectures on Physics");
+                break;
+              case 2:
+                alert("Numerical Recipes in JavaScript");
+                break;
+              case 3:
+                alert("Truman");
+                break;
+              case 4:
+                alert("Freakonomics");
+                break;
+              case 5:
+                alert("The Mezzanine");
+                break;
+              case 6:
+                alert("The Color of Magic");
+                break;
+              case 7:
+                alert("The Law of Superheroes");
+                break;
+            }
+          }
         });
+
+
+        chart.draw(gdata, opt);
       }
     });
 

@@ -15,6 +15,10 @@ class Transaction extends Eloquent {
       'onetime'        => 'required|numeric|between:0,1'
   );
 
+  public function tags() {
+    return $this->belongsToMany('Tag');
+  }
+
   public function account() {
     return $this->belongsTo('Account');
   }

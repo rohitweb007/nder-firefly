@@ -103,7 +103,7 @@ class ChartController extends BaseController {
     $account      = Auth::user()->accounts()->orderBy('id', 'ASC')->first();
     $debug        = Input::get('debug') == 'true' ? true : false;
     $this->_debug = $debug;
-    $key          = $debug ? cacheKey('prediction', Session::get('period')) : cacheKey('prediction', Session::get('period'));
+    $key          = $debug ? cacheKey('prediction', Session::get('period'),rand(1,10000)) : cacheKey('prediction', Session::get('period'));
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
@@ -186,7 +186,9 @@ class ChartController extends BaseController {
 
           // fill the array for the averages later on:
           foreach ($transactions as $t) {
+            $this->_e('Add to avg['.count($average).'] for transactions: ' . (floatval($t->amount) * -1));
             $average[] = floatval($t->amount) * -1;
+
           }
         } else {
           $min = 0;
@@ -206,6 +208,7 @@ class ChartController extends BaseController {
 
           // fill the array for the averages later on:
           foreach ($transfers as $t) {
+            $this->_e('Add to avg['.count($average).'] for transfers: ' . (floatval($t->amount)));
             $average[] = floatval($t->amount);
           }
         }

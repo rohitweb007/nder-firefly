@@ -3,7 +3,16 @@ $(document).ready(function() {
   $('.tt').tooltip();
   $('.popover').popover();
 
- 
+  $('input [name="tags"]').tagsinput({
+    typeahead: {
+      source: function(query) {
+        return ["Amsterdam", "London", "Paris", "Washington", "New York", "Los Angeles", "Sydney", "Melbourne", "Canberra"];
+      },
+      freeInput: true
+    }
+  });
+
+
 
 });
 

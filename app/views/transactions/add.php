@@ -1,6 +1,6 @@
 <?php require_once(__DIR__ . '/../layouts/top.php') ?>
 <div class="row-fluid">
-  <div class="span6">
+  <div class="span8">
     <h3>Add a new transaction</h3>
     <p>
       Please fill in the following details about the new transaction. It can be both
@@ -45,7 +45,7 @@
     </div>
 
     <div class="control-group">
-      <label class="control-label" for="inputOnetime">Check if this is a one time transaction</label>
+      <label class="control-label" for="inputOnetime">One time</label>
       <div class="controls">
         <i class="icon-bar"></i>&nbsp;&nbsp;<?php echo Form::checkbox('onetime',null,false,array('id' => 'inputOnetime')); ?>
         &nbsp;&nbsp;<img class="tt" title="One-time transactions are large and occur rarely. Maybe a big new TV or something else expensive." src="/img/icons/help.png" alt="Help on this field" />
@@ -97,6 +97,14 @@
           <?php endforeach;?>
         </datalist>
 
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputTags">Tags</label>
+      <div class="controls">
+        <i class="icon-bar"></i>&nbsp;&nbsp;<?php echo Form::text('tags',null,array('id' => 'inputTags','autocomplete' => 'off','class' => 'input-xxlarge','placeholder' => 'Type tags here','data-role' => 'tagsinput')); ?>
+        <br /><span class="text-error"><?php echo $errors->first('tags'); ?></span>
       </div>
     </div>
 
