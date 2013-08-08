@@ -188,23 +188,23 @@ class TransactionController extends BaseController {
         }
 
         // beneficiary
-        if (strlen(Input::get('beneficiary')) != 0) {
+        if (strlen($new['beneficiary']) != 0) {
           $beneficiaries = Auth::user()->beneficiaries()->get(); //->where('name','=',Input::get('beneficiary'))->first();
           $beneficiary   = null;
           foreach ($beneficiaries as $ben) {
-            if (Crypt::decrypt($ben->name) == Input::get('beneficiary')) {
+            if (Crypt::decrypt($ben->name) == $new['beneficiary']) {
               $beneficiary = $ben;
               break;
             }
           }
-          unset($ben, $categories);
+          unset($ben, $beneficiaries);
           if (is_null($beneficiary)) {
 
             $beneficiary = new Beneficiary;
 
 
             $beneficiary->fireflyuser_id = Auth::user()->id;
-            $beneficiary->name           = Input::get('beneficiary');
+            $beneficiary->name           = $new['beneficiary'];
             $validator                   = Validator::make($beneficiary->toArray(), Beneficiary::$rules);
             if ($validator->passes()) {
               $beneficiary->name           = Crypt::encrypt($beneficiary->name);
