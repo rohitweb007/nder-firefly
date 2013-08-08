@@ -153,6 +153,4 @@ function overspendSelectCategory(e) {
   // now we can continue and get some data on that category.
 
   window.location = '/home/category/overspending/' + encodeURI(categoryName);
-
-  console.log(value);
 }

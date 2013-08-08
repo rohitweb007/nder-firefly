@@ -15,18 +15,46 @@
 </div>
 
 <div class="row-fluid">
+  <div class="span4">
+    <table class="table table-bordered table-striped">
+      <tr>
+        <td>Saved so far</td>
+        <td><?php echo mf($data['info']['saved']);?> (<?php echo $data['info']['saved_pct'];?>%)</td>
+      </tr>
+      <tr>
+        <td>Should have saved</td>
+        <td><?php echo mf($data['info']['should']);?></td>
+      </tr>
+      <tr>
+        <td>Daily guide</td>
+        <td><?php echo mf($data['info']['daily']);?></td>
+      </tr>
+      <tr>
+        <td>Weekly guide</td>
+        <td><?php echo mf($data['info']['weekly']);?></td>
+      </tr>
+      <tr>
+        <td>Monthly guide</td>
+        <td><?php echo mf($data['info']['monthly']);?></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="row-fluid">
   <div class="span1"></div>
   <div class="span10">
     <table class="table table-bordered table-striped">
       <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
+        <th>Description</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Accounts</th>
+        <th>Category</th>
+        <th>Budget</th>
+        <th>&nbsp;</th>
       </tr>
-      <?php foreach ($transfers as $t): ?>
+      <?php foreach ($data['transfers'] as $t): ?>
         <tr>
           <td>
             <?php

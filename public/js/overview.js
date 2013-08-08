@@ -4,9 +4,21 @@ google.setOnLoadCallback(drawCharts);
 var dashboard;
 var control;
 var chart;
-var start = new Date();
-var end = new Date();
-end.setMonth(end.getMonth() - 1);
+
+if (!strstart) {
+  var start = new Date();
+  start.setMonth(end.getMonth() - 1);
+} else {
+  var start = new Date(strstart);
+}
+
+if (!strend) {
+  var end = new Date();
+} else {
+  var end = new Date(strend);
+}
+
+
 var charts = new Array();
 
 var pieChartOpt = {
@@ -48,6 +60,8 @@ function deleteObject(ev) {
 
 function drawObject() {
   dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
+  // corrective measure.
+  start.setDate(start.getDate() - 1);
   control = new google.visualization.ControlWrapper({
     'controlType': 'ChartRangeFilter',
     'containerId': 'control',
@@ -70,7 +84,8 @@ function drawObject() {
       }
     },
     // Initial range: 2012-02-09 to 2012-03-20.
-    'state': {'range': {'start': end, 'end': start}}
+
+    'state': {'range': {'start': start, 'end': end}}
   });
 
   chart = new google.visualization.ChartWrapper({

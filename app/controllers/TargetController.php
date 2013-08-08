@@ -15,7 +15,7 @@ class TargetController extends BaseController {
       if (Cache::has($key)) {
         $data = Cache::get($key);
       } else {
-        $data = array();
+        $data = array('transfers' => array());
         $transfers = $target->transfers()->
                         leftJoin('accounts AS a1', 'a1.id', '=', 'account_from')->
                         leftJoin('accounts AS a2', 'a2.id', '=', 'account_to')->
@@ -38,16 +38,28 @@ class TargetController extends BaseController {
               'budget_id' => $t->budget_id,
               'budget_name' => is_null($t->budget_name) ? null : Crypt::decrypt($t->budget_name),
               'description' => Crypt::decrypt($t->description),
-              'amount' => $t->amount,
+              'amount' => floatval($t->amount),
               'date' => new Carbon($t->date),
               'ignoreprediction' => intval($t->ignoreprediction) == 1 ? true : false,
               'countasexpense' => intval($t->countasexpense) == 1 ? true : false,
           );
-          $data[] = $arr;
+          if($arr['account_to'] != $target->account_id) {
+            $arr['amount'] = $arr['amount']*-1;
+          }
+          $data['transfers'][] = $arr;
         }
+        // some guides:
+        $data['info']['saved'] = $target->hassaved();
+        $data['info']['should'] = $target->shouldhavesaved();
+        $data['info']['saved_pct'] = round(($data['info']['saved'] / $target->amount)*100,2);
+        $guide = $target->guide();
+        $data['info']['daily'] = $guide;
+        $data['info']['weekly'] = $guide * 7;
+        $data['info']['monthly'] = $guide * 31;
+
       }
 
-      return View::make('targets.overview')->with('target', $target)->with('transfers', $data);
+      return View::make('targets.overview')->with('target', $target)->with('data', $data);
     }
     App::abort(404);
   }

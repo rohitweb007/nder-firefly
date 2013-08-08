@@ -18,9 +18,10 @@ class CategoryController extends BaseController {
       // to get the avg per month we first need the number of months
 
       foreach ($categories as $cat) {
+        $name = Crypt::decrypt($cat->name);
         $cate = array(
             'id'   => intval($cat->id),
-            'name' => Crypt::decrypt($cat->name),
+            'name' => $name,
         );
 
         $now           = new Carbon('now');
@@ -29,6 +30,14 @@ class CategoryController extends BaseController {
 
         $data[] = $cate;
       }
+      unset($name);$name=array();
+      // order by alfabet
+      // Obtain a list of columns
+      foreach ($data as $key => $row) {
+        $id[$key]  = $row['id'];
+        $name[$key] = $row['name'];
+      }
+      array_multisort($name, SORT_ASC, $id, SORT_DESC, $data);
       Cache::put($key, $data, 1440);
     }
     return View::make('categories.all')->with('categories', $data);
@@ -182,7 +191,9 @@ class CategoryController extends BaseController {
           $spent          = $category->spent($first);
           $arr            = array(
               'date'  => $first->format('F Y'),
-              'spent' => $spent
+              'spent' => $spent,
+              'start_date' => $first->format('Y-m-').'01',
+              'end_date' => $first->format('Y-m-t'),
           );
           $data['past'][] = $arr;
           if ($first != $last) {

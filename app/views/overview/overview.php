@@ -4,6 +4,8 @@
   var Name = "<?php echo Crypt::decrypt($object->name); ?>";
   var object = "<?php echo $name; ?>";
   var objects = "<?php echo $names; ?>";
+  var strstart = <?php echo is_null($start) ? 'null' : $start->format('"m/d/Y"'); ?>;
+  var strend = <?php echo is_null($end) ? 'null' : $end->format('"m/d/Y"'); ?>;
 </script>
 <div class="row-fluid">
   <div class="span12">

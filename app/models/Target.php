@@ -1,5 +1,5 @@
 <?php
-
+use Carbon\Carbon as Carbon;
 class Target extends Eloquent {
 
   protected $guarded = array('id', 'created_at', 'updated_at');
@@ -70,9 +70,9 @@ class Target extends Eloquent {
    * @param DateTime $date
    * @return int
    */
-  public function guide(DateTime $date = null, $ignoresaved = false) {
+  public function guide(Carbon $date = null, $ignoresaved = false) {
     $date = is_null($date) ? clone Session::get('period') : $date;
-    $end  = $this->duedate != '0000-00-00' ? new DateTime($this->duedate) : new DateTime('now');
+    $end  = $this->duedate != '0000-00-00' ? new Carbon($this->duedate) : new DateTime('now');
     if ($end < $date) {
       return 0;
     }
@@ -92,15 +92,15 @@ class Target extends Eloquent {
     }
   }
 
-  public function shouldhavesaved(DateTime $date = null) {
+  public function shouldhavesaved(Carbon $date = null) {
     $date = is_null($date) ? clone Session::get('period') : $date;
 
     if ($this->duedate == '0000-00-00') {
       return null;
     }
-    $start = new DateTime($this->startdate);
+    $start = new Carbon($this->startdate);
 // guide voor de hele periode:
-    $due   = new DateTime($this->duedate);
+    $due   = new Carbon($this->duedate);
     if ($date > $due) {
       return 0;
     }

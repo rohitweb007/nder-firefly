@@ -9,10 +9,14 @@ class OverviewController extends BaseController {
   }
 
   public function showOverview($object, $id) {
+    $start = !is_null(Input::get('start')) ? new Carbon(Input::get('start')) : null;
+    $end = !is_null(Input::get('end')) ? new Carbon(Input::get('end')) : null;
+
     $objects = Str::plural($object);
     $db      = Auth::user()->$objects()->find($id);
     if ($db) {
-      return View::make('overview.overview')->with('object', $db)->with('name', $object)->with('names', $objects);
+      return View::make('overview.overview')->with('object', $db)->with('name', $object)->with('names', $objects)
+            ->with('start',$start)->with('end',$end);
     } else {
       return App::abort(404);
     }

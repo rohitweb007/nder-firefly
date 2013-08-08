@@ -92,7 +92,7 @@
       <?php foreach ($data['past'] as $r): ?>
         <tr>
           <td><?php echo $r['date']; ?></td>
-          <td><?php echo mf($r['spent']); ?></td>
+          <td><?php echo HTML::Link('/home/category/overview/' . $category->id.'?start='.$r['start_date'].'&amp;end=' . $r['end_date'],mf($r['spent'])); ?></td>
         </tr>
       <?php endforeach; ?>
       <tr>
