@@ -17,13 +17,13 @@ class Account extends Eloquent {
   }
 
   public function balance(Carbon $date = null) {
-    $date    = is_null($date) ? new Carbon(Session::get('period')->format('Y-m-d')) : $date;
+    $date  = is_null($date) ? new Carbon(Session::get('period')->format('Y-m-d')) : $date;
     $today = new Carbon();
-    $start        = new Carbon($this->date);
-    if($date > $today) {
+    $start = new Carbon($this->date);
+    if ($date > $today) {
       $date = $today;
     }
-    if($date < $start) {
+    if ($date < $start) {
       return floatval($this->balance);
     }
 
@@ -42,13 +42,13 @@ class Account extends Eloquent {
         $workbalance = $this->balancedatapoints()->where('date', '=', $workdate->format('Y-m-d'))->first();
         if (is_null($workbalance)) {
           // calculate it:
-          $tr_sum = floatval($this->transactions()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
-          $away_sum = floatval($this->transfersfrom()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount')) * -1;
-          $here_sum = floatval($this->transfersto()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
-          $result   = $startbalance + $tr_sum + $away_sum + $here_sum;
-          $data = new Balancedatapoint();
-          $data->date = $workdate->format('Y-m-d');
-          $data->balance = $result;
+          $tr_sum           = floatval($this->transactions()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
+          $away_sum         = floatval($this->transfersfrom()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount')) * -1;
+          $here_sum         = floatval($this->transfersto()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
+          $result           = $startbalance + $tr_sum + $away_sum + $here_sum;
+          $data             = new Balancedatapoint();
+          $data->date       = $workdate->format('Y-m-d');
+          $data->balance    = $result;
           $data->account_id = $this->id;
           $data->save();
         }
@@ -56,7 +56,7 @@ class Account extends Eloquent {
       }
       // then, we should / MUST have today's balance.
       $today = $this->balancedatapoints()->where('date', '=', $date->format('Y-m-d'))->first();
-      if(is_null($today)) {
+      if (is_null($today)) {
         return App::abort(500);
       } else {
         return floatval($today->balance);
@@ -77,7 +77,7 @@ class Account extends Eloquent {
 
 
     // add and substract all transactions:
-    $tr_sum = floatval($this->transactions()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
+    $tr_sum   = floatval($this->transactions()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
     //Log::error('balance equation: ' . $date->format('Y-m-d'));
     // substract all transfers away from this account:
     $away_sum = floatval($this->transfersfrom()->where('date', '<=', $date->format('Y-m-d'))->sum('amount')) * -1;
@@ -102,24 +102,29 @@ class Account extends Eloquent {
    * on this day of the month.
    * @param DateTime $date
    */
-  public function predict(DateTime $date = null) {
+  public function predict(Carbon $date = null) {
     $date = is_null($date) ? Session::get('period') : $date;
 
     /**
-     * select alle transacties, na vandaag (dag > 24)
+     * select alle transacties, op vandaag (dag > 24)
      * en maand is niet deze (month != 6)
      * en flikker ze op een hoop (sum amount).
      * Gedeeld door aantal maanden bezig nu (5) == antwoord.
      */
-    $total  = Auth::user()->transactions()->
+    $transactions = $this->transactions()->
             where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '=', $date->format('d'))->
             where(DB::Raw('DATE_FORMAT(`date`,"%m")'), '!=', $date->format('m'))->
             where('amount', '<', 0)->
-            sum('amount');
-    $oldest = BaseController::getFirst();
-    $diff   = $oldest->diff($date);
+            get(array('amount'));
+    $sum          = 0;
+    $count        = 0;
+    foreach ($transactions as $t) {
+      $sum += floatval($t->amount) * -1;
+      $count++;
+    }
+    $count = $count == 0 ? 1 : $count;
 
-    return ($diff->m === 0 ? ($total * -1) : (($total * -1) / $diff->m));
+    return ($sum / $count);
   }
 
   public function transactions() {

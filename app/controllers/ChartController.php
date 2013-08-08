@@ -257,10 +257,15 @@ class ChartController extends BaseController {
                 'id'    => 'Category',
                 'label' => 'Category',
                 'type'  => 'string',
-            ),
+            ), // next spot must be. overspent in pct.
+//            array(
+//                'id'    => 'toomuch', //
+//                'label' => 'Spent more than average',
+//                'type'  => 'number',
+//            ),
             array(
-                'id'    => 'toomuch',
-                'label' => 'Spent more than average',
+                'id'    => 'toomuchpct', //
+                'label' => 'Overspent pct',
                 'type'  => 'number',
             ),
             array(
@@ -306,7 +311,8 @@ class ChartController extends BaseController {
           // 4: grootte van bolletje.
 
           $current['c'][0]['v'] = $category->name; // name
-          $current['c'][1]['v'] = $spent - $avg_spent; // over spent
+          //$current['c'][1]['v'] = $spent - $avg_spent; // over spent
+          $current['c'][1]['v'] = $spentpct; // spent so far
           $current['c'][2]['v'] = $spent; // spent so far
           $current['c'][3]['v'] = $descr; // judge
           $current['c'][4]['v'] = $avg_spent; // spent on avg

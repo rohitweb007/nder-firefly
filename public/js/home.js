@@ -78,7 +78,7 @@ function drawChart() {
 
         var opt = {
           width: '100%',
-          hAxis: {title: 'Overspent in euros'},
+          hAxis: {title: 'Overspent percentage'},
           vAxis: {title: 'Spent so far in euros'},
           bubble: {
             textStyle: {fontSize: 10}
@@ -91,7 +91,7 @@ function drawChart() {
         ovcatData = new google.visualization.DataTable(data);
         var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
         var pct = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '',suffix: '%'});
-        money.format(ovcatData, 1);
+        pct.format(ovcatData, 1);
         money.format(ovcatData, 2);
         //pct.format(ovcatData, 4);
         money.format(ovcatData, 4);

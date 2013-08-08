@@ -5,6 +5,13 @@ var dashboard;
 var control;
 var chart;
 
+
+if (!strend) {
+  var end = new Date();
+} else {
+  var end = new Date(strend);
+}
+
 if (!strstart) {
   var start = new Date();
   start.setMonth(end.getMonth() - 1);
@@ -12,11 +19,6 @@ if (!strstart) {
   var start = new Date(strstart);
 }
 
-if (!strend) {
-  var end = new Date();
-} else {
-  var end = new Date(strend);
-}
 
 
 var charts = new Array();
