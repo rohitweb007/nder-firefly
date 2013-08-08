@@ -134,14 +134,16 @@ function drawPie(chart, type) {
       }
       var gdata = new google.visualization.DataTable(data);
       if (gdata.getNumberOfRows() > 0) {
+        $('#' + chart + type).prev().show();
+        $('#' + chart + type).show();
         var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
         for (i = 1; i < gdata.getNumberOfColumns(); i++) {
           money.format(gdata, i);
         }
         charts[key].draw(gdata, pieChartOpt);
       } else {
-        $('#' + chart + type).prev().remove();
-        $('#' + chart + type).remove();
+        $('#' + chart + type).prev().hide();
+        $('#' + chart + type).hide();
       }
 
     }).fail(function() {
