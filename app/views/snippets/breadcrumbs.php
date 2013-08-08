@@ -40,6 +40,7 @@ $segments = Request::segments();
         case 'account':
         case 'budget':
         case 'category':
+
         case 'transaction':
         case 'transfer':
         case 'beneficiary':
@@ -60,6 +61,9 @@ $segments = Request::segments();
                 break;
               case 'overview':
                 echo '<li class="active">' . ucfirst($segments[1]) . ' overview</li>';
+                break;
+              case 'overspending':
+                echo '<li class="active">' . ucfirst($segments[1]) . ' overspending</li>';
                 break;
             }
           }

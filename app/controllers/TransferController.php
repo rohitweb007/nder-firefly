@@ -1,5 +1,7 @@
 <?php
+
 use Carbon\Carbon as Carbon;
+
 class TransferController extends BaseController {
 
   public function __construct() {
@@ -12,64 +14,44 @@ class TransferController extends BaseController {
       $data = Cache::get($key);
     } else {
       $data   = array();
-      $transf = Auth::user()->transfers()->orderBy('date', 'DESC')->orderBy('created_at','DESC')->get();
-
-      $ct = array(); // category temp
-      $at = array(); // account temp
-      $bt = array(); // budget temp
-      $tt = array(); // target temp
-      $ct = array(); // category temp
-      $ta = array();
+      $transf = Auth::user()->transfers()->
+                      leftJoin('categories', 'categories.id', '=', 'category_id')->
+                      leftJoin('accounts as af', 'af.id', '=', 'account_from')->
+                      leftJoin('accounts as at', 'at.id', '=', 'account_to')->
+                      leftJoin('budgets', 'budgets.id', '=', 'budget_id')->
+                      leftJoin('targets', 'targets.id', '=', 'target_id')->
+                      orderBy('transfers.date', 'DESC')->orderBy('transfers.created_at', 'DESC')->get(
+              array(
+                  'transfers.id',
+                  'category_id', 'categories.name AS category_name',
+                  'account_to', 'at.name AS account_to_name',
+                  'account_from', 'af.name AS account_from_name',
+                  'budget_id', 'budgets.name AS budget_name',
+                  'target_id', 'targets.description AS target_description',
+                  'transfers.date', 'transfers.description', 'transfers.amount', 'countasexpense', 'ignoreprediction'
+              )
+      );
 
       foreach ($transf as $t) {
-        $month           = new Carbon($t->date);
-        $strMonth        = $month->format('F Y');
-        $data[$strMonth] = isset($data[$strMonth]) ? $data[$strMonth] : array();
-
-        // save acc. name:
-        if (!isset($at[intval($t->account_from)])) {
-          $at[intval($t->account_from)] = Crypt::decrypt($t->accountfrom()->first()->name);
-        }
-
-        if (!isset($at[intval($t->account_to)])) {
-          $at[intval($t->account_to)] = Crypt::decrypt($t->accountto()->first()->name);
-        }
-        // target
-        if (!is_null($t->target_id) && !isset($tt[intval($t->target_id)])) {
-          $tt[intval($t->target_id)] = Crypt::decrypt($t->target()->first()->description);
-        }
-
-        // get budget and save
-        if (!is_null($t->budget_id) && !isset($bt[intval($t->budget_id)])) {
-          $bt[intval($t->budget_id)] = Crypt::decrypt($t->budget()->first()->name);
-        }
-
-        // get target
-        if (!is_null($t->target_id) && !isset($ta[intval($t->target_id)])) {
-          $ta[intval($t->target_id)] = Crypt::decrypt($t->target()->first()->description);
-        }
-
-        // get cat and save
-        if (!is_null($t->category_id) && !isset($ct[intval($t->category_id)])) {
-          $ct[intval($t->category_id)] = Crypt::decrypt($t->category()->first()->name);
-        }
-        $date              = new Carbon($t->date);
-        $strDate           = $date->format('d F Y');
+        $month             = new Carbon($t->date);
+        $strMonth          = $month->format('F Y');
+        $data[$strMonth]   = isset($data[$strMonth]) ? $data[$strMonth] : array();
+        $strDate           = $month->format('d F Y');
         $current           = array(
             'id'                 => intval($t->id),
             'date'               => $strDate,
             'description'        => Crypt::decrypt($t->description),
             'amount'             => mf(floatval($t->amount)),
             'account_to'         => $t->account_to,
-            'account_to_name'    => $at[$t->account_to],
+            'account_to_name'    => Crypt::decrypt($t->account_to_name),
             'account_from'       => $t->account_from,
-            'account_from_name'  => $at[$t->account_from],
+            'account_from_name'  => Crypt::decrypt($t->account_from_name),
             'budget_id'          => $t->budget_id,
-            'budget_name'        => (is_null($t->budget_id) ? null : $bt[intval($t->budget_id)]),
+            'budget_name'        => (is_null($t->budget_id) ? null : Crypt::decrypt($t->budget_name)),
             'target_id'          => $t->target_id,
-            'target_description' => (is_null($t->target_id) ? null : $ta[intval($t->target_id)]),
+            'target_description' => (is_null($t->target_id) ? null : Crypt::decrypt($t->target_description)),
             'category_id'        => $t->category_id,
-            'category_name'      => (is_null($t->category_id) ? null : $ct[intval($t->category_id)]),
+            'category_name'      => (is_null($t->category_id) ? null : Crypt::decrypt($t->category_name)),
             'ignoreprediction'   => $t->ignoreprediction == 1 ? true : false,
             'countasexpense'     => $t->countasexpense == 1 ? true : false,
         );

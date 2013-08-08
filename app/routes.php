@@ -121,6 +121,9 @@ Route::get('/home/category/budgets/{id}', 'CategoryController@showBudgetsInTimef
 Route::get('/home/category/beneficiaries/{id}', 'CategoryController@showBeneficiariesInTimeframe')->where('id', '[0-9]+');
 Route::post('/home/category/edit/{id}', 'CategoryController@doEditCategory')->where('id', '[0-9]+');
 Route::post('/home/category/delete/{id}', 'CategoryController@deleteCategory')->where('id', '[0-9]+');
+Route::get('/home/category/overspending/{id}', 'CategoryController@overSpending')->where('id', '[0-9]+');
+Route::get('/home/category/overspending/{name}', 'CategoryController@overSpendingByName');
+
 
 
 # home with a specific date.

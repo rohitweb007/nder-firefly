@@ -4,7 +4,11 @@ google.setOnLoadCallback(drawChart);
 $(document).ready(function() {
 });
 
+// some variables needed (it's for event handling
+var ovcatChart,ovcatData;
+
 function drawChart() {
+
   $.each($('.accountOverviewGraph'), function(i, v) {
     var graphHolder = $(v);
     var ID = graphHolder.attr('data-value');
@@ -83,51 +87,22 @@ function drawChart() {
           colors: ['FFFF99', 'FFCC66', 'FF9933', 'FF6633', 'FF0000', '990000', '660000', '330000', '000']
         };
 
-        var chart = new google.visualization.BubbleChart(document.getElementById('ovcat'));
-        var gdata = new google.visualization.DataTable(data);
+        ovcatChart = new google.visualization.BubbleChart(document.getElementById('ovcat'));
+        ovcatData = new google.visualization.DataTable(data);
         var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-        var pct = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '', suffix: '%'});
-        money.format(gdata, 1);
-        money.format(gdata, 2);
-        money.format(gdata, 4);
+        var pct = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '',suffix: '%'});
+        money.format(ovcatData, 1);
+        money.format(ovcatData, 2);
+        //pct.format(ovcatData, 4);
+        money.format(ovcatData, 4);
+
+        google.visualization.events.addListener(ovcatChart, 'select', overspendSelectCategory);
 
 
-        chart.setAction({
-          id: 'sample', // An id is mandatory for all actions.
-          text: 'See sample book', // The text displayed in the tooltip.
-          action: function() {           // When clicked, the following runs.
-            selection = chart.getSelection();
-            switch (selection[0].row) {
-              case 0:
-                alert("Ender's Game");
-                break;
-              case 1:
-                alert("Feynman Lectures on Physics");
-                break;
-              case 2:
-                alert("Numerical Recipes in JavaScript");
-                break;
-              case 3:
-                alert("Truman");
-                break;
-              case 4:
-                alert("Freakonomics");
-                break;
-              case 5:
-                alert("The Mezzanine");
-                break;
-              case 6:
-                alert("The Color of Magic");
-                break;
-              case 7:
-                alert("The Law of Superheroes");
-                break;
-            }
-          }
-        });
 
 
-        chart.draw(gdata, opt);
+
+        ovcatChart.draw(ovcatData, opt);
       }
     });
 
@@ -168,4 +143,16 @@ function drawBudgetChart(ID, data) {
     money.format(gdata, i);
   }
   chart.draw(gdata, opt);
+}
+
+function overspendSelectCategory(e) {
+  // always one selection:
+  var bubble = ovcatChart.getSelection()[0].row;
+  var categoryName = ovcatData.getFormattedValue(bubble,0);
+
+  // now we can continue and get some data on that category.
+
+  window.location = '/home/category/overspending/' + encodeURI(categoryName);
+
+  console.log(value);
 }

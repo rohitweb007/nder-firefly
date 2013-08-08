@@ -259,13 +259,13 @@ class ChartController extends BaseController {
                 'type'  => 'string',
             ),
             array(
-                'id'    => 'avg',
-                'label' => 'Spent too much',
+                'id'    => 'toomuch',
+                'label' => 'Spent more than average',
                 'type'  => 'number',
             ),
             array(
                 'id'    => 'spent',
-                'label' => 'Spent so far',
+                'label' => 'Spent so far in total',
                 'type'  => 'number',
             ),
             array(
@@ -274,7 +274,7 @@ class ChartController extends BaseController {
                 'type'  => 'string',
             ),
             array(
-                'id'    => 'spentmore',
+                'id'    => 'spentavg',
                 'label' => 'Spent on average',
                 'type'  => 'number',
             ),
@@ -305,11 +305,11 @@ class ChartController extends BaseController {
           // 3: Kleur(groep)
           // 4: grootte van bolletje.
 
-          $current['c'][0]['v'] = $category->name;
-          $current['c'][1]['v'] = $spent - $avg_spent;
-          $current['c'][2]['v'] = $spent;
-          $current['c'][3]['v'] = $descr;
-          $current['c'][4]['v'] = $spentpct;
+          $current['c'][0]['v'] = $category->name; // name
+          $current['c'][1]['v'] = $spent - $avg_spent; // over spent
+          $current['c'][2]['v'] = $spent; // spent so far
+          $current['c'][3]['v'] = $descr; // judge
+          $current['c'][4]['v'] = $avg_spent; // spent on avg
 
 
           $current['spentindex'] = $spentindex;
@@ -327,7 +327,6 @@ class ChartController extends BaseController {
       $data['rows'][$index]['c'] = $c['c'];
       $index++;
     }
-
     Cache::put($key, $data, 1440);
     return Response::json($data);
   }
