@@ -193,7 +193,7 @@ function drawPieCharts(opt) {
 function drawTransactions(filter) {
   // get the date rage from the control chart
   var state = control.getState();
-  var url = '/home/' + object + '/transactions/';
+  var url = '/home/' + object + '/transactions';
   var key = 'transactions';
   // do some kind of switch on the chart if it is not NULL
   var childType, modifier, childValue;
