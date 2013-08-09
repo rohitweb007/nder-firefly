@@ -10,13 +10,13 @@ class OverviewController extends BaseController {
 
   public function showOverview($object, $id) {
     $start = !is_null(Input::get('start')) ? new Carbon(Input::get('start')) : null;
-    $end = !is_null(Input::get('end')) ? new Carbon(Input::get('end')) : null;
+    $end   = !is_null(Input::get('end')) ? new Carbon(Input::get('end')) : null;
 
     $objects = Str::plural($object);
     $db      = Auth::user()->$objects()->find($id);
     if ($db) {
       return View::make('overview.overview')->with('object', $db)->with('name', $object)->with('names', $objects)
-            ->with('start',$start)->with('end',$end);
+                      ->with('start', $start)->with('end', $end);
     } else {
       return App::abort(404);
     }
@@ -96,9 +96,9 @@ class OverviewController extends BaseController {
       switch ($object) {
         default:
           // let's actually do the defaults:
-          $transactions = floatval($db->transactions()->where('onetime','=',0)->where('date','=',$past->format('Y-m-d'))->sum('amount'));
-          $transfers = floatval($db->transfers()->where('countasexpense','=',1)->where('date','=',$past->format('Y-m-d'))->sum('amount'));
-          $sum = $transactions + $transfers;
+          $transactions                      = floatval($db->transactions()->where('onetime', '=', 0)->where('date', '=', $past->format('Y-m-d'))->sum('amount'));
+          $transfers                         = floatval($db->transfers()->where('countasexpense', '=', 1)->where('date', '=', $past->format('Y-m-d'))->sum('amount'));
+          $sum                               = $transactions + $transfers;
           $data['rows'][$index]['c'][1]['v'] = $sum;
           $data['rows'][$index]['c'][2]['v'] = true;
           break;
@@ -132,7 +132,7 @@ class OverviewController extends BaseController {
           $data['rows'][$index]['c'][2]['v'] = $certain;
           break;
       }
-      $past->add(new DateInterval('P1D'));
+      $past->addDay();
       $index++;
     }
 
@@ -243,7 +243,7 @@ class OverviewController extends BaseController {
     }
     // add expenses outside objects (for good measure).
 
-    $transactions = floatval(Auth::user()->transactions()->whereNull($chart . '_id')->where('amount', $operator, 0)->where($object.'_id', '=', $db->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
+    $transactions = floatval(Auth::user()->transactions()->whereNull($chart . '_id')->where('amount', $operator, 0)->where($object . '_id', '=', $db->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
     if ($chart != 'beneficiary' && $chart != 'account' && $object != 'beneficiary') {
       // transfers hebben geen accountid, die hebben account_from en account_to
 
@@ -265,6 +265,224 @@ class OverviewController extends BaseController {
     }
     Cache::put($key, $data, 1440);
 
+    return Response::json($data);
+  }
+
+  function showTransactions($object) {
+    $id       = intval(Input::get('id'));
+    $start    = new Carbon(Input::get('start'));
+    $end      = new Carbon(Input::get('end'));
+    $objects  = Str::plural($object);
+    // we might filter on expenses or incomes:
+    $modifier = Input::get('modifier');
+
+    // we might need to filter on a certain object.
+    // this object is called the child.
+    // so the object might be an account, and the child might be beneficiary
+    $children = Input::get('childType'); // yes this is confusing.
+    $child    = !is_null($children) ? Str::singular($children) : null;
+
+
+
+    // find the ID that this child signifies.
+    // this might be a beneficiary name or a budget name
+    $selection    = Input::get('childValue');
+    $selectedItem = false; // false means no selection made.
+    if (!strstr($selection, '(no ') === false) {
+      $selectedItem = null; // null means select where NULL.
+    }
+
+    if (!is_null($selection) && $selectedItem === false) {
+      // find it:
+      switch ($child) {
+        default:
+          // just find it.
+          $items = Auth::user()->$children()->get();
+          foreach ($items as $item) {
+            if (Crypt::decrypt($item->name) == $selection) {
+              $selectedItem = $item;
+            }
+          }
+          break;
+        case 'budget':
+          // keep the date in mind!
+          $split       = explode('(', $selection);
+          $budget_name = trim($split[0]);
+          $dateStr     = trim(str_replace(')', '', $split[1]));
+          $date        = new Carbon($dateStr);
+          $budgets     = Auth::user()->budgets()->where('date', '=', $date->format('Y-m-d'))->get();
+          foreach ($budgets as $b) {
+            if (Crypt::decrypt($b->name) == $budget_name) {
+              $selectedItem = $b;
+            }
+          }
+          break;
+      }
+    }
+    //var_dump($selectedItem);exit;
+
+
+    $db = Auth::user()->$objects()->find($id);
+
+    // create (and find)  a cache key:
+    $key = cacheKey('PieChart', $id, $start, $end, $objects,$children,$modifier,$selection);
+    if (Cache::has($key)) {
+      return Response::json(Cache::get($key));
+    }
+    if (!$db) {
+      return App::abort(404);
+    }
+
+    // find the transactions and transfers for $object in range.
+    $index             = 0;
+    $data              = array(
+        'cols' => array(
+            array(
+                'id'    => 'date',
+                'label' => 'Date',
+                'type'  => 'date',
+            ),
+            array(
+                'id'    => 'description',
+                'label' => 'Description',
+                'type'  => 'string',
+            ),
+            array(
+                'id'    => 'amount',
+                'label' => 'Amount',
+                'type'  => 'number',
+            ),
+            array(
+                'id'    => 'account',
+                'label' => 'Account(s)',
+                'type'  => 'string',
+            ),
+            array(
+                'id'    => 'budget',
+                'label' => 'Budget',
+                'type'  => 'string',
+            ),
+            array(
+                'id'    => 'category',
+                'label' => 'Category',
+                'type'  => 'string',
+            ),
+            array(
+                'id'    => 'beneficiary',
+                'label' => 'Beneficiary',
+                'type'  => 'string',
+            ),
+            array(
+                'id'    => 'target',
+                'label' => 'Target',
+                'type'  => 'string',
+            ),
+        ),
+        'rows' => array()
+    );
+    $transactionsQuery = $db->transactions()->
+            leftJoin('accounts', 'accounts.id', '=', 'account_id')->
+            leftJoin('budgets', 'budgets.id', '=', 'budget_id')->
+            leftJoin('categories', 'categories.id', '=', 'category_id')->
+            leftJoin('beneficiaries', 'beneficiaries.id', '=', 'beneficiary_id')->
+            orderBy('transactions.date', 'DESC')->
+            where('transactions.date', '>=', $start->format('Y-m-d'))->
+            where('transactions.date', '<=', $end->format('Y-m-d'));
+    if ($modifier == 'income') {
+      $transactionsQuery->where('transactions.amount', '>', 0);
+    } else if ($modifier == 'expenses') {
+      $transactionsQuery->where('transactions.amount', '<', 0);
+    }
+    if (is_null($selectedItem)) {
+      $transactionsQuery->whereNull($child . '_id');
+    } else if (!is_null($selectedItem) && !$selectedItem === false) {
+      $transactionsQuery->where($child . '_id', '=', $selectedItem->id);
+    }
+
+
+
+    $transactions = $transactionsQuery->get(array(
+        'transactions.id',
+        'accounts.name AS account_name',
+        'budgets.name AS budget_name',
+        'categories.name AS category_name',
+        'beneficiaries.name AS beneficiary_name',
+        'transactions.date', 'description', 'transactions.amount', 'onetime'
+    ));
+    foreach ($transactions as $t) {
+      $date = new Carbon($t->date);
+
+      $data['rows'][$index]['c'][0]['v'] = 'Date(' . intval($date->format('Y')) . ', ' . (intval($date->format('n')) - 1) . ', ' . intval($date->format('j')) . ')';
+      $data['rows'][$index]['c'][1]['v'] = Crypt::decrypt($t->description);
+      $data['rows'][$index]['c'][2]['v'] = floatval($t->amount);
+      $data['rows'][$index]['c'][3]['v'] = is_null($t->account_name) ? null : Crypt::decrypt($t->account_name);
+      $data['rows'][$index]['c'][4]['v'] = is_null($t->budget_name) ? null : Crypt::decrypt($t->budget_name);
+      $data['rows'][$index]['c'][5]['v'] = is_null($t->category_name) ? null : Crypt::decrypt($t->category_name);
+      $data['rows'][$index]['c'][6]['v'] = is_null($t->beneficiary_name) ? null : Crypt::decrypt($t->beneficiary_name);
+      $data['rows'][$index]['c'][7]['v'] = null;
+      $index++;
+    }
+
+    // get the transfers (no filter yet if applicable)
+    $searchTransfers = null;
+    if ($object != 'account' && $object != 'beneficiary') {
+      $searchTransfers = 'transfers';
+    } else if ($object == 'account') {
+
+      if($modifier == 'income') {
+        $searchTransfers = 'transfersto';
+      } else if ($modifier == 'expenses') {
+        $searchTransfers = 'transfersfrom';
+      }
+    }
+
+    if(!is_null($searchTransfers)) {
+
+      $transfersQuery = $db->$searchTransfers()->
+                      leftJoin('categories', 'categories.id', '=', 'category_id')->
+                      leftJoin('accounts as af', 'af.id', '=', 'account_from')->
+                      leftJoin('accounts as at', 'at.id', '=', 'account_to')->
+                      leftJoin('budgets', 'budgets.id', '=', 'budget_id')->
+                      leftJoin('targets', 'targets.id', '=', 'target_id')->
+                      where('countasexpense', '=', 1)->
+                      where('transfers.date', '>=', $start->format('Y-m-d'))->
+                      where('transfers.date', '<=', $end->format('Y-m-d'))->
+                      orderBy('transfers.date', 'DESC')->orderBy('transfers.created_at', 'DESC');
+
+
+      if (is_null($selectedItem) && $child != 'beneficiary') {
+        $transfersQuery->whereNull($child . '_id');
+      } else if (!is_null($selectedItem) && !$selectedItem === false && $child != 'beneficiary') {
+        $transfersQuery->where($child . '_id', '=', $selectedItem->id);
+      }
+
+      $transfers = $transfersQuery->get(
+              array(
+                  'transfers.id',
+                  'categories.name AS category_name',
+                  'at.name AS account_to_name',
+                  'af.name AS account_from_name',
+                  'budgets.name AS budget_name',
+                  'targets.description AS target_description',
+                  'transfers.date', 'transfers.description', 'transfers.amount', 'countasexpense', 'ignoreprediction'
+              )
+      );
+
+      foreach ($transfers as $t) {
+        $date = new Carbon($t->date);
+
+        $data['rows'][$index]['c'][0]['v'] = 'Date(' . intval($date->format('Y')) . ', ' . (intval($date->format('n')) - 1) . ', ' . intval($date->format('j')) . ')';
+        $data['rows'][$index]['c'][1]['v'] = Crypt::decrypt($t->description);
+        $data['rows'][$index]['c'][2]['v'] = floatval($t->amount);
+        $data['rows'][$index]['c'][3]['v'] = !is_null($t->account_from_name) && !is_null($t->account_to_name) ? Crypt::decrypt($t->account_from_name) . ' &rarr;  ' . Crypt::decrypt($t->account_to_name) : null;
+        $data['rows'][$index]['c'][4]['v'] = is_null($t->budget_name) ? null : Crypt::decrypt($t->budget_name);
+        $data['rows'][$index]['c'][5]['v'] = is_null($t->category_name) ? null : Crypt::decrypt($t->category_name);
+        $data['rows'][$index]['c'][6]['v'] = is_null($t->beneficiary_name) ? null : Crypt::decrypt($t->beneficiary_name);
+        $data['rows'][$index]['c'][7]['v'] = null;
+        $index++;
+      }
+    }
+    Cache::put($key,$data,1440);
     return Response::json($data);
   }
 

@@ -37,6 +37,8 @@ Route::get('/home/{object}/overview/{id}', 'OverviewController@showOverview')->w
 
 Route::get('/home/{object}/chart/{id}', 'OverviewController@showOverviewChart')->where('id', '[0-9]+');
 Route::get('/home/{object}/pie', 'OverviewController@showPieChart');
+Route::get('/home/{object}/transactions', 'OverviewController@showTransactions');
+
 # charts themselves
 Route::get('/home/chart/progress/budget', 'ChartController@budgetProgress');
 Route::get('/home/chart/ovcat', 'ChartController@showOverExpendingCategories');

@@ -50,6 +50,12 @@
     <div class="span4"><h4>Incomes per category</h4><div id="categoriesincome" class="piechart loading"></div></div>
   <?php endif; ?>
 </div>
+<div class="row-fluid">
+  <div class="span12">
+    <h4>Transactions & transfers</h4>
+    <div id="transactions"></div>
+  </div>
+</div>
 
 <div id="modal" class="modal hide fade">
   <div class="modal-header">

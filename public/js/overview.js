@@ -1,10 +1,19 @@
 google.load('visualization', '1.0', {'packages': ['controls', 'corechart', 'table']});
-google.setOnLoadCallback(drawCharts);
+google.setOnLoadCallback(drawObject);
 
 var dashboard;
 var control;
 var chart;
-
+var charts = new Array();
+var gdatas = new Array();
+var pieChartOpt = {
+  legend: {position: 'none'},
+  animation: {
+    duration: 1000,
+    easing: 'out',
+  }
+};
+var transactionsOpt = {allowHtml: true};
 
 if (!strend) {
   var end = new Date();
@@ -21,20 +30,8 @@ if (!strstart) {
 
 
 
-var charts = new Array();
-
-var pieChartOpt = {
-  legend: {position: 'none'},
-  animation: {
-    duration: 1000,
-    easing: 'out',
-  }
-};
 
 
-function drawCharts() {
-  drawObject();
-}
 
 
 $(document).ready(function() {
@@ -148,16 +145,19 @@ function drawPie(chart, type) {
       var key = type + chart;
       if (!charts[key]) {
         charts[key] = new google.visualization.PieChart(document.getElementById(chart + type));
+        google.visualization.events.addListener(charts[key], 'select', function() {
+          respondPieClick(key);
+        });
       }
-      var gdata = new google.visualization.DataTable(data);
-      if (gdata.getNumberOfRows() > 0) {
+      gdatas[key] = new google.visualization.DataTable(data);
+      if (gdatas[key].getNumberOfRows() > 0) {
         $('#' + chart + type).prev().show();
         $('#' + chart + type).show();
         var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
-        for (i = 1; i < gdata.getNumberOfColumns(); i++) {
-          money.format(gdata, i);
+        for (i = 1; i < gdatas[key].getNumberOfColumns(); i++) {
+          money.format(gdatas[key], i);
         }
-        charts[key].draw(gdata, pieChartOpt);
+        charts[key].draw(gdatas[key], pieChartOpt);
       } else {
         $('#' + chart + type).prev().hide();
         $('#' + chart + type).hide();
@@ -186,6 +186,77 @@ function drawPieCharts(opt) {
 
     drawPie('categories', 'income');
     drawPie('categories', 'expenses');
+    drawTransactions(null);
+  }
+}
+
+function drawTransactions(filter) {
+  // get the date rage from the control chart
+  var state = control.getState();
+  var url = '/home/' + object + '/transactions/';
+  var key = 'transactions';
+  // do some kind of switch on the chart if it is not NULL
+  var childType, modifier, childValue;
+  if (filter) {
+    childType = filter.childType;
+    modifier = filter.modifier;
+    childValue = filter.childValue;
+
   }
 
+
+  $.getJSON(url, {
+    id: ID,
+    start: state.range.start.toDateString(),
+    end: state.range.end.toDateString(),
+    childType: childType,
+    modifier: modifier,
+    childValue: childValue
+  }, function(data) {
+    var gdata = new google.visualization.DataTable(data);
+
+    var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
+    money.format(gdata, 2);
+
+    if (!charts[key]) {
+      charts[key] = new google.visualization.Table(document.getElementById(key));
+    }
+    charts[key].draw(gdata, transactionsOpt);
+
+
+  }).fail(function() {
+    $('#transactions').empty().removeClass('loading').addClass('load_error');
+  });
+}
+
+/**
+ * So we only select the types of children found in the pie,
+ * and a modifier (more or leess than zero).
+
+ * @param {type} key
+ * @returns {undefined} */
+function respondPieClick(key) {
+  var chart = charts[key] ? charts[key] : null;
+  var gdata = gdatas[key] ? gdatas[key] : null;
+  if (chart && gdata) {
+    var selection = chart.getSelection();
+    if (selection.length > 0) {
+      var rowNumber = selection[0].row;
+      if (key.indexOf('income') > -1) {
+        var modifier = 'income';
+      } else {
+        var modifier = 'expenses';
+      }
+      var childType = key.replace(modifier, '');
+      var childValue = gdata.getValue(rowNumber, 0);
+      // get the row from the chart
+      //var row = ;
+      var filter = {childType: childType, modifier: modifier, childValue: childValue};
+      drawTransactions(filter);
+
+
+    } else {
+      drawTransactions(null);
+    }
+  }
 }
