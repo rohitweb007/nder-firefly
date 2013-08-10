@@ -103,7 +103,11 @@ class ChartController extends BaseController {
     $account      = Auth::user()->accounts()->orderBy('id', 'ASC')->first();
     $debug        = Input::get('debug') == 'true' ? true : false;
     $this->_debug = $debug;
-    $key          = $debug ? cacheKey('prediction', Session::get('period'),rand(1,10000)) : cacheKey('prediction', Session::get('period'));
+    $key          = $debug ? cacheKey('prediction', Session::get('period'), rand(1, 10000)) : cacheKey('prediction', Session::get('period'));
+
+    // a setting related to corrections:
+    $doCorrect = Setting::getSetting('correctPredictionChart') == 'true' ? true : false;
+
     if (Cache::has($key)) {
       $data = Cache::get($key);
     } else {
@@ -150,91 +154,100 @@ class ChartController extends BaseController {
       $this->_e('FIRST is ' . $first->format('d M Y'));
       $today     = new Carbon('now');
       $this->_e('Today is ' . $today->format('d M Y'));
-      $today->modify('first day of this month');
-      $this->_e('Today is ' . $today->format('d M Y'));
       $chartdate = new Carbon('now');
       $chartdate->modify('first day of this month');
       $index     = 0;
+      $this->_e('');
 
       $specificAmount = Auth::user()->settings()->where('name', '=', 'monthlyAmount')->where('date', '=', $today->format('Y-m-d'))->first();
       if ($specificAmount) {
-        $balance = intval(Crypt::decrypt($specificAmount->value));
+        $balance = floatval(Crypt::decrypt($specificAmount->value));
       }
+      $this->_e('Opening balance: ' . $balance);
 
       // loop over each day of the month:
       $this->_e('start month loop');
       for ($i = 1; $i <= intval($today->format('t')); $i++) {
         $this->_e('Now at day #' . $i);
-        $current = clone $first;
-        $day     = $i - 1;
-        if ($day > 0) {
-          $current->add(new DateInterval('P' . $day . 'D'));
-        }
-        $this->_e('Date is now: ' . $current->format('d M Y'));
         // this array will be used to collect average amounts:
-        $average      = array();
-        // loop over each month:
-        // get all transaction results for this day of the month:
-        $transactions = Auth::user()->transactions()->where('amount', '<', 0)->where('onetime', '=', 0)
-                        ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', intval($current->format('d')))
-                        ->orderBy('amount', 'ASC')->get();
-        // lets see what we have
+        $this->_e('Chartdate is: ' . $chartdate->format('Y-m-d'));
+        $this->_e('Today is: ' . $today->format('Y-m-d'));
+        if (($doCorrect && $chartdate > $today) || !$doCorrect) {
 
-        if (count($transactions) > 0) {
-          $min = floatval($transactions[count($transactions) - 1]->amount) * -1;
-          $max = floatval($transactions[0]->amount) * -1;
+          $average      = array();
+          // loop over each month:
+          // get all transaction results for this day of the month:
+          $transactions = Auth::user()->transactions()->where('amount', '<', 0)->where('onetime', '=', 0)
+                          ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)
+                          ->orderBy('amount', 'ASC')->get();
+          // lets see what we have
 
-          // fill the array for the averages later on:
-          foreach ($transactions as $t) {
-            $this->_e('Add to avg['.count($average).'] for transactions: ' . (floatval($t->amount) * -1));
-            $average[] = floatval($t->amount) * -1;
+          if (count($transactions) > 0) {
+            $min = floatval($transactions[count($transactions) - 1]->amount) * -1;
+            $max = floatval($transactions[0]->amount) * -1;
 
+            // fill the array for the averages later on:
+            foreach ($transactions as $t) {
+              //$this->_e('Add to avg['.count($average).'] for transactions: ' . (floatval($t->amount) * -1));
+              $average[] = floatval($t->amount) * -1;
+            }
+          } else {
+            $min = 0;
+            $max = 0;
           }
-        } else {
-          $min = 0;
-          $max = 0;
-        }
 
-        // now do the same for transfers and compare it.
-        $transfers = Auth::user()->transfers()->where('countasexpense', '=', 1)->
-                        where('ignoreprediction', '=', 0)->orderBy('amount', 'ASC')
-                        ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', intval($current->format('d')))->get();
-        if (count($transfers) > 0) {
-          $transfer_min = floatval($transfers[count($transfers) - 1]->amount);
-          $transfer_max = floatval($transfers[0]->amount);
-          $min          = $transfer_min < $min ? $transfer_min : $min;
-          $max          = $transfer_max > $max ? $transfer_max : $max;
-          unset($transfer_max, $transfer_min);
+          // now do the same for transfers and compare it.
+          $transfers = Auth::user()->transfers()->where('countasexpense', '=', 1)->
+                          where('ignoreprediction', '=', 0)->orderBy('amount', 'ASC')
+                          ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)->get();
+          if (count($transfers) > 0) {
+            $transfer_min = floatval($transfers[count($transfers) - 1]->amount);
+            $transfer_max = floatval($transfers[0]->amount);
+            $min          = $transfer_min < $min ? $transfer_min : $min;
+            $max          = $transfer_max > $max ? $transfer_max : $max;
+            unset($transfer_max, $transfer_min);
 
-          // fill the array for the averages later on:
-          foreach ($transfers as $t) {
-            $this->_e('Add to avg['.count($average).'] for transfers: ' . (floatval($t->amount)));
-            $average[] = floatval($t->amount);
+            // fill the array for the averages later on:
+            foreach ($transfers as $t) {
+              //$this->_e('Add to avg['.count($average).'] for transfers: ' . (floatval($t->amount)));
+              $average[] = floatval($t->amount);
+            }
           }
-        }
-        $this->_e('New min: ' . $min);
-        $this->_e('New max: ' . $max);
+          //$this->_e('New min: ' . $min);
+          //$this->_e('New max: ' . $max);
+          // calc avg:
+          //$avg                               = (($max - $min) / 2) + $min;
+          $avg                               = count($average) > 0 ? array_sum($average) / count($average) : array_sum($average);
+          //$this->_e('New avg: ' . $avg);
+          $this->_e('Max: ' . $max . ', min: ' . $min . ', avg: ' . $avg);
+          $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
+          $data['rows'][$index]['c'][1]['v'] = $account->balance($chartdate); // actual balance
+          if ($chartdate > $today) {
+            $data['rows'][$index]['c'][2]['v'] = false;
+          } else {
+            $data['rows'][$index]['c'][2]['v'] = true;
+          }
+          $data['rows'][$index]['c'][3]['v'] = $balance - $avg; // predicted balance
+          $data['rows'][$index]['c'][4]['v'] = $balance - $max; // predicted max expenses.
+          $data['rows'][$index]['c'][5]['v'] = $balance - $min; // predicted max expenses.
+          $balance                           = $balance - $avg;
 
-        // calc avg:
-        //$avg                               = (($max - $min) / 2) + $min;
-        $avg                               = array_sum($average) / count($average);
-        $this->_e('New avg: ' . $avg);
-        $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
-        $data['rows'][$index]['c'][1]['v'] = $account->balance($chartdate); // actual balance
-        if ($chartdate > new Carbon('now')) {
-          $data['rows'][$index]['c'][2]['v'] = false;
         } else {
+          // don't predict.
+          //$balance = $account->balance($chartdate);
+          $this->_e('No prediction today!');
+          $balance = $account->balance($chartdate);
+          $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
+          $data['rows'][$index]['c'][1]['v'] = $balance; // actual balance
           $data['rows'][$index]['c'][2]['v'] = true;
+          $data['rows'][$index]['c'][3]['v'] = null;
+          $data['rows'][$index]['c'][4]['v'] = null;
+          $data['rows'][$index]['c'][5]['v'] = null;
+
         }
-        $data['rows'][$index]['c'][3]['v'] = $balance - $avg; // predicted balance
-        $data['rows'][$index]['c'][4]['v'] = $balance - $max; // predicted max expenses.
-        $data['rows'][$index]['c'][5]['v'] = $balance - $min; // predicted max expenses.
-        $balance                           = $balance - $avg;
-
-
-
-        $chartdate->add(new DateInterval('P1D'));
         $index++;
+        $chartdate->addDay();
+
         $this->_e(' ');
       }
       Cache::put($key, $data, 1440);

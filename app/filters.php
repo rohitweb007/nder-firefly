@@ -70,6 +70,15 @@ Route::filter('gs', function() {
               $bb->value          = Crypt::encrypt('substract');
               $bb->save();
             }
+            // prediction chart behaviour:
+            $pcb = $dbUser->settings()->where('name', '=', 'correctPredictionChart')->remember(1440)->first();
+            if(is_null($pcb)) {
+              $pcb                 = new Setting;
+              $pcb->fireflyuser_id = $dbUser->id;
+              $pcb->name           = 'correctPredictionChart';
+              $pcb->value          = Crypt::encrypt('false');
+              $pcb->save();
+            }
             Auth::loginUsingId($dbUser->id);
           }
           // since the user is now present and accounted for, we can define

@@ -3,12 +3,14 @@
 class FlashMsgHandler {
 
   public function onEloquentCreated($event) {
-    $class  = strtolower(get_class($event));
-    $ignore = array('balancedatapoint','budgetpredictionpoint');
+    if (!defined('LESSEVENTS')) {
+      $class  = strtolower(get_class($event));
+      $ignore = array('balancedatapoint', 'budgetpredictionpoint');
 
-    // flash success message:
-    if (!in_array($class, $ignore)) {
-      Session::flash('success', 'The new ' . $class . ' has been created.');
+      // flash success message:
+      if (!in_array($class, $ignore)) {
+        Session::flash('success', 'The new ' . $class . ' has been created.');
+      }
     }
   }
 
@@ -25,6 +27,7 @@ class FlashMsgHandler {
   }
 
 }
+
 $subscriber = new FlashMsgHandler;
 
 Event::subscribe($subscriber);

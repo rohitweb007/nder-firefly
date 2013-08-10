@@ -27,6 +27,17 @@ class SettingsController extends BaseController {
         $setting->save();
       }
     }
+    // special case for checkboxes:
+    //correctPredictionChart
+    $setting = Auth::user()->settings()->where('name','=','correctPredictionChart')->first();
+    if(Input::get('correctPredictionChart') == 'true') {
+      $setting->value = Crypt::encrypt('true');
+    } else {
+      $setting->value = Crypt::encrypt('false');
+    }
+
+    $setting->save();
+
     Session::flash('success','Your settings have been saved.');
     return Redirect::to('/home/settings');
   }

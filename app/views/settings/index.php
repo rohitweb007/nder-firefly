@@ -66,6 +66,18 @@
       echo Form::select('defaultSavingsAccount', $acc, $defaultSavings);
       ?>
     <?php endif; ?>
+    <h4>Correct the prediction chart</h4>
+    <p>
+      Since average amounts just don't cut it (they tend to "flat out") the prediction graph
+      is usually predicting a way higher balance than it should. By checking this checkbox,
+      it will always correct itself to your current balance instead of sticking to the current
+      month's start amount.
+    </p>
+    <?php
+    $setting = Setting::getSetting('correctPredictionChart');
+    $checked = $setting == 'true' ? true : false;
+    echo Form::checkbox('correctPredictionChart','true',$checked);
+    ?>
 
     <p>
       &nbsp;

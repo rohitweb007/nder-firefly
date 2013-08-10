@@ -11,6 +11,7 @@ class ImportController extends BaseController {
   }
 
   public function doImport() {
+    define('LESSEVENTS',true);
     if (strlen(Input::get('payload_text')) == 0) {
       $payload = Input::file('payload');
       $raw     = File::get($payload);
@@ -24,7 +25,8 @@ class ImportController extends BaseController {
         Auth::user()->budgets()->get(),
         Auth::user()->categories()->get(),
         Auth::user()->beneficiaries()->get(),
-        Auth::user()->settings()->get()
+        Auth::user()->settings()->get(),
+        Auth::user()->targets()->get()
     );
 
 
@@ -83,6 +85,11 @@ class ImportController extends BaseController {
           $item['target_id'] = $mapping['targets'][intval($item['target_id'])];
         }
 
+        // overrule due date for targets:
+        if(isset($item['duedate']) && $item['duedate'] == '0000-00-00') {
+          $item['duedate'] = null;
+        }
+
         // remap settings:
         if ($class == 'Setting') {
           if ($item['name'] == 'defaultCheckingAccount') {
@@ -115,6 +122,7 @@ class ImportController extends BaseController {
           if ($class == 'Setting') {
             $object->value = Crypt::encrypt($object->value);
           }
+
           // save:
           $object->save();
 

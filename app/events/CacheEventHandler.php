@@ -3,33 +3,43 @@
 class CacheEventHandler {
 
   public function CRUDTransaction($event) {
-    $class   = strtolower(get_class($event));
-    $account = Account::find($event->account_id);
-    if ($account) {
-      $account->balancedatapoints()->where('date', '>=', $event->date)->delete();
+    if (!defined('LESSEVENTS')) {
+      $class   = strtolower(get_class($event));
+      $account = Account::find($event->account_id);
+      if ($account) {
+        $account->balancedatapoints()->where('date', '>=', $event->date)->delete();
+      }
+      $this->flushCache();
     }
-    $this->flushCache();
   }
 
   public function createdTransfer($event) {
-    $ids      = array($event->account_from, $event->account_to);
-    $accounts = Account::whereIn('id', $ids)->get();
-    foreach ($accounts as $account) {
-      $account->balancedatapoints()->where('date', '>=', $event->date)->delete();
+    if (!defined('LESSEVENTS')) {
+      $ids      = array($event->account_from, $event->account_to);
+      $accounts = Account::whereIn('id', $ids)->get();
+      foreach ($accounts as $account) {
+        $account->balancedatapoints()->where('date', '>=', $event->date)->delete();
+      }
+      $this->flushCache();
     }
-    $this->flushCache();
   }
 
   private function flushCache() {
-    Cache::flush();
+    if (!defined('LESSEVENTS')) {
+      Cache::flush();
+    }
   }
 
   public function createdAll($event) {
-    Cache::flush();
+    if (!defined('LESSEVENTS')) {
+      Cache::flush();
+    }
   }
 
   public function deletedAll($event) {
-    Cache::flush();
+    if (!defined('LESSEVENTS')) {
+      Cache::flush();
+    }
   }
 
   /**
@@ -40,7 +50,6 @@ class CacheEventHandler {
    */
   public function subscribe($events) {
     //created, updated, saved, deleted
-
     $events->listen('eloquent.created: Transaction', 'CacheEventHandler@CRUDTransaction');
     $events->listen('eloquent.deleted: Transaction', 'CacheEventHandler@CRUDTransaction');
     $events->listen('eloquent.updated: Transaction', 'CacheEventHandler@CRUDTransaction');
