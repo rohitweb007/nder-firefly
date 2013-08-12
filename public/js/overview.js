@@ -133,7 +133,13 @@ function updateHeader() {
 function drawPie(chart, type) {
   url = '/home/' + object + '/pie/';
   var state = control.getState();
-  if ($('#' + chart + type).length > 0) {
+  var box = $('#' + chart + type);
+  var header = box.prev();
+  if (box.length > 0) {
+    // add loading gif:
+    var loadgif = $('<img>').attr('src', '/img/ajax-loader.gif').addClass('loadingGif');
+    loadgif.appendTo(header);
+
     // draw it!
     $.getJSON(url, {
       id: ID,
@@ -150,6 +156,7 @@ function drawPie(chart, type) {
         });
       }
       gdatas[key] = new google.visualization.DataTable(data);
+      loadgif.remove();
       if (gdatas[key].getNumberOfRows() > 0) {
         $('#' + chart + type).prev().show();
         $('#' + chart + type).show();
@@ -165,6 +172,7 @@ function drawPie(chart, type) {
 
     }).fail(function() {
       $('#' + chart + type).removeClass('loading').addClass('load_error');
+      loadgif.remove();
     });
   }
 
