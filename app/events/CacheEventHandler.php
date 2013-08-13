@@ -4,7 +4,6 @@ class CacheEventHandler {
 
   public function CRUDTransaction($event) {
     if (!defined('LESSEVENTS')) {
-      $class   = strtolower(get_class($event));
       $account = Account::find($event->account_id);
       if ($account) {
         $account->balancedatapoints()->where('date', '>=', $event->date)->delete();
@@ -49,15 +48,18 @@ class CacheEventHandler {
    * @return array
    */
   public function subscribe($events) {
-    //created, updated, saved, deleted
-    $events->listen('eloquent.created: Transaction', 'CacheEventHandler@CRUDTransaction');
+
+
+    // delete a Transaction:
     $events->listen('eloquent.deleted: Transaction', 'CacheEventHandler@CRUDTransaction');
-    $events->listen('eloquent.updated: Transaction', 'CacheEventHandler@CRUDTransaction');
+
+    // edit or create a Transaction
     $events->listen('eloquent.saved: Transaction', 'CacheEventHandler@CRUDTransaction');
 
+    // create a transfer
     $events->listen('eloquent.created: Transfer', 'CacheEventHandler@createdTransfer');
 
-    // all
+    // create anything or delete anything.
     $events->listen('eloquent.created: *', 'CacheEventHandler@createdAll');
     $events->listen('eloquent.deleted: *', 'CacheEventHandler@deletedAll');
   }
@@ -65,5 +67,4 @@ class CacheEventHandler {
 }
 
 $subscriber = new CacheEventHandler;
-
 Event::subscribe($subscriber);

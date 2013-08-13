@@ -1,15 +1,5 @@
 <?php
 use Carbon\Carbon as Carbon;
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of ComparisionController
- *
- * @author sander
- */
 class ComparisionController extends BaseController {
 
   private $_base;

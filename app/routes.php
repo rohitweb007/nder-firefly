@@ -17,6 +17,9 @@ Route::post('/home/settings/delete', 'SettingsController@deleteSetting');
 Route::post('/home/import', 'ImportController@doImport');
 Route::post('/home/delete', 'HomeController@doDelete');
 
+# tasks
+Route::get('/task/app', 'TaskController@doAPP');
+
 #tags
 Route::get('/home/tags','TagsController@testTags');
 

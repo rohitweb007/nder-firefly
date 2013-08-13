@@ -5,7 +5,7 @@ class FlashMsgHandler {
   public function onEloquentCreated($event) {
     if (!defined('LESSEVENTS')) {
       $class  = strtolower(get_class($event));
-      $ignore = array('balancedatapoint', 'budgetpredictionpoint');
+      $ignore = array('balancedatapoint', 'budgetpredictionpoint', 'accountpredictionpoint', 'beneficiary', 'category');
 
       // flash success message:
       if (!in_array($class, $ignore)) {
@@ -22,12 +22,9 @@ class FlashMsgHandler {
    */
   public function subscribe($events) {
     $events->listen('eloquent.created: *', 'FlashMsgHandler@onEloquentCreated');
-    //$events->listen('user.login', 'UserEventHandler@onUserLogin');
-    //$events->listen('user.logout', 'UserEventHandler@onUserLogout');
   }
 
 }
 
 $subscriber = new FlashMsgHandler;
-
 Event::subscribe($subscriber);

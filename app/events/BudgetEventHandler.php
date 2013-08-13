@@ -2,21 +2,10 @@
 
 use Carbon\Carbon as Carbon;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of BudgetEventHandler
- *
- * @author sander
- */
 class BudgetEventHandler {
 
   public function updateBudgetPrediction($event) {
     $event->name = Crypt::decrypt($event->name);
-
 
     // remove all budget prediction points, if any
     $event->budgetpredictionpoints()->delete();
@@ -42,23 +31,20 @@ class BudgetEventHandler {
       // then make sure it's "average".
       foreach ($amounts as $day => $amount) {
         // save as budget prediction point.
-        $bpp = new Budgetpredictionpoint;
+        $bpp            = new Budgetpredictionpoint;
         $bpp->budget_id = $event->id;
-        $bpp->amount = ($amount / count($similar));
-        $bpp->day = $day;
+        $bpp->amount    = ($amount / count($similar));
+        $bpp->day       = $day;
         $bpp->save();
       }
     }
   }
 
-  //put your code here
   public function subscribe($events) {
-    $events->listen('eloquent.created: Budget', 'BudgetEventHandler@updateBudgetPrediction');
-    $events->listen('eloquent.updated: Budget', 'BudgetEventHandler@updateBudgetPrediction');
+    $events->listen('eloquent.saved: Budget', 'BudgetEventHandler@updateBudgetPrediction');
   }
 
 }
 
-$subscriber = new BudgetEventHandler();
-
-Event::subscribe($subscriber);
+$BudgetHandler = new BudgetEventHandler();
+Event::subscribe($BudgetHandler);

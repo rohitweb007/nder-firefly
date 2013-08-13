@@ -88,6 +88,7 @@ function mf($m, $colorize = false) {
 /*
  * Some cache related functions below:
  */
+
 function cacheKey() {
   $keys = func_get_args();
   $cKey = Auth::user()->id;
