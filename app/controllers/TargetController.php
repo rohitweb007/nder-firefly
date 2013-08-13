@@ -151,11 +151,11 @@ class TargetController extends BaseController {
     return View::make('targets.all')->with('data', $data);
   }
 
-  public function homeOverviewGraph($id = 0) {
+  public function homeOverviewChart($id = 0) {
     $target = Auth::user()->targets()->find($id);
 
     if ($target) {
-      $key = cacheKey('Target', 'homeOverviewGraph', $id, Session::get('period'));
+      $key = cacheKey('Target', 'homeOverviewChart', $id, Session::get('period'));
       if (Cache::has($key)) {
         return Response::json(Cache::get($key));
       } else {

@@ -13,7 +13,7 @@ class PageController extends BaseController {
   }
 
   public function progressPage() {
-    // let's find budgets with "sisters", budgets with the same name. Then, get some graphs going on.
+    // let's find budgets with "sisters", budgets with the same name. Then, get some charts going on.
     $budgets = Auth::user()->budgets()->orderBy('date', 'DESC')->get();
     $list    = array();
     $last    = array();

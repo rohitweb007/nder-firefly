@@ -14,13 +14,13 @@ function drawProgressCharts() {
     var box = $(v);
     var budget = box.attr('data-value');
 
-    // get JSON for graph:
+    // get JSON for chart:
     if (cached[budget]) {
       gdata = new google.visualization.DataTable(cached[budget]);
       drawProgressChart(box, gdata);
     } else {
       $.getJSON('/home/chart/progress/budget', {budget: budget}, function(data) {
-        // when data is here, create graph object:
+        // when data is here, create chart object:
 
         var gdata = new google.visualization.DataTable(data);
         drawProgressChart(box, gdata);

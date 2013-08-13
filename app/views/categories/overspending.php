@@ -82,7 +82,7 @@
 <div class="row-fluid">
   <div class="span6">
     <h4>Months for this category</h4>
-    <p>Please note that this graph is corrected for the day of the month.
+    <p>Please note that this chart is corrected for the day of the month.
       It only counts up until the <?php echo Session::get('period')->format('jS'); ?> of <?php echo Session::get('period')->format('F Y'); ?>.
     <table class="table table-bordered table-striped">
       <tr>

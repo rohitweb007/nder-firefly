@@ -9,32 +9,32 @@ var ovcatChart,ovcatData;
 
 function drawChart() {
 
-  $.each($('.accountOverviewGraph'), function(i, v) {
-    var graphHolder = $(v);
-    var ID = graphHolder.attr('data-value');
+  $.each($('.accountOverviewChart'), function(i, v) {
+    var chartHolder = $(v);
+    var ID = chartHolder.attr('data-value');
 
-    // do async data grab for all graphs:
+    // do async data grab for all charts:
     //var gdata = new google.visualization.DataTable(accountCache[ID]);
     if (!accountCache[ID]) {
-      $.getJSON('/home/account/overviewGraph/' + ID, function(data) {
+      $.getJSON('/home/account/overviewChart/' + ID, function(data) {
         drawAccountChart(ID, data);
       }).fail(function() {
-        $('#accountOverviewGraph' + ID).removeClass('loading').addClass('load_error');
+        $('#accountOverviewChart' + ID).removeClass('loading').addClass('load_error');
       });
     } else {
       drawAccountChart(ID, accountCache[ID]);
     }
   });
 
-  $.each($('.budgetOverviewGraph'), function(i, v) {
-    var graphHolder = $(v);
-    var ID = graphHolder.attr('data-value');
+  $.each($('.budgetOverviewChart'), function(i, v) {
+    var chartHolder = $(v);
+    var ID = chartHolder.attr('data-value');
 
     if (!budgetCache[ID]) {
-      $.getJSON('/home/budget/overviewGraph/' + ID, function(data) {
+      $.getJSON('/home/budget/overviewChart/' + ID, function(data) {
         drawBudgetChart(ID, data);
       }).fail(function() {
-        $('#budgetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
+        $('#budgetOverviewChart' + ID).removeClass('loading').addClass('load_error');
       });
     } else {
       drawBudgetChart(ID, budgetCache[ID]);
@@ -42,11 +42,11 @@ function drawChart() {
 
   });
 
-  $.each($('.targetOverviewGraph'), function(i, v) {
-    var graphHolder = $(v);
-    var ID = graphHolder.attr('data-value');
-    $.getJSON('/home/target/overviewGraph/' + ID, function(data) {
-      var chart = new google.visualization.AreaChart(document.getElementById('targetOverviewGraph' + ID));
+  $.each($('.targetOverviewChart'), function(i, v) {
+    var chartHolder = $(v);
+    var ID = chartHolder.attr('data-value');
+    $.getJSON('/home/target/overviewChart/' + ID, function(data) {
+      var chart = new google.visualization.AreaChart(document.getElementById('targetOverviewChart' + ID));
       var gdata = new google.visualization.DataTable(data);
       var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
       for (i = 1; i < gdata.getNumberOfColumns(); i++) {
@@ -65,7 +65,7 @@ function drawChart() {
 
       chart.draw(gdata, opt);
     }).fail(function() {
-      $('#targetOverviewGraph' + ID).removeClass('loading').addClass('load_error');
+      $('#targetOverviewChart' + ID).removeClass('loading').addClass('load_error');
     });
 
   });
@@ -122,7 +122,7 @@ function drawAccountChart(ID, data) {
     chartArea: {left: 40, width: '100%'}
   };
 
-  var chart = new google.visualization.AreaChart(document.getElementById('accountOverviewGraph' + ID));
+  var chart = new google.visualization.AreaChart(document.getElementById('accountOverviewChart' + ID));
   var gdata = new google.visualization.DataTable(data);
   var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
   for (i = 1; i < gdata.getNumberOfColumns(); i++) {
@@ -136,7 +136,7 @@ function drawBudgetChart(ID, data) {
 
   var opt = {vAxis: {textPosition: 'none'}, lineWidth: 1, legend: {position: 'none'}, hAxis: {textPosition: 'none', gridlines: {count: 2}}, height: 90, chartArea: {left: 40, width: '100%'}};
 
-  var chart = new google.visualization.AreaChart(document.getElementById('budgetOverviewGraph' + ID));
+  var chart = new google.visualization.AreaChart(document.getElementById('budgetOverviewChart' + ID));
   var gdata = new google.visualization.DataTable(data);
   var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});
   for (i = 1; i < gdata.getNumberOfColumns(); i++) {

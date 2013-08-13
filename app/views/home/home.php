@@ -14,7 +14,7 @@
         <tr>
           <th colspan="2">
             <script type="text/javascript">
-              accountCache[<?php echo $account['id']; ?>] = <?php echo json_encode(Cache::get(cacheKey('Account', 'homeOverviewGraph', $account['id'], Session::get('period')))); ?>;
+              accountCache[<?php echo $account['id']; ?>] = <?php echo json_encode(Cache::get(cacheKey('Account', 'homeOverviewChart', $account['id'], Session::get('period')))); ?>;
             </script>
             <?php
             echo HTML::Link('/home/account/overview/' . $account['id'], $account['name'], $account['header']);
@@ -26,7 +26,7 @@
         </tr>
         <tr>
           <td colspan="3">
-            <div class="accountOverviewGraph loading" data-value="<?php echo $account['id']; ?>" id="accountOverviewGraph<?php echo $account['id']; ?>"></div>
+            <div class="accountOverviewChart loading" data-value="<?php echo $account['id']; ?>" id="accountOverviewChart<?php echo $account['id']; ?>"></div>
           </td>
         </tr>
       <?php endforeach;
@@ -59,7 +59,7 @@
             <tr>
               <th style="width:30%;">
                 <script type="text/javascript">
-                  budgetCache[<?php echo $budget['id']; ?>] = <?php echo json_encode(Cache::get(cacheKey('Budget', 'homeOverviewGraph', $budget['id'], Session::get('period')))); ?>;
+                  budgetCache[<?php echo $budget['id']; ?>] = <?php echo json_encode(Cache::get(cacheKey('Budget', 'homeOverviewChart', $budget['id'], Session::get('period')))); ?>;
                 </script>
 
                 <?php if ($budget['overflow'] === false): ?>
@@ -72,7 +72,7 @@
             </tr>
             <tr>
               <td colspan="3">
-                <div class="budgetOverviewGraph loading" data-value="<?php echo $budget['id']; ?>" id="budgetOverviewGraph<?php echo $budget['id']; ?>"></div>
+                <div class="budgetOverviewChart loading" data-value="<?php echo $budget['id']; ?>" id="budgetOverviewChart<?php echo $budget['id']; ?>"></div>
               </td>
             </tr>
     <?php endforeach; ?>
@@ -107,7 +107,7 @@
             <td><small><?php echo mf($target['saved']); ?> ... <?php echo mf($target['amount']); ?> </td>
           <tr>
             <td colspan="3">
-              <div class="targetOverviewGraph loading" data-value="<?php echo $target['id']; ?>" id="targetOverviewGraph<?php echo $target['id']; ?>"></div>
+              <div class="targetOverviewChart loading" data-value="<?php echo $target['id']; ?>" id="targetOverviewChart<?php echo $target['id']; ?>"></div>
             </td>
   <?php } ?>
       </table>

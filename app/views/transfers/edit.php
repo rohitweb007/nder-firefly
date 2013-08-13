@@ -82,7 +82,7 @@
       <label class="control-label" for="inputIgnorePrediction">Ignore in predictions</label>
       <div class="controls">
         <?php echo Form::checkbox('ignoreprediction',null,($transfer->ignoreprediction == 1 ? true : false),array('id' => 'inputIgnorePrediction')); ?>
-        &nbsp;&nbsp;<img class="tt" title="Graphs that try to guess your future balance also trigger on transfers, unless you choose to ignore them." src="/img/icons/help.png" alt="Help on this field" />
+        &nbsp;&nbsp;<img class="tt" title="Charts that try to guess your future balance also trigger on transfers, unless you choose to ignore them." src="/img/icons/help.png" alt="Help on this field" />
         <br /><span class="text-error"><?php echo $errors->first('ignoreprediction'); ?></span>
         <datalist id="editTransferTarget">
           <?php foreach($targets as $t): ?>

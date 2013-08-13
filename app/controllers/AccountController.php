@@ -99,8 +99,8 @@ class AccountController extends BaseController {
     }
   }
 
-  public function homeOverviewGraph($id = 0) {
-    $key = cacheKey('Account', 'homeOverviewGraph', $id, Session::get('period'));
+  public function homeOverviewChart($id = 0) {
+    $key = cacheKey('Account', 'homeOverviewChart', $id, Session::get('period'));
 
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));

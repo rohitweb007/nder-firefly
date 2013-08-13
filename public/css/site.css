@@ -1,6 +1,6 @@
-.accountOverviewGraph {width:100%;height:90px;}
-.budgetOverviewGraph {width:100%;height:90px;}
-.targetOverviewGraph {width:100%;height:180px;}
+.accountOverviewChart {width:100%;height:90px;}
+.budgetOverviewChart {width:100%;height:90px;}
+.targetOverviewChart {width:100%;height:180px;}
 .showTransactions {cursor:pointer;}
 
 .loading {background:url('/img/ajax-loader.gif') center center no-repeat;}

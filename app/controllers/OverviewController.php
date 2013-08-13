@@ -29,7 +29,7 @@ class OverviewController extends BaseController {
    * @return type
    */
   public function showOverviewChart($object, $id = 0) {
-    $key = cacheKey($object, 'overviewGraph', $id, Session::get('period'));
+    $key = cacheKey($object, 'overviewChart', $id, Session::get('period'));
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }

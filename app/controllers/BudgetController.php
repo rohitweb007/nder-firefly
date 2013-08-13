@@ -120,9 +120,9 @@ class BudgetController extends BaseController {
     }
   }
 
-  public function homeOverviewGraph($id = 0) {
+  public function homeOverviewChart($id = 0) {
 
-    $key = cacheKey('Budget', 'homeOverviewGraph', $id, Session::get('period'));
+    $key = cacheKey('Budget', 'homeOverviewChart', $id, Session::get('period'));
 
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));

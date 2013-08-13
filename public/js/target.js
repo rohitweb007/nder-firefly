@@ -31,7 +31,7 @@ function deleteTarget(ev) {
 
 
 function drawTarget() {
-  $.getJSON('/home/target/overviewGraph/' + ID, function(data) {
+  $.getJSON('/home/target/overviewChart/' + ID, function(data) {
       var chart = new google.visualization.AreaChart(document.getElementById('chart'));
       var gdata = new google.visualization.DataTable(data);
       var money = new google.visualization.NumberFormat({decimalSymbol: ',', groupingSymbol: '.', prefix: '€ '});

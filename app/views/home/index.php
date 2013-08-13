@@ -17,7 +17,7 @@
           <p>
             Firefly is a personal finances app anybody can use. It allows you
             to track your personal accounts, save transactions, set saving targets
-            and tries to make some neat graphs to show you how you're doing.
+            and tries to make some neat charts to show you how you're doing.
           </p>
           <p>
             You can find an example screenshot here (todo).

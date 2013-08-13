@@ -21,12 +21,12 @@ $(document).ready(function() {
 
 
 //
-//    var graphHolder = $(v);
-//    var ID = graphHolder.attr('data-value');
-//    // grab data for this graph:
-//    var data = $.ajax({url: "/home/budget/overviewGraph/" + ID, dataType: "json", async: false}).responseText;
+//    var chartHolder = $(v);
+//    var ID = chartHolder.attr('data-value');
+//    // grab data for this chart:
+//    var data = $.ajax({url: "/home/budget/overviewChart/" + ID, dataType: "json", async: false}).responseText;
 //    // make chart for the data:
-//    var chart = new google.visualization.LineChart(document.getElementById('accountOverviewGraph' + ID));
+//    var chart = new google.visualization.LineChart(document.getElementById('accountOverviewChart' + ID));
 //    // make GData:
 //    var gdata = new google.visualization.DataTable(data);
 //
