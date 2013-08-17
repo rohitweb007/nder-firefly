@@ -158,6 +158,9 @@ class ChartController extends BaseController {
       $chartdate->modify('first day of this month');
       $index     = 0;
       $this->_e('');
+      $diff = $first->diff($today);
+      $months = ($diff->y*12) + $diff->m;
+      unset($diff);
 
       $specificAmount = Auth::user()->settings()->where('name', '=', 'monthlyAmount')->where('date', '=', $today->format('Y-m-d'))->first();
       if ($specificAmount) {
@@ -217,7 +220,7 @@ class ChartController extends BaseController {
           //$this->_e('New max: ' . $max);
           // calc avg:
           //$avg                               = (($max - $min) / 2) + $min;
-          $avg                               = count($average) > 0 ? array_sum($average) / count($average) : array_sum($average);
+          $avg                               = $months > 0 ? array_sum($average) / $months : array_sum($average);
           //$this->_e('New avg: ' . $avg);
           $this->_e('Max: ' . $max . ', min: ' . $min . ', avg: ' . $avg);
           $data['rows'][$index]['c'][0]['v'] = $chartdate->format('j F');
