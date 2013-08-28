@@ -125,6 +125,16 @@
 
 
 
+    <div class="control-group">
+      <label class="control-label" for="inputTags">Tags</label>
+      <div class="controls">
+        <i class="icon-bar"></i>&nbsp;&nbsp;<?php echo Form::text('tags', $transaction->tagList(), array('id'           => 'inputTags', 'autocomplete' => 'off', 'class'        => 'input-xxlarge', 'placeholder'  => 'Type tags here', 'data-role'    => 'tagsinput')); ?>
+        <br /><span class="text-error"><?php echo $errors->first('tags'); ?></span>
+      </div>
+    </div>
+
+
+
 
     <div class="control-group">
       <div class="controls">

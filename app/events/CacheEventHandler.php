@@ -8,6 +8,7 @@ class CacheEventHandler {
       if ($account) {
         $account->balancedatapoints()->where('date', '>=', $event->date)->delete();
       }
+      // also delete other stuff?
       $this->flushCache();
     }
   }
@@ -53,8 +54,12 @@ class CacheEventHandler {
     // delete a Transaction:
     $events->listen('eloquent.deleted: Transaction', 'CacheEventHandler@CRUDTransaction');
 
-    // edit or create a Transaction
+    // edit or create a Transaction (also original catch for saving).
+    $events->listen('eloquent.saving: Transaction', 'CacheEventHandler@CRUDTransaction');
     $events->listen('eloquent.saved: Transaction', 'CacheEventHandler@CRUDTransaction');
+
+
+    // debug save / before save
 
     // create a transfer
     $events->listen('eloquent.created: Transfer', 'CacheEventHandler@createdTransfer');

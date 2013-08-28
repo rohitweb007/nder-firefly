@@ -1,5 +1,10 @@
 <?php
+
+require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
+
+use google\appengine\api\cloud_storage\CloudStorageTools;
 use Carbon\Carbon as Carbon;
+
 class ImportController extends BaseController {
 
   public function __construct() {
@@ -7,11 +12,18 @@ class ImportController extends BaseController {
   }
 
   public function showImport() {
-    return View::make('home.import');
+
+    $options    = [ 'gs_bucket_name' => 'nder-firefly'];
+    $upload_url = CloudStorageTools::createUploadUrl('/home/import', $options);
+
+    return View::make('home.import')->with('url',$upload_url);
   }
 
   public function doImport() {
-    define('LESSEVENTS',true);
+    var_dump($_FILES);
+    var_dump($_POST);
+    exit();
+    define('LESSEVENTS', true);
     if (strlen(Input::get('payload_text')) == 0) {
       $payload = Input::file('payload');
       $raw     = File::get($payload);
@@ -86,7 +98,7 @@ class ImportController extends BaseController {
         }
 
         // overrule due date for targets:
-        if(isset($item['duedate']) && $item['duedate'] == '0000-00-00') {
+        if (isset($item['duedate']) && $item['duedate'] == '0000-00-00') {
           $item['duedate'] = null;
         }
 

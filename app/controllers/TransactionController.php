@@ -237,6 +237,8 @@ class TransactionController extends BaseController {
   }
 
   public function newTransaction() {
+
+
     $transaction                 = new Transaction;
     $transaction->amount         = floatval(Input::get('amount'));
     $transaction->fireflyuser_id = Auth::user()->id;
@@ -329,8 +331,19 @@ class TransactionController extends BaseController {
     if ($validator->fails()) {
       return Redirect::to('/home/transaction/add')->withErrors($validator)->withInput();
     } else {
+
+      // the transaction was valid! lets save some tags!
       $transaction->save();
-      return Redirect::to('/home');
+
+      if(Input::get('tags') != null && strlen(Input::get('tags')) > 0) {
+        $tags = explode(',',Input::get('tags'));
+
+        foreach($tags as $tag) {
+          $dbTag = Tag::findOrCreate($tag);
+          $transaction->tags()->attach($dbTag);
+        }
+      }
+      return Redirect::to('/home/transaction/add');
     }
   }
 
@@ -461,12 +474,25 @@ class TransactionController extends BaseController {
         $transaction->beneficiary_id = null;
       }
 
+
+
+
+
       $validator                = Validator::make($transaction->toArray(), Transaction::$rules);
       $transaction->description = Crypt::encrypt($transaction->description);
 
       if ($validator->fails()) {
         return Redirect::to('/home/transaction/edit/' . $transaction->id)->withErrors($validator)->withInput();
       } else {
+
+        // work the tags
+        $tags = explode(',',Input::get('tags'));
+        $sync = array();
+        foreach($tags as $tag) {
+          $dbTag = Tag::findOrCreate($tag);
+          $sync[] = $dbTag->id;
+        }
+        $transaction->tags()->sync($sync);
         $transaction->save();
         return Redirect::to('/home/transactions');
       }

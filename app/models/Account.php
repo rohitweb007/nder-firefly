@@ -29,39 +29,16 @@ class Account extends Eloquent {
 
     $balance = $this->balancedatapoints()->where('date', '=', $date->format('Y-m-d'))->first();
 
-    if (!is_null($balance)) {
-      return $balance->balance;
-    } else {
-      // terug rekenen tot de start van account en balance points maken:
-
-      $startbalance = floatval($this->balance);
-      $workdate     = clone $date;
-      while ($workdate >= $start) {
-        // calculate the account's balance for this day and save it in the database.
-        // if it's already there, skip it:
-        $workbalance = $this->balancedatapoints()->where('date', '=', $workdate->format('Y-m-d'))->first();
-        if (is_null($workbalance)) {
-          // calculate it:
-          $tr_sum           = floatval($this->transactions()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
-          $away_sum         = floatval($this->transfersfrom()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount')) * -1;
-          $here_sum         = floatval($this->transfersto()->remember(1440)->where('date', '<=', $workdate->format('Y-m-d'))->sum('amount'));
-          $result           = $startbalance + $tr_sum + $away_sum + $here_sum;
-          $data             = new Balancedatapoint();
-          $data->date       = $workdate->format('Y-m-d');
-          $data->balance    = $result;
-          $data->account_id = $this->id;
-          $data->save();
-        }
-        $workdate->subDay();
-      }
-      // then, we should / MUST have today's balance.
-      $today = $this->balancedatapoints()->where('date', '=', $date->format('Y-m-d'))->first();
-      if (is_null($today)) {
-        return App::abort(500);
+    if (is_null($balance)) {
+      // trigger balance point for this day.
+      $result = Event::fire('account.makeBDP', array('account' => $this, 'date'    => $date));
+      if(isset($result[0])) {
+        $balance = $result[0];
       } else {
-        return floatval($today->balance);
+        App::abort(500);
       }
     }
+    return $balance->balance;
   }
 
   public function balanceOld(DateTime $date = null) {

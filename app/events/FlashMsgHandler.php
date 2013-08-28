@@ -5,7 +5,7 @@ class FlashMsgHandler {
   public function onEloquentCreated($event) {
     if (!defined('LESSEVENTS')) {
       $class  = strtolower(get_class($event));
-      $ignore = array('balancedatapoint', 'budgetpredictionpoint', 'accountpredictionpoint', 'beneficiary', 'category');
+      $ignore = array('balancedatapoint','tag', 'budgetpredictionpoint', 'accountpredictionpoint', 'beneficiary', 'category');
 
       // flash success message:
       if (!in_array($class, $ignore)) {

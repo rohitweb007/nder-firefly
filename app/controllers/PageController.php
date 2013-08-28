@@ -9,7 +9,14 @@ class PageController extends BaseController {
   }
 
   public function predictionChart() {
-    return View::make('pages.prediction');
+    $accounts = Auth::user()->accounts()->get();
+    $alist = array();
+    foreach($accounts as $a) {
+      $alist[] = array('name' => Crypt::decrypt($a->name),'id' => intval($a->id));
+    }
+
+
+    return View::make('pages.prediction')->with('accounts',$alist);;
   }
 
   public function progressPage() {

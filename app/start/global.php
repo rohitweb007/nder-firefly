@@ -109,5 +109,6 @@ function cacheKey() {
 require app_path() . '/events/CacheEventHandler.php';
 require app_path() . '/events/BudgetEventHandler.php';
 require app_path() . '/events/FlashMsgHandler.php';
+require app_path() . '/events/AccountEventHandler.php';
 
 require app_path() . '/filters.php';

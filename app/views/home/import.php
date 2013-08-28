@@ -6,13 +6,10 @@
     <p>
       This form allows you to re-import old data. Everything else will
       be deleted!</p>
-    <?php echo Form::open(array('files' => true));
+    <?php echo Form::open(array('files' => true,'url' => $url));
       echo Form::file('payload');
-      ?>
-    <br />Or paste here<br />
-    <?
-      echo Form::textarea('payload_text');
-      echo '<br />';
+      ?><br />
+    <?php
       echo Form::submit('Upload',array('class' => 'btn'));
     echo Form::close(); ?>
   </div>

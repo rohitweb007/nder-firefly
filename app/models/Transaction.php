@@ -11,7 +11,7 @@ class Transaction extends Eloquent {
       'budget_id'      => 'integer|exists:budgets,id',
       'date'           => 'required|before:2038-01-01|after:1980-01-01',
       'description'    => 'required|between:1,255',
-      'amount'         => 'required|numeric|between:-65536,65536',
+      'amount'         => 'required|numeric|between:-65536,65536|not_in:0',
       'onetime'        => 'required|numeric|between:0,1'
   );
 
@@ -33,6 +33,15 @@ class Transaction extends Eloquent {
 
   public function budget() {
     return $this->belongsTo('Budget');
+  }
+
+  public function tagList() {
+    $tags = $this->tags()->get();
+    $arr = array();
+    foreach($tags as $tag) {
+      $arr[] = $tag->tag;
+    }
+    return join(',',$arr);
   }
 
 }
