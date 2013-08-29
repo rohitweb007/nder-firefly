@@ -91,7 +91,7 @@ function mf($m, $colorize = false) {
 
 function cacheKey() {
   $keys = func_get_args();
-  $cKey = Auth::user()->id;
+  $cKey = !is_null(Auth::user()) ? Auth::user()->id : $keys[0];
   foreach ($keys as $key) {
     if (is_string($key)) {
       $cKey .= $key;
