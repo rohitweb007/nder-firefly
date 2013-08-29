@@ -1,0 +1,7 @@
+cron:
+- description: regenerate all account charts
+  url: /cron/accounts
+  schedule: every day 01:00
+- description: regenerate all budget charts
+  url: /cron/budgets
+  schedule: every day 02:00
