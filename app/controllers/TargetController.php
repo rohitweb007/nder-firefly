@@ -24,7 +24,7 @@ class TargetController extends BaseController {
                         orderBy('date','DESC')->get(array(
             'transfers.id', 'account_from', 'a1.name as account_from_name', 'account_to', 'a2.name as account_to_name',
             'category_id', 'c.name as category_name', 'budget_id', 'b.name as budget_name', 'description',
-            'transfers.amount', 'transfers.date', 'ignoreprediction', 'countasexpense'
+            'transfers.amount', 'transfers.date',
         ));
         foreach ($transfers as $t) {
           $arr = array(
@@ -40,8 +40,6 @@ class TargetController extends BaseController {
               'description' => Crypt::decrypt($t->description),
               'amount' => floatval($t->amount),
               'date' => new Carbon($t->date),
-              'ignoreprediction' => intval($t->ignoreprediction) == 1 ? true : false,
-              'countasexpense' => intval($t->countasexpense) == 1 ? true : false,
           );
           if($arr['account_to'] != $target->account_id) {
             $arr['amount'] = $arr['amount']*-1;

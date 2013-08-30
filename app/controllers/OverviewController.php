@@ -97,8 +97,7 @@ class OverviewController extends BaseController {
         default:
           // let's actually do the defaults:
           $transactions                      = floatval($db->transactions()->where('onetime', '=', 0)->where('date', '=', $past->format('Y-m-d'))->sum('amount'));
-          $transfers                         = floatval($db->transfers()->where('countasexpense', '=', 1)->where('date', '=', $past->format('Y-m-d'))->sum('amount'));
-          $sum                               = $transactions + $transfers;
+          $sum                               = $transactions;
           $data['rows'][$index]['c'][1]['v'] = $sum;
           $data['rows'][$index]['c'][2]['v'] = true;
           break;
@@ -229,12 +228,7 @@ class OverviewController extends BaseController {
       $transactions = floatval($dbObject->transactions()->where('amount', $operator, 0)->where($object . '_id', '=', $db->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
       // exception for beneficiary
 
-      if ($object != 'beneficiary' && $chart != 'account' && $chart != 'beneficiary') {
-        $transfers = floatval($dbObject->transfers()->where($acc, '=', $db->id)->where('countasexpense', '=', 1)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
-      } else {
-        $transfers = 0;
-      }
-      $sum       = ($transactions + $transfers) < 0 ? ($transactions + $transfers) * -1 : ($transactions + $transfers);
+      $sum       = $transactions < 0 ? $transactions * -1 : $transactions;
       $array     = array(
           'name'   => $name,
           'amount' => $sum
@@ -244,15 +238,8 @@ class OverviewController extends BaseController {
     // add expenses outside objects (for good measure).
 
     $transactions = floatval(Auth::user()->transactions()->whereNull($chart . '_id')->where('amount', $operator, 0)->where($object . '_id', '=', $db->id)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount'));
-    if ($chart != 'beneficiary' && $chart != 'account' && $object != 'beneficiary') {
-      // transfers hebben geen accountid, die hebben account_from en account_to
-
-      $transfers = floatval(Auth::user()->transfers()->whereNull($chart . '_id')->where($acc, '=', $db->id)->where('countasexpense', '=', 1)->where('date', '>=', $start->format('Y-m-d'))->where('date', '<=', $end->format('Y-m-d'))->sum('amount')) * -1;
-    } else {
-      $transfers = 0;
-    }
-    $sum       = ($transactions + $transfers) < 0 ? ($transactions + $transfers) * -1 : ($transactions + $transfers);
-    $records[] = array('name'   => '(no ' . $chart . ')', 'amount' => $sum);
+    $sum          = $transactions < 0 ? $transactions * -1 : $transactions;
+    $records[]    = array('name'   => '(no ' . $chart . ')', 'amount' => $sum);
 
 
     $i = 0;
@@ -325,7 +312,7 @@ class OverviewController extends BaseController {
     $db = Auth::user()->$objects()->find($id);
 
     // create (and find)  a cache key:
-    $key = cacheKey('PieChart', $id, $start, $end, $objects,$children,$modifier,$selection);
+    $key = cacheKey('PieChart', $id, $start, $end, $objects, $children, $modifier, $selection);
     if (Cache::has($key)) {
       return Response::json(Cache::get($key));
     }
@@ -422,67 +409,7 @@ class OverviewController extends BaseController {
       $data['rows'][$index]['c'][7]['v'] = null;
       $index++;
     }
-
-    // get the transfers (no filter yet if applicable)
-    $searchTransfers = null;
-    if ($object != 'account' && $object != 'beneficiary') {
-      $searchTransfers = 'transfers';
-    } else if ($object == 'account') {
-
-      if($modifier == 'income') {
-        $searchTransfers = 'transfersto';
-      } else if ($modifier == 'expenses') {
-        $searchTransfers = 'transfersfrom';
-      }
-    }
-
-    if(!is_null($searchTransfers)) {
-
-      $transfersQuery = $db->$searchTransfers()->
-                      leftJoin('categories', 'categories.id', '=', 'category_id')->
-                      leftJoin('accounts as af', 'af.id', '=', 'account_from')->
-                      leftJoin('accounts as at', 'at.id', '=', 'account_to')->
-                      leftJoin('budgets', 'budgets.id', '=', 'budget_id')->
-                      leftJoin('targets', 'targets.id', '=', 'target_id')->
-                      where('countasexpense', '=', 1)->
-                      where('transfers.date', '>=', $start->format('Y-m-d'))->
-                      where('transfers.date', '<=', $end->format('Y-m-d'))->
-                      orderBy('transfers.date', 'DESC')->orderBy('transfers.created_at', 'DESC');
-
-
-      if (is_null($selectedItem) && $child != 'beneficiary') {
-        $transfersQuery->whereNull($child . '_id');
-      } else if (!is_null($selectedItem) && !$selectedItem === false && $child != 'beneficiary') {
-        $transfersQuery->where($child . '_id', '=', $selectedItem->id);
-      }
-
-      $transfers = $transfersQuery->get(
-              array(
-                  'transfers.id',
-                  'categories.name AS category_name',
-                  'at.name AS account_to_name',
-                  'af.name AS account_from_name',
-                  'budgets.name AS budget_name',
-                  'targets.description AS target_description',
-                  'transfers.date', 'transfers.description', 'transfers.amount', 'countasexpense', 'ignoreprediction'
-              )
-      );
-
-      foreach ($transfers as $t) {
-        $date = new Carbon($t->date);
-
-        $data['rows'][$index]['c'][0]['v'] = 'Date(' . intval($date->format('Y')) . ', ' . (intval($date->format('n')) - 1) . ', ' . intval($date->format('j')) . ')';
-        $data['rows'][$index]['c'][1]['v'] = Crypt::decrypt($t->description);
-        $data['rows'][$index]['c'][2]['v'] = floatval($t->amount);
-        $data['rows'][$index]['c'][3]['v'] = !is_null($t->account_from_name) && !is_null($t->account_to_name) ? Crypt::decrypt($t->account_from_name) . ' &rarr;  ' . Crypt::decrypt($t->account_to_name) : null;
-        $data['rows'][$index]['c'][4]['v'] = is_null($t->budget_name) ? null : Crypt::decrypt($t->budget_name);
-        $data['rows'][$index]['c'][5]['v'] = is_null($t->category_name) ? null : Crypt::decrypt($t->category_name);
-        $data['rows'][$index]['c'][6]['v'] = is_null($t->beneficiary_name) ? null : Crypt::decrypt($t->beneficiary_name);
-        $data['rows'][$index]['c'][7]['v'] = null;
-        $index++;
-      }
-    }
-    Cache::put($key,$data,1440);
+    Cache::put($key, $data, 1440);
     return Response::json($data);
   }
 

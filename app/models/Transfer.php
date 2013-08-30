@@ -6,8 +6,6 @@ class Transfer extends Eloquent {
   public static $rules   = array(
       'fireflyuser_id'   => 'required|exists:users,id',
       'description'      => 'required|between:1,500',
-      'ignoreprediction' => 'required|between:0,1',
-      'countasexpense'   => 'required|between:0,1',
       'date'             => 'required|before:2038-01-01|after:1980-01-01',
       'amount'           => 'required|numeric|between:0.01,65536',
       'account_from'     => 'required|integer|exists:accounts,id|different:account_to',

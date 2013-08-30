@@ -1,6 +1,6 @@
 <?php
 
-use Carbon\Carbon as Carbon;
+use Carbon\Carbon as Carbon; 
 
 class BudgetController extends BaseController {
 

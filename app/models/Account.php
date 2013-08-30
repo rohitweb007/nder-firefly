@@ -32,38 +32,13 @@ class Account extends Eloquent {
     if (is_null($balance)) {
       // trigger balance point for this day.
       $result = Event::fire('account.makeBDP', array('account' => $this, 'date'    => $date));
-      if(isset($result[0])) {
+      if (isset($result[0])) {
         $balance = $result[0];
       } else {
         App::abort(500);
       }
     }
     return $balance->balance;
-  }
-
-  public function balanceOld(DateTime $date = null) {
-    $key = cacheKey('accountBalance', $this->id, $date);
-    if (Cache::has($key)) {
-      return Cache::get($key);
-    }
-    // default to the period date:
-    $date = is_null($date) ? clone Session::get('period') : $date;
-
-    // calculate and cache this account's balance on the date given.
-    $start = floatval($this->balance);
-
-
-    // add and substract all transactions:
-    $tr_sum   = floatval($this->transactions()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
-    //Log::error('balance equation: ' . $date->format('Y-m-d'));
-    // substract all transfers away from this account:
-    $away_sum = floatval($this->transfersfrom()->where('date', '<=', $date->format('Y-m-d'))->sum('amount')) * -1;
-
-    // add all transfers TO this account
-    $here_sum = floatval($this->transfersto()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
-    $result   = $start + $tr_sum + $away_sum + $here_sum;
-    Cache::put($key, $result, 5000);
-    return $result;
   }
 
   public function transfersfrom() {
@@ -94,14 +69,14 @@ class Account extends Eloquent {
             where('amount', '<', 0)->
             get(array('amount'));
     $sum          = 0;
-    $count        = 0;
+    $first        = BaseController::getFirst($this->id);
+    $diff         = $first->diff($date);
     foreach ($transactions as $t) {
       $sum += floatval($t->amount) * -1;
-      $count++;
     }
-    $count = $count == 0 ? 1 : $count;
+    $months = ($diff->y * 12) + $diff->m;
 
-    return ($sum / $count);
+    return ($months > 0 ? ($sum / $months) : $sum);
   }
 
   public function transactions() {

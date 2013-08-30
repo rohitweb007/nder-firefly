@@ -1,6 +1,6 @@
 <?php
 
-use Holmes\Holmes;
+use Holmes\Holmes; 
 use Carbon\Carbon as Carbon;
 class BaseController extends Controller {
 

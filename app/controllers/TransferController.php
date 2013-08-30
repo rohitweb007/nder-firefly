@@ -28,7 +28,7 @@ class TransferController extends BaseController {
                   'account_from', 'af.name AS account_from_name',
                   'budget_id', 'budgets.name AS budget_name',
                   'target_id', 'targets.description AS target_description',
-                  'transfers.date', 'transfers.description', 'transfers.amount', 'countasexpense', 'ignoreprediction'
+                  'transfers.date', 'transfers.description', 'transfers.amount'
               )
       );
 
@@ -52,8 +52,6 @@ class TransferController extends BaseController {
             'target_description' => (is_null($t->target_id) ? null : Crypt::decrypt($t->target_description)),
             'category_id'        => $t->category_id,
             'category_name'      => (is_null($t->category_id) ? null : Crypt::decrypt($t->category_name)),
-            'ignoreprediction'   => $t->ignoreprediction == 1 ? true : false,
-            'countasexpense'     => $t->countasexpense == 1 ? true : false,
         );
         $data[$strMonth][] = $current;
       }
@@ -95,8 +93,6 @@ class TransferController extends BaseController {
     $transfer->description      = Input::get('description');
     $transfer->fireflyuser_id   = Auth::user()->id;
     $transfer->date             = Input::get('date');
-    $transfer->ignoreprediction = Input::get('ignoreprediction') == 'on' ? 1 : 0;
-    $transfer->countasexpense   = Input::get('countasexpense') == 'on' ? 1 : 0;
 
     // account_from (special)
     if (!is_null(Input::get('account_from'))) {
@@ -166,11 +162,6 @@ class TransferController extends BaseController {
     $validator             = Validator::make($transfer->toArray(), Transfer::$rules);
     $transfer->description = Crypt::encrypt($transfer->description);
 
-//    var_dump($validator->passes());
-//    var_dump($validator->messages());
-//    var_dump($transfer);
-//    exit;
-
     if ($validator->fails()) {
       return Redirect::to('/home/transfer/add')->withErrors($validator)->withInput();
     } else {
@@ -226,8 +217,6 @@ class TransferController extends BaseController {
       $transfer->amount           = floatval(Input::get('amount'));
       $transfer->description      = Input::get('description');
       $transfer->date             = Input::get('date');
-      $transfer->ignoreprediction = Input::get('ignoreprediction') == 'on' ? 1 : 0;
-      $transfer->countasexpense   = Input::get('countasexpense') == 'on' ? 1 : 0;
 
       // account_from (special)
       if (!is_null(Input::get('account_from'))) {

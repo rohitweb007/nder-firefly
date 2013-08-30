@@ -44,34 +44,6 @@
         </tr>
         </tr>
       <?php endforeach; ?>
-      <?php foreach ($data['transfers'] as $t): ?>
-        <tr>
-          <td>Transfer</td>
-          <td><?php echo $t['date']->format('j F Y'); ?></td>
-          <td>
-            <?php
-            if ($t['ignoreprediction']) {
-              echo '<i class="icon-eye-close" title="Ignore in predictions" alt="Ignore in predictions"></i> ';
-            }
-            if ($t['countasexpense']) {
-              echo '<i class="icon-shopping-cart" title="Count as expense" alt="Count as expense"></i> ';
-            }
-            ?>
-            <?php echo HTML::Link('/home/transfer/edit/' . $t['id'], $t['description']); ?></td>
-          <td><?php echo $t['amount'] ?></td>
-          <td>
-            <?php echo HTML::Link('/home/account/overview/' . $t['account_from'], $t['account_from_name']); ?>
-            &rarr;
-            <?php echo HTML::Link('/home/account/overview/' . $t['account_to'], $t['account_to_name']); ?>
-          </td>
-          <td><?php echo!is_null($t['budget_id']) ? HTML::Link('/home/budget/overview/' . $t['budget_id'], $t['budget_name']) : ''; ?></td>
-          <td><?php echo!is_null($t['target_id']) ? HTML::Link('/home/target/overview/' . $t['target_id'], $t['target_description']) : ''; ?></td>
-          <td>
-            <a href="/home/transfer/edit/<?php echo $t['id']; ?>" class="btn"><i class="icon-pencil"></i></a>
-            <a href="#"  data-value="<?php echo $t['id']; ?>" title="Delete <?php echo $t['description']; ?>" class="btn btn-danger deleteTransfer"><i data-value="<?php echo $t['id']; ?>" class="icon-white icon-remove"></i></a>
-          </td>
-        </tr>
-      <?php endforeach; ?>
       <tr>
         <td colspan="3"><em>Sum of all expenses counted:</em></td>
         <td colspan="5"><em><?php echo mf($data['sum']); ?></em></td>

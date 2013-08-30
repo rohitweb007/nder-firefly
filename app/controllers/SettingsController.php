@@ -8,7 +8,7 @@ use Carbon\Carbon as Carbon;
 class SettingsController extends BaseController {
 
   //put your code here
-
+ 
   public function __construct() {
     $this->beforeFilter('gs'); // do Google "sync".
   }

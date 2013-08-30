@@ -136,47 +136,8 @@ class CategoryController extends BaseController {
           }
           $data['transactions'][] = $tr;
         }
-
-        // then, transfers in this category:
-        $transf            = $category->transfers()->
-                        leftJoin('accounts as af', 'af.id', '=', 'account_from')->
-                        leftJoin('accounts as at', 'at.id', '=', 'account_to')->
-                        leftJoin('budgets', 'budgets.id', '=', 'budget_id')->
-                        leftJoin('targets', 'targets.id', '=', 'target_id')->
-                        where(DB::Raw('DATE_FORMAT(`transfers`.`date`,"%m-%Y")'), '=', $period->format('m-Y'))->
-                        orderBy('transfers.date', 'DESC')->orderBy('transfers.created_at', 'DESC')->get(
-                array(
-                    'transfers.id',
-                    'account_to', 'at.name AS account_to_name',
-                    'account_from', 'af.name AS account_from_name',
-                    'budget_id', 'budgets.name AS budget_name',
-                    'target_id', 'targets.description AS target_description',
-                    'transfers.date', 'transfers.description', 'transfers.amount', 'countasexpense', 'ignoreprediction'
-                )
-        );
-        $data['transfers'] = array();
-        foreach ($transf as $t) {
-          $current             = array(
-              'id'                 => intval($t->id),
-              'description'        => Crypt::decrypt($t->description),
-              'amount'             => mf(floatval($t->amount)),
-              'date'             => new Carbon($t->date),
-              'account_to'         => $t->account_to,
-              'account_to_name'    => Crypt::decrypt($t->account_to_name),
-              'account_from'       => $t->account_from,
-              'account_from_name'  => Crypt::decrypt($t->account_from_name),
-              'budget_id'          => $t->budget_id,
-              'budget_name'        => (is_null($t->budget_id) ? null : Crypt::decrypt($t->budget_name)),
-              'target_id'          => $t->target_id,
-              'target_description' => (is_null($t->target_id) ? null : Crypt::decrypt($t->target_description)),
-              'ignoreprediction'   => $t->ignoreprediction == 1 ? true : false,
-              'countasexpense'     => $t->countasexpense == 1 ? true : false,
-          );
-          if($t['countasexpense']) {
-            $data['sum'] += floatval($t->amount);
-          }
-          $data['transfers'][] = $current;
-        }
+        // TODO REMOVE THIS.
+        
         // van elke vorige maand de average.
         // dat getal moet overeen komen met de average uit de grafiek!
         $first        = BaseController::getFirst();

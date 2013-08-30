@@ -67,8 +67,6 @@ class ChartController extends BaseController {
         $data['rows'][$index]['c'][0]['v'] = $clone->format('j F');
         if (!is_null($current)) {
           $expenses                          = floatval($current->transactions()->where('onetime', '=', 0)->where('date', '=', $clone->format('Y-m-d'))->sum('amount')) * -1;
-          // also get 'expenses' from transactions:
-          $expenses += floatval($current->transfers()->where('countasexpense', '=', 1)->where('ignoreprediction', '=', 0)->where('date', '=', $clone->format('Y-m-d'))->sum('amount'));
           $spent += $expenses;
           $data['rows'][$index]['c'][1]['v'] = $spent;
         }
@@ -77,7 +75,6 @@ class ChartController extends BaseController {
         if (count($others) > 0) {
           // now for all previous budgets.
           $oldExpenses                       = (floatval(Auth::user()->transactions()->where('onetime', '=', 0)->whereIn('budget_id', $others)->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)->sum('amount')) * -1) / count($others);
-          $oldExpenses += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->where('ignoreprediction', '=', 0)->whereIn('budget_id', $others)->where('date', '=', $clone->format('Y-m-d'))->sum('amount'));
           $previouslySpent += $oldExpenses;
           $data['rows'][$index]['c'][2]['v'] = $previouslySpent;
         }
@@ -198,28 +195,7 @@ class ChartController extends BaseController {
             $min = 0;
             $max = 0;
           }
-
-          // now do the same for transfers and compare it.
-          $transfers = Auth::user()->transfers()->where('countasexpense', '=', 1)->
-                          where('ignoreprediction', '=', 0)->orderBy('amount', 'ASC')
-                          ->where(DB::Raw('DATE_FORMAT(`date`,"%e")'), '=', $i)->get();
-          if (count($transfers) > 0) {
-            $transfer_min = floatval($transfers[count($transfers) - 1]->amount);
-            $transfer_max = floatval($transfers[0]->amount);
-            $min          = $transfer_min < $min ? $transfer_min : $min;
-            $max          = $transfer_max > $max ? $transfer_max : $max;
-            unset($transfer_max, $transfer_min);
-
-            // fill the array for the averages later on:
-            foreach ($transfers as $t) {
-              //$this->_e('Add to avg['.count($average).'] for transfers: ' . (floatval($t->amount)));
-              $average[] = floatval($t->amount);
-            }
-          }
-          //$this->_e('New min: ' . $min);
-          //$this->_e('New max: ' . $max);
           // calc avg:
-          //$avg                               = (($max - $min) / 2) + $min;
           $avg                               = $months > 0 ? array_sum($average) / $months : array_sum($average);
           //$this->_e('New avg: ' . $avg);
           $this->_e('Max: ' . $max . ', min: ' . $min . ', avg: ' . $avg);

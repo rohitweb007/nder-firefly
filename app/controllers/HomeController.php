@@ -87,7 +87,6 @@ class HomeController extends BaseController {
 
       $data['budget_data']['amount']        = $monthlyAmount;
       $data['budget_data']['spent_outside'] = floatval(Auth::user()->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount')) * -1;
-      $data['budget_data']['spent_outside'] += floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->sum('amount'));
 
 
       // targets, cant make it better im afraid.

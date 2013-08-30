@@ -357,8 +357,6 @@ class ImportController extends BaseController {
       $nt->amount      = floatval($t->amount);
       $nt->date        = $t->date;
 
-      $nt->ignoreprediction   = intval($t->ignoreprediction);
-      $nt->countasexpense     = intval($t->countasexpense);
       $nt->save();
       $map['targets'][$t->id] = $nt->id;
     }

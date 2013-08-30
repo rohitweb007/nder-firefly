@@ -288,16 +288,14 @@ class ComparisionController extends BaseController {
     }
     // expenses for this month without any budget:
     $nobud_transactions = floatval(Auth::user()->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount')) * -1;
-    $nobud_transfers    = floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount'));
 
     // expenses for prev without budget
     $nobud_prev_transactions = (floatval(Auth::user()->transactions()->where('amount', '<', 0)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))->whereIn(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), $compares)->sum('amount')) / count($compares)) * -1;
-    $nobud_prev_transfers    = (floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('budget_id')->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))->whereIn(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), $compares)->sum('amount')) / count($compares));
 
 
     $data['rows'][0]['c'][0]['v'] = '(no budget)';
-    $data['rows'][0]['c'][1]['v'] = ($nobud_transactions + $nobud_transfers);
-    $data['rows'][0]['c'][2]['v'] = $nobud_prev_transactions + $nobud_prev_transfers;
+    $data['rows'][0]['c'][1]['v'] = $nobud_transactions;
+    $data['rows'][0]['c'][2]['v'] = $nobud_prev_transactions;
 
     // get this months budgets. Save the names.
     $budgets   = Auth::user()->budgets()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->get();
@@ -309,8 +307,7 @@ class ComparisionController extends BaseController {
 
       // expenses in this budget:
       $transactions = floatval($budget->transactions()->where('amount', '<', 0)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount')) * -1;
-      $transfers    = floatval($budget->transfers()->where('countasexpense', '=', 1)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount'));
-      $sum          = $transactions + $transfers;
+      $sum          = $transactions;
       if ($sum > 0) {
         $data['rows'][$index]['c'][0]['v'] = $name;
         $data['rows'][$index]['c'][1]['v'] = $sum;
@@ -350,13 +347,7 @@ class ComparisionController extends BaseController {
                                 ->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))
                                 ->sum('amount')
                 ) * -1) / count($oldids);
-        $prev_transfers                    = floatval(Auth::user()->transfers()
-                                ->whereIn('budget_id', $oldids)
-                                ->where('countasexpense', '=', 1)
-                                ->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))
-                                ->sum('amount')) / count($oldids);
-        $data['rows'][$index]['c'][2]['v'] = ($prev_transactions + $prev_transfers);
-        //echo 'Sum is '.$data['rows'][$index]['c'][2]['v'].' <br>';
+        $data['rows'][$index]['c'][2]['v'] = $prev_transactions;
       }
     }
 
@@ -412,18 +403,15 @@ class ComparisionController extends BaseController {
     // needs to be said as well.
     $nocat_transactions = floatval(Auth::user()->transactions()->whereNull('category_id')->
                             where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount')) * -1;
-    $nocat_transfers    = floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('category_id')->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount'));
 
 
 
     $nocat_prev_transactions = (floatval(Auth::user()->transactions()->whereNull('category_id')->
                             where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))->whereIn(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), $compares)->sum('amount')) / count($compares)) * -1;
 
-    $nocat_prev_transfers = (floatval(Auth::user()->transfers()->where('countasexpense', '=', 1)->whereNull('category_id')->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))->whereIn(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), $compares)->sum('amount')) / count($compares));
-
     $data['rows'][0]['c'][0]['v'] = '(no category)';
-    $data['rows'][0]['c'][1]['v'] = ($nocat_transactions + $nocat_transfers);
-    $data['rows'][0]['c'][2]['v'] = $nocat_prev_transactions + $nocat_prev_transfers;
+    $data['rows'][0]['c'][1]['v'] = $nocat_transactions;
+    $data['rows'][0]['c'][2]['v'] = $nocat_prev_transactions;
 
     // for the 'past', we can look at $_base for the day?
     // go for current month:
@@ -432,16 +420,14 @@ class ComparisionController extends BaseController {
     foreach ($categories as $category) {
       // current month's expenses in this category:
       $transactions = floatval($category->transactions()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount')) * -1;
-      $transfers    = floatval($category->transfers()->where('countasexpense', '=', 1)->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $this->_base->format('m-Y'))->sum('amount'));
-      $sum          = $transactions + $transfers;
+      $sum          = $transactions;
 
       if ($sum > 0) {
         $prev_transactions = floatval($category->transactions()->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', intval($this->_base->format('d')))->whereIn(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), $compares)->sum('amount')) * -1;
-        $prev_transfers    = floatval($category->transfers()->where('countasexpense', '=', 1)->where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', DB::Raw(intval($this->_base->format('d'))))->whereIn(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), $compares)->sum('amount'));
 
         $data['rows'][$index]['c'][0]['v'] = Crypt::decrypt($category->name);
         $data['rows'][$index]['c'][1]['v'] = $sum;
-        $data['rows'][$index]['c'][2]['v'] = ($prev_transactions + $prev_transfers);
+        $data['rows'][$index]['c'][2]['v'] = $prev_transactions;
         $index++;
       }
     }

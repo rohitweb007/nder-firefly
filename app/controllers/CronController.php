@@ -20,7 +20,7 @@ class CronController extends BaseController {
       Auth::logout();
     }
     return 'Regenerated ' . $count . ' account charts.';
-  }
+  } 
 
   public function budgetCharts() {
     $budgets = Budget::get();

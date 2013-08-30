@@ -22,15 +22,6 @@
         <tr>
           <td><?php echo $t['date']; ?></td>
           <td>
-            <?php
-            if($t['ignoreprediction']) {
-              echo '<i class="icon-eye-close" title="Ignore in predictions" alt="Ignore in predictions"></i> ';
-            }
-            if($t['countasexpense']) {
-              echo '<i class="icon-shopping-cart" title="Count as expense" alt="Count as expense"></i> ';
-            }
-            ?>
-
             <?php echo HTML::Link('/home/transfer/edit/'.$t['id'],$t['description']); ?></td>
           <td><?php echo $t['amount'] ?></td>
           <td>

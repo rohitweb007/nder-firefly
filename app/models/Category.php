@@ -16,15 +16,11 @@ class Category extends Eloquent {
                             where('onetime', '=', 0)->
                             where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', intval($date->format('j')))->sum('amount')) * -1;
 
-    $transfers = floatval($this->transfers()->
-                            where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '!=', $date->format('m-Y'))->
-                            where('countasexpense', '=', 1)->
-                            where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '<=', intval($date->format('j')))->sum('amount'));
-
-    $sum          = $transactions + $transfers;
+    $sum          = $transactions;
     $oldest       = BaseController::getFirst();
     $diff         = $oldest->diff($date);
-    return ($sum / $diff->m);
+    $months = $diff->m + (12 * $diff->y);
+    return $months > 0 ? ($sum / $months) : $sum;
   }
 
   public function spent(Carbon $date = null) {
@@ -33,11 +29,7 @@ class Category extends Eloquent {
                             where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $date->format('m-Y'))->
                             where('onetime', '=', 0)->
                             sum('amount')) * -1;
-    $transfers = floatval($this->transfers()->where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '=', $date->format('m-Y'))->
-                            where('countasexpense', '=', 1)->
-                            sum('amount'));
-
-    return ($transactions + $transfers);
+    return ($transactions);
   }
 
   public function transactions() {

@@ -82,36 +82,6 @@
       </div>
     </div>
 
-   <div class="control-group">
-      <label class="control-label" for="inputIgnorePrediction">Ignore in predictions</label>
-      <div class="controls">
-        <?php echo Form::checkbox('ignoreprediction',null,false,array('id' => 'inputIgnorePrediction')); ?>
-        &nbsp;&nbsp;<img class="tt" title="Charts that try to guess your future balance also trigger on transfers, unless you choose to ignore them." src="/img/icons/help.png" alt="Help on this field" />
-        <br /><span class="text-error"><?php echo $errors->first('ignoreprediction'); ?></span>
-        <datalist id="addTransferTarget">
-          <?php foreach($targets as $t): ?>
-          <option value="<?php echo $t; ?>"></option>
-          <?php endforeach; ?>
-        </datalist>
-      </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label" for="inputCountAsExpense">Count as expense</label>
-      <div class="controls">
-        <?php echo Form::checkbox('countasexpense',null,false,array('id' => 'inputCountAsExpense')); ?>
-        &nbsp;&nbsp;<img class="tt" title="If you cannot 'access' the money you transferred, count it as an expense to better reflect this." src="/img/icons/help.png" alt="Help on this field" />
-        <br /><span class="text-error"><?php echo $errors->first('countasexpense'); ?></span>
-        <datalist id="addTransferTarget">
-          <?php foreach($targets as $t): ?>
-          <option value="<?php echo $t; ?>"></option>
-          <?php endforeach; ?>
-        </datalist>
-      </div>
-    </div>
-
-
-
     <div class="control-group">
       <div class="controls">
         <input type="submit" class="btn btn-primary" value="Save new transfer" />

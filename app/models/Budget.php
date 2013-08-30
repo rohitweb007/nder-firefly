@@ -1,5 +1,7 @@
 <?php
+
 use Carbon\Carbon as Carbon;
+
 class Budget extends Eloquent {
 
   protected $guarded = array('id', 'created_at', 'updated_at');
@@ -13,6 +15,7 @@ class Budget extends Eloquent {
   public function transactions() {
     return $this->hasMany('Transaction');
   }
+
   public function budgetpredictionpoints() {
     return $this->hasMany('Budgetpredictionpoint');
   }
@@ -35,11 +38,7 @@ class Budget extends Eloquent {
     $date         = is_null($date) ? Session::get('period') : $date;
     $transactions = floatval($this->transactions()->where('date', '<=', $date->format('Y-m-d'))->sum('amount'));
 
-    // transfers that are expenses in this budget:
-    $transfers = floatval($this->transfers()->where('date', '<=', $date->format('Y-m-d'))->where('countasexpense', '=', '1')->sum('amount'));
-
-    $sum = ($transactions * -1) + $transfers;
-    return $sum;
+    return ($transactions * -1);
   }
 
   /**
@@ -68,24 +67,11 @@ class Budget extends Eloquent {
         $sum += ($transaction->amount * -1);
       }
     }
-    // transfers:
-    $transfers = Auth::user()->transfers()->
-                    where(DB::Raw('DATE_FORMAT(`date`,"%m-%Y")'), '!=', $date->format('m-Y'))->
-                    whereNotNull('budget_id')->
-                    where('countasexpense', '=', 1)->
-                    where('ignoreprediction', '=', 0)->
-                    where(DB::Raw('DATE_FORMAT(`date`,"%d")'), '>', $date->format('d'))->get();
-    foreach ($transfers as $transfer) {
-      $budget = $transfer->budget()->first();
-      $bname  = Crypt::decrypt($budget->name);
-      if ($name == $bname) {
-        // part of this budget's past.
-        $sum += $transfer->amount;
-      }
-    }
+
     $oldest = BaseController::getFirst();
     $diff   = $oldest->diff($date);
-    return $diff->m == 0 ? $sum : ($sum / $diff->m);
+    $months = $diff->m + ($diff->y * 12);
+    return $months == 0 ? $sum : ($sum / $months);
   }
 
   /**
@@ -122,8 +108,9 @@ class Budget extends Eloquent {
             sum('amount');
     $oldest    = BaseController::getFirst();
     $diff      = $oldest->diff($date);
+    $months = $diff->m + (12* $diff->y);
 
-    return $diff->m != 0 ? (($total * -1) / $diff->m) : $total * -1;
+    return $months != 0 ? (($total * -1) / $months) : $total * -1;
   }
 
   /**
@@ -140,24 +127,24 @@ class Budget extends Eloquent {
 
   public static function getHomeOverview() {
     $budgets = Auth::user()->budgets()->
-            leftJoin('transactions','transactions.budget_id','=','budgets.id')->
-            groupBy('budgets.id')->
-            where(DB::Raw('DATE_FORMAT(`budgets`.`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get(
-                    array('budgets.id','budgets.predicted','budgets.name','budgets.amount',DB::Raw('SUM(`transactions`.`amount`) AS `spent`')));
-    $data = array();
-      foreach ($budgets as $b) {
-        $budget             = array(
-            'id'       => intval($b->id),
-            'name'     => Crypt::decrypt($b->name),
-            'predicted' => floatval($b->predicted),
-            'spent'    => floatval($b->spent),
-            'left'     => floatval($b->amount) + floatval($b->spent),
-            'amount'   => floatval($b->amount),
-        );
-        $budget['overflow'] = $budget['predicted'] > $budget['left'];
-        $data[] = $budget;
-      }
-      return $data;
+                    leftJoin('transactions', 'transactions.budget_id', '=', 'budgets.id')->
+                    groupBy('budgets.id')->
+                    where(DB::Raw('DATE_FORMAT(`budgets`.`date`,"%m-%Y")'), '=', Session::get('period')->format('m-Y'))->get(
+            array('budgets.id', 'budgets.predicted', 'budgets.name', 'budgets.amount', DB::Raw('SUM(`transactions`.`amount`) AS `spent`')));
+    $data    = array();
+    foreach ($budgets as $b) {
+      $budget             = array(
+          'id'        => intval($b->id),
+          'name'      => Crypt::decrypt($b->name),
+          'predicted' => floatval($b->predicted),
+          'spent'     => floatval($b->spent),
+          'left'      => floatval($b->amount) + floatval($b->spent),
+          'amount'    => floatval($b->amount),
+      );
+      $budget['overflow'] = $budget['predicted'] > $budget['left'];
+      $data[]             = $budget;
+    }
+    return $data;
   }
 
 }
